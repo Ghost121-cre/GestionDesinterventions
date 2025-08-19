@@ -1,0 +1,118 @@
+.profil-container {
+  padding: 20px;
+  background-color: #fcfdfe; /* fond sombre */
+  min-height: 100vh;
+  color: #0e0e0e;
+  font-family: Arial, sans-serif;
+}
+
+.profil-title {
+  font-size: 20px;
+  font-weight: bold;
+  margin-bottom: 20px;
+}
+
+.profil-header {
+  background: #f5f6f7;
+  padding: 20px;
+  border-radius: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.profil-info {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+}
+
+.profil-avatar {
+  width: 70px;
+  height: 70px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.profil-name {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+.profil-role {
+  color: #9ca3af;
+  font-size: 14px;
+}
+
+.profil-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.social-btn {
+  background: #374151;
+  border: none;
+  color: black;
+  width: 35px;
+  height: 35px;
+  border-radius: 50%;
+  cursor: pointer;
+  font-size: 14px;
+  transition: background 0.2s;
+}
+
+.social-btn:hover {
+  background: #4b5563;
+}
+
+.edit-btn {
+  background: #eeeff0;
+  border: none;
+  color: black;
+  padding: 6px 14px;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.edit-btn:hover {
+  background: #4b5563;
+}
+
+.profil-card {
+  background: #f0f0f2;
+  padding: 20px;
+  border-radius: 12px;
+  margin-bottom: 20px;
+}
+
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 15px;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.label {
+  color: #9ca3af;
+  font-size: 13px;
+}
+
+.value {
+  font-weight: 500;
+  margin-top: 4px;
+}
+
+.full-row {
+  grid-column: span 2;
+}

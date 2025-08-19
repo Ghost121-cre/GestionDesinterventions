@@ -1,0 +1,37 @@
+.sidebar-fixed {
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100vh;
+  transition: width 0.3s;
+  z-index: 1000;
+}
+
+.sidebar-nav{
+  margin-top: -40px;
+  
+}
+
+.sidebar-title {
+  display: flex;
+  align-items: center;
+ margin-left: 5px;
+}
+
+/* Logo */
+.sidebar-logo {
+  display: flex;
+  margin-top: -15px;
+  justify-content: center;
+}
+
+.sidebar-logo img {
+  width: 70px;
+  height: 70px;
+  object-fit: contain;
+}
+
+.sidebar{
+  justify-content: center;
+  /* align-items: center; */
+}

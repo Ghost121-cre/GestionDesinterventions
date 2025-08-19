@@ -1,0 +1,24 @@
+ .layout {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+} 
+
+/* Conteneur sous la navbar */
+.layout-body {
+  display: flex;
+  flex: 1;
+} 
+
+/* Contenu principal */
+ .layout-content {
+  flex: 1;
+  padding: 20px;
+  transition: margin-left 0.3s;
+} 
+.layout-main {
+  padding: 1rem;
+  transition: margin-left 0.3s, margin-top 0.3s;
+  min-height: calc(100vh - 60px); /* prend tout l'écran sauf la navbar */
+  background: #f9f9f9; /* couleur claire de fond */
+}
