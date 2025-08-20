@@ -32,6 +32,9 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
         <CSidebarBrand className="sidebar-logo">
           <img src={activ} alt="Logo Activ" />
         </CSidebarBrand>
+        <div className='Titre-sidebar-header'>
+          {sidebarWidth === collapsedWidth ? null : 'Gestion des interventions'}
+        </div>
       </CSidebarHeader>
 
       {/* Menu */}

@@ -7,6 +7,21 @@
   z-index: 1000;
 }
 
+.Titre-sidebar-header {
+  font-size: 20px;        /* taille du texte */
+  font-weight: 600;       /* gras moyen */
+  color: #9ca3af;         /* couleur gris clair */
+  margin-left: 12px;      /* espace entre logo et texte */
+  /* white-space: nowrap;    empêche le texte de passer à la ligne */
+  transition: opacity 0.3s ease; /* animation si sidebar se rétracte */
+  margin-top: -15px;
+  font-family: Georgia, serif;
+}
+.CSidebarHeader {
+  display: flex;
+  align-items: center;
+}
+
 .sidebar-nav{
   margin-top: -40px;
   
