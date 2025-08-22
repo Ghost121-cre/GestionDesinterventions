@@ -13,6 +13,9 @@ function App() {
     <Router>
       <Routes>
         <Route element={<Layout />}>
+          {/* Route par défaut → Calendrier */}
+          <Route index element={<Calendrier />} />
+
           <Route path="/calendrier" element={<Calendrier />} />
           <Route path="/rapports" element={<Rapports />} />
           <Route path="/parametres" element={<Parametres />} />

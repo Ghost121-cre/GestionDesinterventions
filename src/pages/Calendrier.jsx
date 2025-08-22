@@ -1,4 +1,5 @@
-import React from "react"
+import React, { useRef, useEffect } from "react"
+import { useOutletContext } from "react-router-dom"
 import FullCalendar from "@fullcalendar/react"
 import dayGridPlugin from "@fullcalendar/daygrid"
 import timeGridPlugin from "@fullcalendar/timegrid"
@@ -6,25 +7,39 @@ import interactionPlugin from "@fullcalendar/interaction"
 import frLocale from "@fullcalendar/core/locales/fr"
 import "../assets/css/Calendrier.css"
 
+function Calendrier() {
+  const { sidebarWidth } = useOutletContext()
+  const calendarRef = useRef(null)
 
+  // Recalcule quand la sidebar change
+  useEffect(() => {
+  // Quand la sidebar change de largeur → simule un resize
+  window.dispatchEvent(new Event("resize"))
 
-function Calendar() {
+  if (calendarRef.current) {
+    setTimeout(() => {
+      calendarRef.current.getApi().updateSize()
+    }, 300)
+  }
+}, [sidebarWidth])
+
   return (
     <div className="calendar-container">
       <FullCalendar
+        ref={calendarRef}
         plugins={[dayGridPlugin, timeGridPlugin, interactionPlugin]}
         initialView="dayGridMonth"
-        selectable={true}
-        editable={true}
+        selectable
+        editable
         locales={[frLocale]}
         locale="fr"
         height="1000px"
-        expandRows={true}
+        expandRows
         dayHeaderContent={info => info.text.replace('.', '')}
         aspectRatio={1.5}
         headerToolbar={{
-          left: "prev,next",   
-          center: "title",     
+          left: "prev,next",
+          center: "title",
           right: "dayGridMonth,timeGridWeek,timeGridDay",
         }}
         buttonText={{
@@ -33,14 +48,9 @@ function Calendar() {
           week: "Semaine",
           day: "Jour",
         }}
-        events={[
-          { title: "Conférence", date: "2025-08-20", color: "#ff6b6b" },
-          { title: "Réunion", date: "2025-08-21", color: "#1dd1a1" },
-          { title: "Atelier", date: "2025-08-22", color: "#54a0ff" },
-        ]}
       />
     </div>
   )
 }
 
-export default Calendar
+export default Calendrier

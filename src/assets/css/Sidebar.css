@@ -3,7 +3,7 @@
   top: 0;
   left: 0;
   height: 100vh;
-  transition: width 0.3s;
+  transition: width 0.15s ease; /* deux fois plus rapide */
   z-index: 1000;
 }
 
@@ -13,7 +13,7 @@
   color: #9ca3af;         /* couleur gris clair */
   margin-left: 12px;      /* espace entre logo et texte */
   /* white-space: nowrap;    empêche le texte de passer à la ligne */
-  transition: opacity 0.3s ease; /* animation si sidebar se rétracte */
+  transition: width 0.15s ease; /* deux fois plus rapide */ /* animation si sidebar se rétracte */
   margin-top: -15px;
   font-family: Georgia, serif;
 }

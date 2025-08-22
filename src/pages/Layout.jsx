@@ -25,7 +25,8 @@ function Layout() {
         }}
       >
         {/* Outlet = contenu des pages */}
-        <Outlet />
+        <Outlet context={{ sidebarWidth }} />
+
       </main>
     </div>
   )
