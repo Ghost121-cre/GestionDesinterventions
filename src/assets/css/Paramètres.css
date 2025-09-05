@@ -1,0 +1,61 @@
+/* Espacement global des cartes */
+.card {
+  border-radius: 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* Effet au survol */
+.card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0px 6px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Titre centré et en gras */
+.card-title {
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.2rem;
+}
+
+/* Texte légèrement gris */
+.card-text {
+  color: #555;
+  font-size: 0.95rem;
+  text-align: center;
+}
+
+/* Bouton stylisé */
+.card .btn {
+  width: 100%;
+  border-radius: 8px;
+  font-weight: 500;
+  transition: background 0.2s ease;
+}
+
+/* Effet hover sur bouton */
+.card .btn:hover {
+  background-color: #007bff;
+  opacity: 0.9;
+}
+
+.card-img-top {
+  height: 200px;           /* Taille uniforme pour toutes les images */
+  width: 100%;             /* S'assure que l'image remplit la carte horizontalement */
+  object-fit: cover;       /* Recadre l'image pour garder le ratio */
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+.bouton{
+    background-color: #007bff;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    border-radius: 5px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    transition: background-color 0.3s;
+}
+.bouton:hover {
+    background-color: #0056b3;
+}

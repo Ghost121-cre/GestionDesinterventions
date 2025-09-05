@@ -1,7 +1,6 @@
 import React, { useState } from 'react'
 import DataTable from "react-data-table-component"
 import { FaEdit, FaTrash, FaDownload } from "react-icons/fa"
-import "../assets/css/Rapport.css"
 import "../assets/css/OffCanvas.css"
 
 const columns = [
@@ -38,7 +37,7 @@ const data = [
   { id: 11, Numéro: "011", Contenu: "Maintenance", Date_debut: "06/08/2025", Date_fin: "07/08/2025" },
   { id: 12, Numéro: "012", Contenu: "Bug", Date_debut: "07/08/2025", Date_fin: "08/08/2025" }
 ]
-function Rapports() {
+function InterventionTerminees() {
   const [filterText, setFilterText] = useState("");
   const [isOpen, setIsOpen] = useState(false);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -68,7 +67,7 @@ function Rapports() {
 
   return (
     <div className="rapport-container">
-      <h2>Liste des rapports</h2>
+      <h2>Liste des interventions terminées</h2>
 
       {/* Toolbar */}
       <div className="table-toolbar">
@@ -131,4 +130,4 @@ function Rapports() {
     </div>
   );
 }
-export default Rapports
+export default InterventionTerminees

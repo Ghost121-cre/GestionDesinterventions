@@ -1,6 +1,6 @@
 // src/composants/Sidebar.jsx
 import React from 'react'
-import { Link } from 'react-router-dom'
+import { NavLink } from 'react-router-dom'
 import "../assets/css/Sidebar.css"
 import activ from "../assets/images/activ.png"
 
@@ -45,10 +45,13 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
 
         {/* Calendrier */}
         <CNavItem>
-          <Link to="/calendrier" className="nav-link">
+          <NavLink 
+            to="/calendrier" 
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
             <CIcon customClassName="nav-icon" icon={cilCalendar} />
             {sidebarWidth === collapsedWidth ? null : 'Calendrier'}
-          </Link>
+          </NavLink>
         </CNavItem>
 
         {/* Interventions */}
@@ -56,52 +59,73 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
           toggler={
             <>
               <CIcon customClassName="nav-icon" icon={cilRecycle} />
-              {sidebarWidth === collapsedWidth ? null : 'Interventions'}
+              {sidebarWidth !== collapsedWidth && 'Interventions'}
             </>
           }
+          className={sidebarWidth === collapsedWidth ? 'collapsed-group' : ''}
         >
-          <CNavItem>
-            <Link to="/interventions" className="nav-link">
-              <span className="nav-icon">
-                <span className="nav-icon-bullet"></span>
-              </span>
-              {sidebarWidth === collapsedWidth ? null : 'Liste des interventions'}
-            </Link>
-          </CNavItem>
+          {sidebarWidth !== collapsedWidth && (
+            <>
+              <CNavItem>
+                <NavLink 
+                  to="/interventions" 
+                  className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                >
+                  <span className="nav-icon">
+                    <span className="nav-icon-bullet"></span>
+                  </span>
+                  En cours
+                </NavLink>
+              </CNavItem>
 
-          <CNavItem>
-            <Link to="/interventions/nouvelle" className="nav-link">
-              <span className="nav-icon">
-                <span className="nav-icon-bullet"></span>
-              </span>
-              {sidebarWidth === collapsedWidth ? null : 'Nouvelle intervention'}
-            </Link>
-          </CNavItem>
+              <CNavItem>
+                <NavLink 
+                  to="/interventions_terminees" 
+                  className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+                >
+                  <span className="nav-icon">
+                    <span className="nav-icon-bullet"></span>
+                  </span>
+                  Terminées
+                </NavLink>
+              </CNavItem>
+            </>
+          )}
         </CNavGroup>
 
         {/* Rapports */}
         <CNavItem>
-          <Link to="/rapports" className="nav-link">
+          <NavLink 
+            to="/rapports" 
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
             <CIcon customClassName="nav-icon" icon={cilDescription} />
             {sidebarWidth === collapsedWidth ? null : 'Rapports'}
-          </Link>
+          </NavLink>
         </CNavItem>
 
         {/* Profil */}
         <CNavItem>
-          <Link to="/profil" className="nav-link">
+          <NavLink 
+            to="/profil" 
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
             <CIcon customClassName="nav-icon" icon={cilUser} />
             {sidebarWidth === collapsedWidth ? null : 'Profil'}
-          </Link>
+          </NavLink>
         </CNavItem>
 
         {/* Paramètres */}
         <CNavItem>
-          <Link to="/parametres" className="nav-link">
+          <NavLink 
+            to="/parametres" 
+            className={({ isActive }) => isActive ? "nav-link active" : "nav-link"}
+          >
             <CIcon customClassName="nav-icon" icon={cilSettings} />
             {sidebarWidth === collapsedWidth ? null : 'Paramètres'}
-          </Link>
+          </NavLink>
         </CNavItem>
+
       </CSidebarNav>
     </CSidebar>
   )

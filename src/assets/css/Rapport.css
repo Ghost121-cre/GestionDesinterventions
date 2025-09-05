@@ -3,13 +3,14 @@
   background: #fff;
   border-radius: 8px;
   box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  overflow-y: hidden;
 }
 
 /* Barre outils (recherche) */
 .table-toolbar {
   display: flex;
-  justify-content: flex-end;
-  margin-bottom: 10px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .search-input {
@@ -81,9 +82,13 @@ h2{
 }
 .btn-add{
   background: #007bff;
+  border-radius: 8px;
+  padding: 5px;
 }
 .btn-add:hover{
   background: #0056b3;
   box-shadow: 0 0 4px rgba(0,123,255,0.3);
   border: 20px, 20px, 20px, 20px;
 }
+
+
