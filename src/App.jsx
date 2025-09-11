@@ -6,7 +6,6 @@ import Calendrier from "./pages/Calendrier"
 import Rapports from "./pages/Rapports"
 import Parametres from "./pages/Paramètres"
 import Interventions from "./pages/Interventions"
-import InterventionsTerminees from "./pages/Intervention_terminees"
 import Profil from "./pages/Profil"
 import Incident from "./pages/Incident"
 import AccountUser from "./pages/AccountUser"
@@ -19,16 +18,15 @@ function App() {
     <Router>
       <Routes>
         {/* Login en dehors du Layout */}
-        <Route path="/" element={<LoginPage />} />
         <Route path="/login" element={<LoginPage />} />
 
         {/* Toutes les autres pages avec le Layout */}
         <Route element={<Layout />}>
+        <Route path="/" element={<Calendrier />} />
           <Route path="/calendrier" element={<Calendrier />} />
           <Route path="/rapports" element={<Rapports />} />
           <Route path="/parametres" element={<Parametres />} />
           <Route path="/interventions" element={<Interventions />} />
-          <Route path="/interventions_terminees" element={<InterventionsTerminees />} />
           <Route path="/profil" element={<Profil />} />
           <Route path="/incident" element={<Incident />} />
           <Route path="/compte_utilisateur" element={<AccountUser />} />

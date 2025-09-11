@@ -69,3 +69,19 @@
 .nav-link.active .nav-icon {
   color: #1d4ed8; /* bleu */
 }
+/* État actif quand sidebar réduite */
+.nav-link.active.collapsed {
+  background-color: transparent; /* pas de fond large */
+}
+
+.nav-link.active.collapsed .nav-icon {
+  background-color: #e5e7eb; /* gris clair autour */
+  color: #1f2937;            /* couleur icône */
+  border-radius: 8px;
+  width: 40px;               /* largeur fixe */
+  height: 25px;              /* hauteur fixe */
+  display: flex;             /* centrage */
+  align-items: center;
+  justify-content: center;
+  font-size: 25px;           /* taille icône */
+}

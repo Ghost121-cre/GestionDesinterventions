@@ -1,0 +1,109 @@
+.intervention-container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Onglets */
+.custom-tabs .nav-link {
+  cursor: pointer;
+  color: #333;
+}
+.custom-tabs .nav-link.active {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px 5px 0 0;
+}
+
+/* Contenu */
+.custom-content {
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 0 0 5px 5px;
+}
+
+/* Tableau */
+.custom-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+.custom-table th,
+.custom-table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+.custom-table th {
+  background-color: #f8f9fa;
+}
+
+/* Icônes Actions */
+.action-icon {
+  font-size: 1.2rem;
+  cursor: pointer;
+}
+.action-icon:hover {
+  opacity: 0.7;
+}
+
+.btn-custom-blue {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+    transition: background-color 0.3s;
+    display: flex;
+    align-items: flex-start;
+}
+.btn-container {
+  display: flex;
+  justify-content: flex-end; 
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+
+.btn-custom-blue:hover {
+  background-color: #0056b3;
+  color: white;
+}
+
+/* Icônes d'action */
+.action-icon {
+  font-size: 1.05rem;
+  cursor: pointer;
+}
+.action-icon:hover {
+  opacity: 0.8;
+}
+
+/* Badges statut (visuel plus clair) */
+.status-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+}
+.status-en-cours {
+  background: #fff3cd; /* jaune clair */
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+.status-termine {
+  background: #d4edda; /* vert clair */
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+.status-en-attente {
+  background: #cce5ff; /* bleu clair */
+  color: #004085;
+  border: 1px solid #b8daff;
+}
