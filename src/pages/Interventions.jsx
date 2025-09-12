@@ -10,17 +10,36 @@ function Interventions() {
   const [filterStartDate, setFilterStartDate] = useState("");
   const [filterEndDate, setFilterEndDate] = useState("");
 
-  const [interventionsEnAttente, setInterventionsEnAttente] = useState([
-    { id: 1, titre: "Impossible de Télécharger un fichier lourd", client: "SIB", date: "2025-09-01", statut: "En attente" },
-    { id: 2, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
-  ]);
+  // const [interventionsEnAttente, setInterventionsEnAttente] = useState([
+  //   { id: 1, titre: "Impossible de Télécharger un fichier lourd", client: "SIB", date: "2025-09-01", statut: "En attente" },
+  //   { id: 2, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
+  //   { id: 3, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
+  //   { id: 4, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
+  //   { id: 5, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
+  // ]);
+  // Générer des lignes aléatoires à l'initialisation
+  const [interventionsEnAttente, setInterventionsEnAttente] = useState([]);
+
+useEffect(() => {
+  const randomEnAttente = [];
+  for (let i = 1; i <= 20; i++) {
+    randomEnAttente.push({
+      id: i,
+      titre: `Intervention ${i}`,
+      client: `Client ${Math.ceil(Math.random() * 10)}`,
+      date: new Date().toISOString().split("T")[0], // date du jour
+      statut: "En attente"
+    });
+  }
+  setInterventionsEnAttente(randomEnAttente);
+}, []);
 
   const [interventionsEnCours, setInterventionsEnCours] = useState([
-    { id: 1, titre: "Réparation serveur", client: "Orange", date: "2025-09-08", statut: "En cours", startedAt: new Date() },
+    { id: 1, titre: "Réparation serveur", client: "Orange", date: "2025-09-08", statut: "En cours", startedAt: new Date().toISOString() },
   ]);
 
   const [interventionsTerminees, setInterventionsTerminees] = useState([
-    { id: 3, titre: "Installation fibre", client: "Moov", date: "2025-09-05", statut: "Terminé", startedAt: new Date(), endedAt: new Date() },
+    { id: 3, titre: "Installation fibre", client: "Moov", date: "2025-09-05", statut: "Terminé", startedAt: new Date().toISOString(), endedAt: new Date().toISOString() },
   ]);
 
   const [newIntervention, setNewIntervention] = useState({ id: null, titre: "", client: "", date: "", statut: "En attente" });
@@ -80,7 +99,7 @@ function Interventions() {
     const item = interventionsEnAttente.find(i => i.id === id);
     if (!item) return;
     setInterventionsEnAttente(prev => prev.filter(i => i.id !== id));
-    setInterventionsEnCours(prev => [...prev, { ...item, statut: "En cours", startedAt: new Date() }]);
+    setInterventionsEnCours(prev => [...prev, { ...item, statut: "En cours", startedAt: new Date(). toISOString() }]);
   };
 
   // Terminer une intervention
@@ -88,7 +107,7 @@ function Interventions() {
     const item = interventionsEnCours.find(i => i.id === id);
     if (!item) return;
     setInterventionsEnCours(prev => prev.filter(i => i.id !== id));
-    setInterventionsTerminees(prev => [...prev, { ...item, statut: "Terminé", endedAt: new Date() }]);
+    setInterventionsTerminees(prev => [...prev, { ...item, statut: "Terminé", endedAt: new Date().toISOString() }]);
   };
 
   // Réouvrir
@@ -117,15 +136,51 @@ function Interventions() {
   };
 
   // Utils pour date et durée
-  const formatDateTime = (date) => date ? new Date(date).toLocaleString("fr-FR") : "-";
+  const formatDateTime = (iSoString) => {
+    if (!iSoString) return "-";
+    return new Date(iSoString).toLocaleString("fr-FR", { 
+      year: "numeric", 
+      month: "2-digit", 
+      day: "2-digit", 
+      hour: "2-digit", 
+      minute: "2-digit" 
+    });
+  };
   const formatDuration = (start) => {
     if (!start) return "-";
-    const diff = Math.floor((new Date() - new Date(start)) / 1000);
+    const diff = Math.floor((new Date().getTime() - new Date(start).getTime()) / 1000);
     const h = String(Math.floor(diff / 3600)).padStart(2,"0");
     const m = String(Math.floor((diff % 3600) / 60)).padStart(2,"0");
     const s = String(diff % 60).padStart(2,"0");
     return `${h}:${m}:${s}`;
   };
+  // Durée Totale
+  const formatTotalDuration = (start, end) => {
+  if (!start || !end) return "-";
+  const diff = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 1000);
+  const h = String(Math.floor(diff / 3600)).padStart(2,"0");
+  const m = String(Math.floor((diff % 3600) / 60)).padStart(2,"0");
+  const s = String(diff % 60).padStart(2,"0");
+  return `${h}:${m}:${s}`;
+};
+
+  // pagination
+  const [currentPage, setCurrentPage] = useState(1);
+const itemsPerPage = 10; // Nombre de lignes par page
+
+const paginateData = (data) => {
+  const start = (currentPage - 1) * itemsPerPage;
+  const end = start + itemsPerPage;
+  return data.slice(start, end);
+};
+
+const totalPages = (data) => Math.ceil(data.length / itemsPerPage);
+const handlePageChange = (page, data) => {
+  if (page < 1 || page > totalPages(data)) return;
+  setCurrentPage(page);
+};
+  const filteredTerminees = applyFilters(interventionsTerminees);
+  const paginatedTerminees = paginateData(filteredTerminees);
 
   return (
     <div className="intervention-container">
@@ -178,10 +233,20 @@ function Interventions() {
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Titre</th><th>Client</th><th>Date</th><th>Statut</th><th>Actions</th>
+                  <th>ID</th>
+                  <th>Titre</th>
+                  <th>Client</th>
+                  <th>Date</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
+                {applyFilters(interventionsEnAttente).length === 0 && (
+                  <tr>
+                    <td colSpan="6" className="text-center">Pas d'intervention en attente.</td>
+                  </tr>
+                )}
                 {applyFilters(interventionsEnAttente).map(item=>(
                   <tr key={item.id}>
                     <td>{item.id}</td>
@@ -208,10 +273,21 @@ function Interventions() {
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Titre</th><th>Client</th><th>Démarrée le</th><th>Durée</th><th>Statut</th><th>Actions</th>
+                  <th>ID</th>
+                  <th>Titre</th>
+                  <th>Client</th>
+                  <th>Démarrée le</th>
+                  <th>Durée</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
+                {interventionsEnCours.length === 0 && (
+                  <tr>
+                    <td colSpan="7" className="text-center">Pas d'intervention en cours.</td>
+                  </tr>
+                )}
                 {interventionsEnCours.map(item=>(
                   <tr key={item.id}>
                     <td>{item.id}</td>
@@ -238,17 +314,25 @@ function Interventions() {
             <table className="custom-table">
               <thead>
                 <tr>
-                  <th>ID</th><th>Titre</th><th>Client</th><th>Démarrée le</th><th>Terminée le</th><th>Statut</th><th>Actions</th>
+                  <th>ID</th>
+                  <th>Titre</th>
+                  <th>Client</th>
+                  <th>Démarrée le</th>
+                  <th>Terminée le</th>
+                  <th>Durée Totale</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {applyFilters(interventionsTerminees).map(item=>(
+                {paginatedTerminees.map(item=>(
                   <tr key={item.id}>
                     <td>{item.id}</td>
                     <td>{item.titre}</td>
                     <td>{item.client}</td>
                     <td>{formatDateTime(item.startedAt)}</td>
                     <td>{formatDateTime(item.endedAt)}</td>
+                    <td>{formatTotalDuration(item.startedAt, item.endedAt)}</td>
                     <td><span className="badge status-badge status-termine"><i className="bi bi-check-circle-fill me-1"/> {item.statut}</span></td>
                     <td>
                       <i className="bi bi-arrow-counterclockwise text-warning me-2 action-icon" title="Réouvrir" onClick={()=>handleReopen(item.id)} />
@@ -258,6 +342,12 @@ function Interventions() {
                 ))}
               </tbody>
             </table>
+           <div className="pagination-controls">
+             <button onClick={() => handlePageChange(currentPage - 1, filteredTerminees)} disabled={currentPage === 1}>Précédent</button>
+             <span>Page {currentPage} / {totalPages(filteredTerminees)}</span>
+             <button onClick={() => handlePageChange(currentPage + 1, filteredTerminees)} disabled={currentPage === totalPages(filteredTerminees)}>Suivant</button>
+          </div>
+
           </div>
         )}
       </div>
