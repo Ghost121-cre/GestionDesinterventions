@@ -1,134 +1,71 @@
-import React, { useState } from 'react'
-import DataTable from "react-data-table-component"
-import { FaEdit, FaTrash, FaDownload } from "react-icons/fa"
-import "../assets/css/Rapport.css"
-import "../assets/css/OffCanvas.css"
+import React from "react";
+import { FaTrash, FaDownload } from "react-icons/fa";
+import { useRapports } from "../context/RapportContext";
+import { toast } from "react-toastify";
+import { generateRapportPDF } from "../utils/pdfGenerator";
+import "react-toastify/dist/ReactToastify.css";
 
-const columns = [
-  { name: "Numéro", selector: row => row.Numéro, sortable: true },
-  { name: "Contenu", selector: row => row.Contenu, sortable: true },
-  { name: "Date de début", selector: row => row.Date_debut, sortable: true },
-  { name: "Date de fin", selector: row => row.Date_fin, sortable: true },
-  {
-    name: "Action",
-    cell: row => (
-      <div className="action-buttons">
-        <button className="btn-edit"><FaEdit /></button>
-        <button className="btn-delete"><FaTrash /></button>
-        <button className="btn-download"><FaDownload /></button>
-      </div>
-    ),
-    ignoreRowClick: true,
-    allowOverflow: true,
-    button: true
-  }
-]
-
-const data = [
-  { id: 1, Numéro: "001", Contenu: "Probème Technique", Date_debut: "05/08/2025", Date_fin: "06/08/2025" },
-  { id: 2, Numéro: "002", Contenu: "Maintenance", Date_debut: "06/08/2025", Date_fin: "07/08/2025" },
-  { id: 3, Numéro: "003", Contenu: "Bug", Date_debut: "07/08/2025", Date_fin: "08/08/2025" },
-  { id: 4, Numéro: "004", Contenu: "Probème Technique", Date_debut: "05/08/2025", Date_fin: "06/08/2025" },
-  { id: 5, Numéro: "005", Contenu: "Maintenance", Date_debut: "06/08/2025", Date_fin: "07/08/2025" },
-  { id: 6, Numéro: "006", Contenu: "Bug", Date_debut: "07/08/2025", Date_fin: "08/08/2025" },
-  { id: 7, Numéro: "007", Contenu: "Probème Technique", Date_debut: "05/08/2025", Date_fin: "06/08/2025" },
-  { id: 8, Numéro: "008", Contenu: "Maintenance", Date_debut: "06/08/2025", Date_fin: "07/08/2025" },
-  { id: 9, Numéro: "009", Contenu: "Bug", Date_debut: "07/08/2025", Date_fin: "08/08/2025" },
-  { id: 10, Numéro: "010", Contenu: "Probème Technique", Date_debut: "05/08/2025", Date_fin: "06/08/2025" },
-  { id: 11, Numéro: "011", Contenu: "Maintenance", Date_debut: "06/08/2025", Date_fin: "07/08/2025" },
-  { id: 12, Numéro: "012", Contenu: "Bug", Date_debut: "07/08/2025", Date_fin: "08/08/2025" }
-]
 function Rapports() {
-  const [filterText, setFilterText] = useState("");
-  const [isOpen, setIsOpen] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [resetPaginationToggle, setResetPaginationToggle] = useState(false); // ✅
+  const { rapports, deleteRapport } = useRapports();
 
-  const handleChangeRowsPerPage = (n) => {
-    setRowsPerPage(n);
-    setResetPaginationToggle(prev => !prev); // ✅ reset page 1
+  const handleDelete = (id) => {
+    deleteRapport(id);
+    toast.error("🗑️ Rapport supprimé");
   };
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Ici tu mets ta logique pour ajouter un rapport
-    alert("Rapport ajouté !");
-    setIsOpen(false);
-  };
-
-  const toggleForm = () => {
-    setIsOpen(!isOpen);
-  };
-
-  const filteredData = data.filter(item =>
-    item.Numéro.toLowerCase().includes(filterText.toLowerCase()) ||
-    item.Contenu.toLowerCase().includes(filterText.toLowerCase()) ||
-    item.Date_debut.toLowerCase().includes(filterText.toLowerCase()) ||
-    item.Date_fin.toLowerCase().includes(filterText.toLowerCase())
-  );
 
   return (
-    <div className="rapport-container">
-      <h2>Liste des rapports</h2>
+    <div className="container mt-4">
+      <h2 className="mb-3">Tous les rapports</h2>
 
-      {/* Toolbar */}
-      <div className="table-toolbar">
-        <div className="left-tools">
-          <label>
-            Show
-            <select
-              value={rowsPerPage}
-              onChange={(e) => handleChangeRowsPerPage(Number(e.target.value))}
-            >
-              <option value="5">5</option>
-              <option value="10">10</option>
-              <option value="25">25</option>
-              <option value="50">50</option>
-              <option value="100">100</option>
-            </select>
-            entries
-          </label>
-        </div>
-
-        <div className="right-tools">
-          <input
-            type="text"
-            placeholder="Recherches..."
-            value={filterText}
-            onChange={e => handleChangeRowsPerPage(rowsPerPage) || setFilterText(e.target.value)}
-            className="search-input"
-          />
-          <button className="btn-add" onClick={() => setIsOpen(s => !s)}>Ajouter</button>
-        </div>
-      </div>
-
-      {/* DataTable */}
-      <DataTable
-        key={rowsPerPage}                      // ✅ force le remount -> applique le nouveau perPage
-        columns={columns}
-        data={filteredData}
-        pagination
-        highlightOnHover
-        striped
-        responsive
-        keyField="id"
-        paginationPerPage={rowsPerPage}       // ✅ contrôlé par ton "Show"
-        paginationRowsPerPageOptions={[]}     // ✅ on supprime le sélecteur natif
-        paginationResetDefaultPage={resetPaginationToggle} // ✅ revient à la page 1
-      />
-
-      {/* Off-canvas ... */}
-      <div className={`offcanvas-form ${isOpen ? "open" : ""}`}>
-        <h2>Ajouter un rapport</h2>
-        <form onSubmit={handleSubmit}>
-          <label>Numéro : <input type="text" required /></label>
-          <label>Contenu : <input type="text" required /></label>
-          <label>Date de début : <input type="text" required /></label>
-          <label>Date de fin : <input type="text" required /></label>
-          <button type="submit">Envoyer</button>
-        </form>
-      </div>
-      {isOpen && <div className="overlay" onClick={toggleForm}></div>}
+      <table className="table table-striped table-bordered">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Description</th>
+            <th>Client</th>
+            <th>Produit</th>
+            <th>Date</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {rapports.length === 0 ? (
+            <tr>
+              <td colSpan="6" className="text-center">
+                Aucun rapport disponible
+              </td>
+            </tr>
+          ) : (
+            rapports.map((r, index) => (
+              <tr key={r.id}>
+                <td>{index + 1}</td>
+                <td>{r.description}</td>
+                <td>{r.client}</td>
+                <td>{r.produit}</td>
+                <td>{r.date}</td>
+                <td>
+                  <button
+                    className="btn btn-sm btn-danger me-2"
+                    onClick={() => handleDelete(r.id)}
+                    title="Supprimer"
+                  >
+                    <FaTrash />
+                  </button>
+                  <button
+                    className="btn btn-sm btn-success"
+                    onClick={() => generateRapportPDF(r, r.intervention)}
+                    title="Télécharger PDF"
+                  >
+                    <FaDownload />
+                  </button>
+                </td>
+              </tr>
+            ))
+          )}
+        </tbody>
+      </table>
     </div>
   );
 }
-export default Rapports
+
+export default Rapports;

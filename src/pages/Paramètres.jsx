@@ -51,19 +51,6 @@ function Parametres() {
             </Card.Body>
           </Card>
         </Col>
-
-        {/* Quatrième carte */}
-        <Col md={3} sm={6} className="mb-4">
-          <Card className="h-100 shadow-sm">
-            <Card.Img variant="top" src={incident} className="card-img-top" />
-            <Card.Body className="d-flex flex-column">
-              <Card.Title>Incident</Card.Title>
-              <div className="mt-auto">
-                <Button as={Link} to="/incident" className="bouton">Accéder</Button>
-              </div>
-            </Card.Body>
-          </Card>
-        </Col>
       </Row>
     </Container>
   );

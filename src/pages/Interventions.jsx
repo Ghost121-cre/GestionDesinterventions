@@ -1,391 +1,395 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { useInterventions } from "../context/InterventionContext";
 import "../assets/css/Interventions.css";
-import "bootstrap/dist/css/bootstrap.min.css";
-import "bootstrap/dist/js/bootstrap.bundle.min.js";
-import "bootstrap-icons/font/bootstrap-icons.css";
+import { Offcanvas } from "react-bootstrap";
+import { generateRapportPDF } from "../utils/pdfGenerator";
+import { useRapports } from "../context/RapportContext";
+
 
 function Interventions() {
+  const navigate = useNavigate();
+  const {
+    interventions,
+    startIntervention,
+    finishIntervention,
+    deleteIntervention,
+  } = useInterventions();
+
   const [activeTab, setActiveTab] = useState("enattente");
-  const [filterClient, setFilterClient] = useState("");
-  const [filterStartDate, setFilterStartDate] = useState("");
-  const [filterEndDate, setFilterEndDate] = useState("");
+  const [showOffcanvas, setShowOffcanvas] = useState(false);
+  const [selectedIntervention, setSelectedIntervention] = useState(null);
+  const [rapport, setRapport] = useState({
+    date: "",
+    client: "",
+    intervenant: "",
+    type: "",
+    description: "",
+    observation: "",
+    travaux: "",
+  });
 
-  // const [interventionsEnAttente, setInterventionsEnAttente] = useState([
-  //   { id: 1, titre: "Impossible de Télécharger un fichier lourd", client: "SIB", date: "2025-09-01", statut: "En attente" },
-  //   { id: 2, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
-  //   { id: 3, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
-  //   { id: 4, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
-  //   { id: 5, titre: "Pointage impossible", client: "BNB", date: "2025-09-02", statut: "En attente" },
-  // ]);
-  // Générer des lignes aléatoires à l'initialisation
-  const [interventionsEnAttente, setInterventionsEnAttente] = useState([]);
+  const { addRapport } = useRapports();
+const handleSaveRapport = () => {
+  if (!selectedIntervention) return;
 
-useEffect(() => {
-  const randomEnAttente = [];
-  for (let i = 1; i <= 20; i++) {
-    randomEnAttente.push({
-      id: i,
-      titre: `Intervention ${i}`,
-      client: `Client ${Math.ceil(Math.random() * 10)}`,
-      date: new Date().toISOString().split("T")[0], // date du jour
-      statut: "En attente"
-    });
-  }
-  setInterventionsEnAttente(randomEnAttente);
-}, []);
-
-  const [interventionsEnCours, setInterventionsEnCours] = useState([
-    { id: 1, titre: "Réparation serveur", client: "Orange", date: "2025-09-08", statut: "En cours", startedAt: new Date().toISOString() },
-  ]);
-
-  const [interventionsTerminees, setInterventionsTerminees] = useState([
-    { id: 3, titre: "Installation fibre", client: "Moov", date: "2025-09-05", statut: "Terminé", startedAt: new Date().toISOString(), endedAt: new Date().toISOString() },
-  ]);
-
-  const [newIntervention, setNewIntervention] = useState({ id: null, titre: "", client: "", date: "", statut: "En attente" });
-  const [isEditing, setIsEditing] = useState(false);
-
-  // Tick pour compteur en cours
-  const [tick, setTick] = useState(0);
-  useEffect(() => {
-    const interval = setInterval(() => setTick(prev => prev + 1), 1000);
-    return () => clearInterval(interval);
-  }, []);
-
-  const toDate = (isoDate) => (isoDate ? new Date(isoDate + "T00:00:00") : null);
-
-  const applyFilters = (data) => {
-    return data.filter((item) => {
-      const itemDate = toDate(item.date);
-      const startDate = filterStartDate ? toDate(filterStartDate) : null;
-      const endDate = filterEndDate ? toDate(filterEndDate) : null;
-      const matchesClient = filterClient ? item.client.toLowerCase().includes(filterClient.toLowerCase()) : true;
-      const afterStart = startDate ? itemDate >= startDate : true;
-      const beforeEnd = endDate ? itemDate <= endDate : true;
-      return matchesClient && afterStart && beforeEnd;
-    });
+  const newRapport = {
+    id: Date.now(),
+    date: rapport.date,
+    client: rapport.client,
+    intervenant: rapport.intervenant,
+    type: rapport.type,
+    description: rapport.description,
+    observation: rapport.observation,
+    travaux: rapport.travaux,
+    interventionId: selectedIntervention.id,
   };
 
-  const handleSaveIntervention = () => {
-    if (!newIntervention.titre || !newIntervention.client || !newIntervention.date) return;
+  // Ajouter dans un état ou context global pour centraliser tous les rapports
+  addRapport(newRapport);
 
-    if (isEditing && newIntervention.id) {
-      if (interventionsEnAttente.some((i) => i.id === newIntervention.id)) {
-        setInterventionsEnAttente(prev => prev.map(i => i.id === newIntervention.id ? { ...newIntervention } : i));
-      } else if (interventionsEnCours.some((i) => i.id === newIntervention.id)) {
-        setInterventionsEnCours(prev => prev.map(i => i.id === newIntervention.id ? { ...newIntervention } : i));
-      } else {
-        setInterventionsTerminees(prev => prev.map(i => i.id === newIntervention.id ? { ...newIntervention } : i));
-      }
-    } else {
-      const newItem = { ...newIntervention, id: Date.now() };
-      if (newItem.statut === "En attente") setInterventionsEnAttente(prev => [...prev, newItem]);
-      else if (newItem.statut === "En cours") setInterventionsEnCours(prev => [...prev, { ...newItem, startedAt: new Date() }]);
-      else setInterventionsTerminees(prev => [...prev, { ...newItem, startedAt: new Date(), endedAt: new Date() }]);
+  setShowOffcanvas(false);
+  toast.success("✅ Rapport enregistré !");
+};
+
+
+
+  // Filtrer interventions par statut
+  const interventionsEnAttente = interventions.filter((i) => i.statut === "En attente");
+  const interventionsEnCours = interventions.filter((i) => i.statut === "En cours");
+  const interventionsTerminees = interventions.filter((i) => i.statut === "Terminé");
+
+  // Format date lisible
+  const formatDateTime = (iSoString) =>
+    iSoString
+      ? new Date(iSoString).toLocaleString("fr-FR", {
+          year: "numeric",
+          month: "2-digit",
+          day: "2-digit",
+          hour: "2-digit",
+          minute: "2-digit",
+        })
+      : "-";
+
+  // Ouvrir Offcanvas rapport
+  const openReportForm = (intervention) => {
+    setSelectedIntervention(intervention);
+    setRapport({
+      date: new Date().toISOString().slice(0, 16),
+      client: intervention.client || "",
+      intervenant: "",
+      type: "",
+      description: intervention.description || "",
+      observation: "",
+      travaux: "",
+    });
+    setShowOffcanvas(true);
+  };
+
+  // const handleSaveRapport = () => {
+  //   console.log("Rapport :", { intervention: selectedIntervention, ...rapport });
+  //   setShowOffcanvas(false);
+  //   alert("Rapport enregistré !");
+  // };
+
+  const handleDownloadRapport = () => {
+    if (!rapport.client || !selectedIntervention) {
+      alert("Veuillez remplir le rapport avant de générer le PDF.");
+      return;
     }
-
-    setNewIntervention({ id: null, titre: "", client: "", date: "", statut: "En attente" });
-    setIsEditing(false);
+    generateRapportPDF(rapport, selectedIntervention);
   };
 
-  const handleDelete = (id, statut) => {
-    if (statut === "En attente") setInterventionsEnAttente(prev => prev.filter(i => i.id !== id));
-    else if (statut === "En cours") setInterventionsEnCours(prev => prev.filter(i => i.id !== id));
-    else setInterventionsTerminees(prev => prev.filter(i => i.id !== id));
+  // ✅ Terminer une intervention et résoudre l'incident lié
+  const handleFinishIntervention = (intervention) => {
+    finishIntervention(intervention.id); // change statut intervention + endedAt
+    // L'incident lié est déjà résolu dans finishIntervention via handleMarkResolved
   };
-
-  // Démarrer une intervention
-  const handleStart = (id) => {
-    const item = interventionsEnAttente.find(i => i.id === id);
-    if (!item) return;
-    setInterventionsEnAttente(prev => prev.filter(i => i.id !== id));
-    setInterventionsEnCours(prev => [...prev, { ...item, statut: "En cours", startedAt: new Date(). toISOString() }]);
-  };
-
-  // Terminer une intervention
-  const handleFinish = (id) => {
-    const item = interventionsEnCours.find(i => i.id === id);
-    if (!item) return;
-    setInterventionsEnCours(prev => prev.filter(i => i.id !== id));
-    setInterventionsTerminees(prev => [...prev, { ...item, statut: "Terminé", endedAt: new Date().toISOString() }]);
-  };
-
-  // Réouvrir
-  const handleReopen = (id) => {
-    const item = interventionsTerminees.find(i => i.id === id);
-    if (!item) return;
-    setInterventionsTerminees(prev => prev.filter(i => i.id !== id));
-    setInterventionsEnCours(prev => [...prev, { ...item, statut: "En cours" }]);
-  };
-
-  // Formulaire
-  const handleEdit = (item) => {
-    setNewIntervention({ ...item });
-    setIsEditing(true);
-    const offcanvas = document.getElementById("offcanvasAdd");
-    if (offcanvas && window.bootstrap) new window.bootstrap.Offcanvas(offcanvas).show();
-  };
-
-  const openAdd = () => {
-    setNewIntervention({ id: null, titre: "", client: "", date: "", statut: "En attente" });
-    setIsEditing(false);
-  };
-
-  const resetFilters = () => {
-    setFilterClient(""); setFilterStartDate(""); setFilterEndDate("");
-  };
-
-  // Utils pour date et durée
-  const formatDateTime = (iSoString) => {
-    if (!iSoString) return "-";
-    return new Date(iSoString).toLocaleString("fr-FR", { 
-      year: "numeric", 
-      month: "2-digit", 
-      day: "2-digit", 
-      hour: "2-digit", 
-      minute: "2-digit" 
-    });
-  };
-  const formatDuration = (start) => {
-    if (!start) return "-";
-    const diff = Math.floor((new Date().getTime() - new Date(start).getTime()) / 1000);
-    const h = String(Math.floor(diff / 3600)).padStart(2,"0");
-    const m = String(Math.floor((diff % 3600) / 60)).padStart(2,"0");
-    const s = String(diff % 60).padStart(2,"0");
-    return `${h}:${m}:${s}`;
-  };
-  // Durée Totale
-  const formatTotalDuration = (start, end) => {
-  if (!start || !end) return "-";
-  const diff = Math.floor((new Date(end).getTime() - new Date(start).getTime()) / 1000);
-  const h = String(Math.floor(diff / 3600)).padStart(2,"0");
-  const m = String(Math.floor((diff % 3600) / 60)).padStart(2,"0");
-  const s = String(diff % 60).padStart(2,"0");
-  return `${h}:${m}:${s}`;
-};
-
-  // pagination
-  const [currentPage, setCurrentPage] = useState(1);
-const itemsPerPage = 10; // Nombre de lignes par page
-
-const paginateData = (data) => {
-  const start = (currentPage - 1) * itemsPerPage;
-  const end = start + itemsPerPage;
-  return data.slice(start, end);
-};
-
-const totalPages = (data) => Math.ceil(data.length / itemsPerPage);
-const handlePageChange = (page, data) => {
-  if (page < 1 || page > totalPages(data)) return;
-  setCurrentPage(page);
-};
-  const filteredTerminees = applyFilters(interventionsTerminees);
-  const paginatedTerminees = paginateData(filteredTerminees);
 
   return (
     <div className="intervention-container">
       {/* Onglets */}
       <ul className="nav nav-tabs custom-tabs">
         <li className="nav-item">
-          <button className={`nav-link ${activeTab==="enattente"?"active":""}`} onClick={()=>setActiveTab("enattente")}>
+          <button
+            className={`nav-link ${activeTab === "enattente" ? "active" : ""}`}
+            onClick={() => setActiveTab("enattente")}
+          >
             En attente ({interventionsEnAttente.length})
           </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab==="encours"?"active":""}`} onClick={()=>setActiveTab("encours")}>
+          <button
+            className={`nav-link ${activeTab === "encours" ? "active" : ""}`}
+            onClick={() => setActiveTab("encours")}
+          >
             En cours ({interventionsEnCours.length})
           </button>
         </li>
         <li className="nav-item">
-          <button className={`nav-link ${activeTab==="termine"?"active":""}`} onClick={()=>setActiveTab("termine")}>
+          <button
+            className={`nav-link ${activeTab === "termine" ? "active" : ""}`}
+            onClick={() => setActiveTab("termine")}
+          >
             Terminé ({interventionsTerminees.length})
           </button>
         </li>
       </ul>
 
-      {/* Bouton Ajouter */}
-      {activeTab==="enattente" && (
-        <div className="btn-container">
-          <button className="btn-custom-blue" data-bs-toggle="offcanvas" data-bs-target="#offcanvasAdd" onClick={openAdd}>
-            + Ajouter
-          </button>
-        </div>
-      )}
-
-      {/* Filtres pour Terminé */}
-      {activeTab==="termine" && (
-        <div className="filtre-container">
-          <div className="d-flex gap-3 mb-3 mt-3">
-            <input type="text" placeholder="Filtrer par client" className="form-control" value={filterClient} onChange={(e)=>setFilterClient(e.target.value)} />
-            <input type="date" className="form-control" value={filterStartDate} onChange={(e)=>setFilterStartDate(e.target.value)} />
-            <input type="date" className="form-control" value={filterEndDate} onChange={(e)=>setFilterEndDate(e.target.value)} />
-            <button className="btn btn-secondary" onClick={resetFilters}>Réinitialiser</button>
-          </div>
-        </div>
-      )}
-
-      {/* Tableaux */}
       <div className="tab-content custom-content">
-        {/* En attente */}
-        {activeTab==="enattente" && (
-          <div>
-            <h4>Interventions en attente</h4>
-            <table className="custom-table">
-              <thead>
+        {/* EN ATTENTE */}
+        {activeTab === "enattente" && (
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Incidents</th>
+                <th>Description</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Date</th>
+                <th>Statut</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {interventionsEnAttente.length === 0 && (
                 <tr>
-                  <th>ID</th>
-                  <th>Titre</th>
-                  <th>Client</th>
-                  <th>Date</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+                  <td colSpan="8" className="text-center">
+                    Pas d'intervention en attente.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {applyFilters(interventionsEnAttente).length === 0 && (
-                  <tr>
-                    <td colSpan="6" className="text-center">Pas d'intervention en attente.</td>
-                  </tr>
-                )}
-                {applyFilters(interventionsEnAttente).map(item=>(
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.titre}</td>
-                    <td>{item.client}</td>
-                    <td>{item.date}</td>
-                    <td><span className="badge status-badge status-en-attente"><i className="bi bi-hourglass-split me-1"/> {item.statut}</span></td>
-                    <td>
-                      <i className="bi bi-pencil-square text-primary me-2 action-icon" title="Modifier" onClick={()=>handleEdit(item)} />
-                      <i className="bi bi-play-circle text-success me-2 action-icon" title="Démarrer" onClick={()=>handleStart(item.id)} />
-                      <i className="bi bi-trash-fill text-danger action-icon" title="Supprimer" onClick={()=>handleDelete(item.id,item.statut)} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              )}
+              {interventionsEnAttente.map((i) => (
+                <tr key={i.id}>
+                  <td>{i.id}</td>
+                  <td>{i.incidentId}</td>
+                  <td>{i.description}</td>
+                  <td>{i.client}</td>
+                  <td>{i.produit}</td>
+                  <td>{formatDateTime(i.datetime)}</td>
+                  <td>
+                    <span className="badge bg-warning">{i.statut}</span>
+                  </td>
+                  <td>
+                    <i
+                      className="bi bi-play-circle-fill text-success action-icon"
+                      title="Démarrer"
+                      onClick={() => startIntervention(i.id)}
+                    />
+                    <i
+                      className="bi bi-trash-fill text-danger action-icon"
+                      title="Supprimer"
+                      onClick={() => deleteIntervention(i.id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
 
-        {/* En cours */}
-        {activeTab==="encours" && (
-          <div>
-            <h4>Interventions en cours</h4>
-            <table className="custom-table">
-              <thead>
+        {/* EN COURS */}
+        {activeTab === "encours" && (
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Démarrée le</th>
+                <th>Statut</th>
+                <th>Rapport</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {interventionsEnCours.length === 0 && (
                 <tr>
-                  <th>ID</th>
-                  <th>Titre</th>
-                  <th>Client</th>
-                  <th>Démarrée le</th>
-                  <th>Durée</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+                  <td colSpan="8" className="text-center">
+                    Pas d'intervention en cours.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {interventionsEnCours.length === 0 && (
-                  <tr>
-                    <td colSpan="7" className="text-center">Pas d'intervention en cours.</td>
-                  </tr>
-                )}
-                {interventionsEnCours.map(item=>(
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.titre}</td>
-                    <td>{item.client}</td>
-                    <td>{formatDateTime(item.startedAt)}</td>
-                    <td>{formatDuration(item.startedAt)}</td>
-                    <td><span className="badge status-badge status-en-cours"><i className="bi bi-clock-fill me-1"/> {item.statut}</span></td>
-                    <td>
-                      <i className="bi bi-check-circle text-success me-2 action-icon" title="Terminer" onClick={()=>handleFinish(item.id)} />
-                      <i className="bi bi-trash-fill text-danger action-icon" title="Supprimer" onClick={()=>handleDelete(item.id,item.statut)} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              )}
+              {interventionsEnCours.map((i) => (
+                <tr key={i.id}>
+                  <td>{i.id}</td>
+                  <td>{i.description}</td>
+                  <td>{i.client}</td>
+                  <td>{i.produit}</td>
+                  <td>{formatDateTime(i.startedAt)}</td>
+                  <td>
+                    <span className="badge bg-primary">{i.statut}</span>
+                  </td>
+                  <td>
+                    <i
+                      className="bi bi-journal-text text-info action-icon"
+                      title="Rapport"
+                      onClick={() => openReportForm(i)}
+                    />
+                    <i
+                      className="bi bi-download text-success action-icon"
+                      title="Télécharger rapport"
+                      onClick={() => handleDownloadRapport(i)}
+                    />
+                  </td>
+                  <td>
+                    <i
+                      className="bi bi-stop-circle-fill text-success action-icon"
+                      title="Terminer"
+                      onClick={() => handleFinishIntervention(i)}
+                    />
+                    <i
+                      className="bi bi-trash-fill text-danger action-icon"
+                      title="Supprimer"
+                      onClick={() => deleteIntervention(i.id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
 
-        {/* Terminé */}
-        {activeTab==="termine" && (
-          <div>
-            <h4>Interventions terminées</h4>
-            <table className="custom-table">
-              <thead>
+        {/* TERMINE */}
+        {activeTab === "termine" && (
+          <table className="custom-table">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Description</th>
+                <th>Client</th>
+                <th>Produit</th>
+                <th>Démarrée le</th>
+                <th>Terminée le</th>
+                <th>Statut</th>
+                <th>Rapport</th>
+                <th>Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              {interventionsTerminees.length === 0 && (
                 <tr>
-                  <th>ID</th>
-                  <th>Titre</th>
-                  <th>Client</th>
-                  <th>Démarrée le</th>
-                  <th>Terminée le</th>
-                  <th>Durée Totale</th>
-                  <th>Statut</th>
-                  <th>Actions</th>
+                  <td colSpan="9" className="text-center">
+                    Pas d'intervention terminée.
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {paginatedTerminees.map(item=>(
-                  <tr key={item.id}>
-                    <td>{item.id}</td>
-                    <td>{item.titre}</td>
-                    <td>{item.client}</td>
-                    <td>{formatDateTime(item.startedAt)}</td>
-                    <td>{formatDateTime(item.endedAt)}</td>
-                    <td>{formatTotalDuration(item.startedAt, item.endedAt)}</td>
-                    <td><span className="badge status-badge status-termine"><i className="bi bi-check-circle-fill me-1"/> {item.statut}</span></td>
-                    <td>
-                      <i className="bi bi-arrow-counterclockwise text-warning me-2 action-icon" title="Réouvrir" onClick={()=>handleReopen(item.id)} />
-                      <i className="bi bi-trash-fill text-danger action-icon" title="Supprimer" onClick={()=>handleDelete(item.id,item.statut)} />
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-           <div className="pagination-controls">
-             <button onClick={() => handlePageChange(currentPage - 1, filteredTerminees)} disabled={currentPage === 1}>Précédent</button>
-             <span>Page {currentPage} / {totalPages(filteredTerminees)}</span>
-             <button onClick={() => handlePageChange(currentPage + 1, filteredTerminees)} disabled={currentPage === totalPages(filteredTerminees)}>Suivant</button>
-          </div>
-
-          </div>
+              )}
+              {interventionsTerminees.map((i) => (
+                <tr key={i.id}>
+                  <td>{i.id}</td>
+                  <td>{i.description}</td>
+                  <td>{i.client}</td>
+                  <td>{i.produit}</td>
+                  <td>{formatDateTime(i.startedAt)}</td>
+                  <td>{formatDateTime(i.endedAt)}</td>
+                  <td>
+                    <span className="badge bg-success">{i.statut}</span>
+                  </td>
+                  <td>
+                    <i
+                      className="bi bi-journal-text text-info action-icon"
+                      title="Voir rapport"
+                      onClick={() => openReportForm(i)}
+                    />
+                    <i
+                      className="bi bi-download text-success action-icon"
+                      title="Télécharger rapport"
+                      onClick={() => handleDownloadRapport(i)}
+                    />
+                  </td>
+                  <td>
+                    <i
+                      className="bi bi-trash-fill text-danger action-icon"
+                      title="Supprimer"
+                      onClick={() => deleteIntervention(i.id)}
+                    />
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         )}
       </div>
 
-      {/* Offcanvas Ajouter / Modifier */}
-      <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasAdd" aria-labelledby="offcanvasAddLabel">
-        <div className="offcanvas-header">
-          <h5 id="offcanvasAddLabel">{isEditing ? "Modifier Intervention" : "Nouvelle Intervention"}</h5>
-          <button type="button" className="btn-close" data-bs-dismiss="offcanvas"></button>
-        </div>
-        <div className="offcanvas-body">
+      {/* Offcanvas */}
+      <Offcanvas
+        show={showOffcanvas}
+        onHide={() => setShowOffcanvas(false)}
+        placement="end"
+      >
+        <Offcanvas.Header closeButton>
+          <Offcanvas.Title>Rapport d’intervention</Offcanvas.Title>
+        </Offcanvas.Header>
+        <Offcanvas.Body>
           <form>
             <div className="mb-3">
-              <label className="form-label">Titre</label>
-              <input type="text" className="form-control" value={newIntervention.titre} onChange={(e)=>setNewIntervention({...newIntervention,titre:e.target.value})} />
+              <label>Date</label>
+              <input
+                type="datetime-local"
+                className="form-control"
+                value={rapport.date}
+                onChange={(e) => setRapport({ ...rapport, date: e.target.value })}
+              />
             </div>
             <div className="mb-3">
-              <label className="form-label">Client</label>
-              <input type="text" className="form-control" value={newIntervention.client} onChange={(e)=>setNewIntervention({...newIntervention,client:e.target.value})} />
+              <label>Client</label>
+              <input
+                type="text"
+                className="form-control"
+                value={rapport.client}
+                onChange={(e) => setRapport({ ...rapport, client: e.target.value })}
+              />
             </div>
             <div className="mb-3">
-              <label className="form-label">Date</label>
-              <input type="date" className="form-control" value={newIntervention.date} onChange={(e)=>setNewIntervention({...newIntervention,date:e.target.value})} />
+              <label>Intervenant</label>
+              <input
+                type="text"
+                className="form-control"
+                value={rapport.intervenant}
+                onChange={(e) => setRapport({ ...rapport, intervenant: e.target.value })}
+              />
             </div>
             <div className="mb-3">
-              <label className="form-label">Statut</label>
-              <select className="form-select" value={newIntervention.statut} onChange={(e)=>setNewIntervention({...newIntervention, statut:e.target.value})}>
-                <option>En attente</option>
-                <option>En cours</option>
-                <option>Terminé</option>
-              </select>
+              <label>Type Intervention</label>
+              <input
+                type="text"
+                className="form-control"
+                value={rapport.type}
+                onChange={(e) => setRapport({ ...rapport, type: e.target.value })}
+              />
             </div>
-            <button type="button" className="btn btn-success" data-bs-dismiss="offcanvas" onClick={handleSaveIntervention}>
-              {isEditing ? "Mettre à jour" : "Ajouter"}
+            <div className="mb-3">
+              <label>Description</label>
+              <textarea
+                className="form-control"
+                value={rapport.description}
+                onChange={(e) => setRapport({ ...rapport, description: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label>Observation</label>
+              <textarea
+                className="form-control"
+                value={rapport.observation}
+                onChange={(e) => setRapport({ ...rapport, observation: e.target.value })}
+              />
+            </div>
+            <div className="mb-3">
+              <label>Travaux effectués</label>
+              <textarea
+                className="form-control"
+                value={rapport.travaux}
+                onChange={(e) => setRapport({ ...rapport, travaux: e.target.value })}
+              />
+            </div>
+            <button type="button" className="btn btn-success w-100" onClick={handleSaveRapport}>
+              Générer le rapport
             </button>
           </form>
-        </div>
-      </div>
+        </Offcanvas.Body>
+      </Offcanvas>
     </div>
   );
 }

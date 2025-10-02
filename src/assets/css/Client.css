@@ -1,0 +1,18 @@
+.client-container h3 {
+  color: #16a34a; /* vert */
+  font-weight: 600;
+}
+
+.client-table th {
+  background-color: #f0fdf4;
+}
+
+.action-icon {
+  cursor: pointer;
+  transition: transform 0.2s ease, opacity 0.2s ease;
+}
+
+.action-icon:hover {
+  transform: scale(1.2);
+  opacity: 0.8;
+}

@@ -1,0 +1,68 @@
+/* Style global de la page d'accueil */
+.accueil-container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 30px;
+}
+
+.accueil-container h2 {
+  font-size: 26px;
+  font-weight: bold;
+  color: #2c3e50;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+/* Carte du formulaire */
+.accueil-card {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 25px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.accueil-card h4 {
+  font-size: 20px;
+  margin-bottom: 20px;
+  color: #34495e;
+  font-weight: 600;
+}
+
+/* Labels */
+.accueil-card label {
+  font-weight: 500;
+  color: #555;
+  margin-bottom: 6px;
+  display: block;
+}
+
+/* Champs */
+.accueil-card input {
+  border-radius: 8px;
+  border: 1px solid #ddd;
+  padding: 10px 12px;
+  font-size: 15px;
+  transition: all 0.3s ease-in-out;
+}
+
+.accueil-card input:focus {
+  border-color: #28a745;
+  outline: none;
+  box-shadow: 0 0 6px rgba(40, 167, 69, 0.4);
+}
+
+/* Bouton */
+.accueil-card button {
+  background: #28a745;
+  border: none;
+  border-radius: 8px;
+  font-size: 16px;
+  padding: 12px;
+  font-weight: bold;
+  transition: 0.3s ease;
+}
+
+.accueil-card button:hover {
+  background: #218838;
+  transform: translateY(-1px);
+}

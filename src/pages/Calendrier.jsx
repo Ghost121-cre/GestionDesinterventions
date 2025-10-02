@@ -1,27 +1,36 @@
-import React, { useRef, useEffect } from "react"
-import { useOutletContext } from "react-router-dom"
-import FullCalendar from "@fullcalendar/react"
-import dayGridPlugin from "@fullcalendar/daygrid"
-import timeGridPlugin from "@fullcalendar/timegrid"
-import interactionPlugin from "@fullcalendar/interaction"
-import frLocale from "@fullcalendar/core/locales/fr"
-import "../assets/css/Calendrier.css"
+import React, { useRef, useEffect } from "react";
+import { useOutletContext } from "react-router-dom";
+import FullCalendar from "@fullcalendar/react";
+import dayGridPlugin from "@fullcalendar/daygrid";
+import timeGridPlugin from "@fullcalendar/timegrid";
+import interactionPlugin from "@fullcalendar/interaction";
+import frLocale from "@fullcalendar/core/locales/fr";
+import "../assets/css/Calendrier.css";
+import { useInterventions } from "../context/InterventionContext";
 
 function Calendrier() {
-  const { sidebarWidth } = useOutletContext()
-  const calendarRef = useRef(null)
+  const { interventions } = useInterventions();
+  const { sidebarWidth } = useOutletContext();
+  const calendarRef = useRef(null);
 
-  // Recalcule quand la sidebar change
+  const events = interventions.map((i) => ({
+    id: i.id,
+    title: i.description,
+    start: i.datetime || i.startedAt || new Date().toISOString(),
+    backgroundColor:
+      i.statut === "En attente"
+        ? "#cce5ff"
+        : i.statut === "En cours"
+        ? "#fff3cd"
+        : "#d4edda",
+  }));
+
   useEffect(() => {
-  // Quand la sidebar change de largeur → simule un resize
-  window.dispatchEvent(new Event("resize"))
-
-  if (calendarRef.current) {
-    setTimeout(() => {
-      calendarRef.current.getApi().updateSize()
-    }, 300)
-  }
-}, [sidebarWidth])
+    window.dispatchEvent(new Event("resize"));
+    if (calendarRef.current) {
+      setTimeout(() => calendarRef.current.getApi().updateSize(), 300);
+    }
+  }, [sidebarWidth, interventions]);
 
   return (
     <div className="calendar-container">
@@ -35,7 +44,7 @@ function Calendrier() {
         locale="fr"
         height="1000px"
         expandRows
-        dayHeaderContent={info => info.text.replace('.', '')}
+        dayHeaderContent={(info) => info.text.replace(".", "")}
         aspectRatio={1.5}
         headerToolbar={{
           left: "prev,next",
@@ -48,9 +57,10 @@ function Calendrier() {
           week: "Semaine",
           day: "Jour",
         }}
+        events={events}
       />
     </div>
-  )
+  );
 }
 
-export default Calendrier
+export default Calendrier;

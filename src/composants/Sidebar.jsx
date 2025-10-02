@@ -14,7 +14,7 @@ import {
   CNavTitle,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser } from '@coreui/icons'
+import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser, cilHome, cilWarning } from '@coreui/icons'
 
 function Sidebar({ sidebarWidth, setSidebarWidth }) {
   const expandedWidth = 250
@@ -42,6 +42,31 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
         <CNavTitle className="sidebar-title">
           {sidebarWidth === collapsedWidth ? '...' : 'Menu'}
         </CNavTitle>
+        {/* Accueil */}
+        <CNavItem>
+          <NavLink 
+            to="/accueil" 
+            className={({ isActive }) => 
+              isActive ? 
+            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
+          >
+            <CIcon customClassName="nav-icon" icon={cilHome} />
+            {sidebarWidth === collapsedWidth ? null : 'Accueil'}
+          </NavLink>
+        </CNavItem>
+
+        {/* Incidents */}
+        <CNavItem>
+          <NavLink 
+            to="/incidents" 
+            className={({ isActive }) => 
+              isActive ? 
+            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
+          >
+            <CIcon customClassName="nav-icon" icon={cilWarning} />
+            {sidebarWidth === collapsedWidth ? null : 'Incidents'}
+          </NavLink>
+        </CNavItem>
 
         {/* Calendrier */}
         <CNavItem>
