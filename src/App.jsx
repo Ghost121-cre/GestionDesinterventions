@@ -15,6 +15,7 @@ import Accueil from "./pages/Accueil";
 import InterventionForm from "./pages/InterventionForm";
 import IncidentForm from "./pages/IncidentForm";
 import Incident from "./pages/Incident";
+import Dashboard from "./pages/Dashboard";
 
 // Toastify global
 import { ToastContainer } from "react-toastify";
@@ -52,6 +53,8 @@ function App() {
           <Route path="/ajouter_intervention" element={<InterventionForm />} />
           <Route path="/declarer_incident" element={<IncidentForm />} />
           <Route path="/incidents" element={<Incident />} />
+          <Route path="/dashboard" element={<Dashboard />} />
+
         </Route>
       </Routes>
     </Router>

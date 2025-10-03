@@ -1,39 +1,92 @@
-import React, { useState } from "react";
-import Interventions from "./Interventions";
-import Incident from "./Incident";
+// src/pages/Dashboard.jsx
+import React, { useContext } from "react";
+import "../assets/css/Dashboard.css";
+import { useInterventions } from "../context/InterventionContext";
+import { useRapports } from "../context/RapportContext";
+import { Bar, Pie } from "react-chartjs-2";
+import {
+  Chart as ChartJS,
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+} from "chart.js";
+
+ChartJS.register(
+  CategoryScale,
+  LinearScale,
+  BarElement,
+  Title,
+  Tooltip,
+  Legend,
+  ArcElement
+);
 
 function Dashboard() {
-  const [incidentNonResolus, setIncidentNonResolus] = useState([]);
-  const [incidentsResolus, setIncidentsResolus] = useState([]);
+  const { interventions } = useInterventions();
+  const { rapports } = useRapports();
 
-  // 👉 Fonction appelée quand une intervention est terminée
-  const handleTerminerIntervention = (intervention) => {
-    const nouvelIncident = {
-      id: Date.now(),
-      contenu: intervention.titre,
-      client: intervention.client || "Client démo",
-      produit: intervention.produit || "Produit démo",
-      date_survenu: new Date().toISOString().split("T")[0],
-      statut: "résolu",
-    };
+  const enAttente = interventions.filter(i => i.statut === "En attente").length;
+  const enCours = interventions.filter(i => i.statut === "En cours").length;
+  const terminee = interventions.filter(i => i.statut === "Terminé").length;
 
-    setIncidentsResolus((prev) => [...prev, nouvelIncident]);
+  // Données pour graphique interventions
+  const interventionsData = {
+    labels: ["En attente", "En cours", "Terminé"],
+    datasets: [
+      {
+        label: "Interventions",
+        data: [enAttente, enCours, terminee],
+        backgroundColor: ["#ffc107", "#0d6efd", "#198754"],
+      },
+    ],
+  };
+
+  // Données pour graphique rapports
+  const rapportsData = {
+    labels: ["Total Rapports"],
+    datasets: [
+      {
+        label: "Rapports générés",
+        data: [rapports.length],
+        backgroundColor: ["#6610f2"],
+      },
+    ],
   };
 
   return (
-    <div>
-      <h2 className="text-center mb-4">Tableau de bord Démo</h2>
-      <div className="row">
-        <div className="col-md-6">
-          <Interventions onTerminer={handleTerminerIntervention} />
+    <div className="dashboard-container">
+      <h2>Tableau de bord</h2>
+
+      {/* Cartes statuts interventions */}
+      <div className="cards-container">
+        <div className="card card-attente">
+          <h3>{enAttente}</h3>
+          <p>En attente</p>
         </div>
-        <div className="col-md-6">
-          <Incident
-            incidentNonResolus={incidentNonResolus}
-            incidentsResolus={incidentsResolus}
-            setIncidentNonResolus={setIncidentNonResolus}
-            setIncidentsResolus={setIncidentsResolus}
-          />
+        <div className="card card-encours">
+          <h3>{enCours}</h3>
+          <p>En cours</p>
+        </div>
+        <div className="card card-terminee">
+          <h3>{terminee}</h3>
+          <p>Terminées</p>
+        </div>
+      </div>
+
+      {/* Graphiques */}
+      <div className="charts-container">
+        <div className="chart">
+          <h4>Répartition des interventions</h4>
+          <Pie data={interventionsData} />
+        </div>
+
+        <div className="chart">
+          <h4>Rapports générés</h4>
+          <Bar data={rapportsData} />
         </div>
       </div>
     </div>

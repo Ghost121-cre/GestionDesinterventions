@@ -14,7 +14,7 @@ import {
   CNavTitle,
 } from '@coreui/react'
 import CIcon from '@coreui/icons-react'
-import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser, cilHome, cilWarning } from '@coreui/icons'
+import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser, cilHome, cilWarning, cilSpeedometer } from '@coreui/icons'
 
 function Sidebar({ sidebarWidth, setSidebarWidth }) {
   const expandedWidth = 250
@@ -42,6 +42,19 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
         <CNavTitle className="sidebar-title">
           {sidebarWidth === collapsedWidth ? '...' : 'Menu'}
         </CNavTitle>
+        {/* Dashboard */}
+        <CNavItem>
+          <NavLink 
+            to="/dashboard" 
+            className={({ isActive }) => 
+              isActive ? 
+            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
+          >
+            <CIcon customClassName="nav-icon" icon={cilSpeedometer} />
+            {sidebarWidth === collapsedWidth ? null : 'Dashboard'}
+          </NavLink>
+        </CNavItem>
+
         {/* Accueil */}
         <CNavItem>
           <NavLink 

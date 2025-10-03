@@ -5,9 +5,13 @@ import "../assets/css/Interventions.css";
 import { Offcanvas } from "react-bootstrap";
 import { generateRapportPDF } from "../utils/pdfGenerator";
 import { useRapports } from "../context/RapportContext";
-
+import { useContext } from "react"
+import { toast } from "react-toastify"
+import { NotificationContext } from "../context/NotificationContext"
 
 function Interventions() {
+  const { addNotification } = useContext(NotificationContext)
+
   const navigate = useNavigate();
   const {
     interventions,
@@ -100,11 +104,17 @@ const handleSaveRapport = () => {
     generateRapportPDF(rapport, selectedIntervention);
   };
 
-  // ✅ Terminer une intervention et résoudre l'incident lié
   const handleFinishIntervention = (intervention) => {
-    finishIntervention(intervention.id); // change statut intervention + endedAt
-    // L'incident lié est déjà résolu dans finishIntervention via handleMarkResolved
-  };
+  // Met à jour le statut de l'intervention
+  finishIntervention(intervention.id);
+
+  // Ajouter une notification globale
+  addNotification(`Intervention #${intervention.id} terminée ✅`);
+
+  // Afficher un toast
+  toast.success(`✅ Intervention #${intervention.id} terminée !`);
+};
+
 
   return (
     <div className="intervention-container">

@@ -1,32 +1,38 @@
-import React, { createContext, useState, useContext } from "react";
+import React, { createContext, useState } from "react"
 
-export const NotificationContext = createContext();
+export const NotificationContext = createContext()
 
 export const NotificationProvider = ({ children }) => {
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState([])
 
+  // Ajouter une notification
   const addNotification = (message) => {
-    const newNotif = { id: Date.now(), message, read: false };
-    setNotifications(prev => [newNotif, ...prev]);
-  };
+    const newNotification = {
+      id: Date.now(),
+      message,
+      read: false,
+      date: new Date().toLocaleString("fr-FR"),
+    }
+    setNotifications((prev) => [newNotification, ...prev])
+  }
 
+  // Marquer une notification comme lue
   const markAsRead = (id) => {
-    setNotifications(prev =>
-      prev.map(n => (n.id === id ? { ...n, read: true } : n))
-    );
-  };
+    setNotifications((prev) =>
+      prev.map((n) => (n.id === id ? { ...n, read: true } : n))
+    )
+  }
+
+  // Tout marquer comme lu (optionnel)
+  const markAllAsRead = () => {
+    setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
+  }
 
   return (
-    <NotificationContext.Provider value={{ notifications, addNotification, markAsRead }}>
+    <NotificationContext.Provider
+      value={{ notifications, addNotification, markAsRead, markAllAsRead }}
+    >
       {children}
     </NotificationContext.Provider>
-  );
-};
-
-export const useNotifications = () => {
-  const context = useContext(NotificationContext);
-  if (!context) {
-    throw new Error("useNotifications doit être utilisé dans un NotificationProvider");
-  }
-  return context;
-};
+  )
+}
