@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import "bootstrap/dist/css/bootstrap.min.css";
 import CIcon from "@coreui/icons-react";
 import { cilPlus, cilWarning } from "@coreui/icons";
+import "../assets/css/Accueil.css";
 
 function Accueil() {
   const navigate = useNavigate();

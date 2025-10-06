@@ -1,155 +1,126 @@
-// src/composants/Sidebar.jsx
-import React from 'react'
-import { NavLink } from 'react-router-dom'
-import "../assets/css/Sidebar.css"
-import activ from "../assets/images/activ.png"
+import React, { useState, useEffect } from 'react';
+import { NavLink } from 'react-router-dom';
+import "../assets/css/Sidebar.css";
+import activ from "../assets/images/activ.png";
 
 import {
   CSidebar,
   CSidebarBrand,
   CSidebarHeader,
   CSidebarNav,
-  CNavGroup,
   CNavItem,
   CNavTitle,
-} from '@coreui/react'
-import CIcon from '@coreui/icons-react'
-import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser, cilHome, cilWarning, cilSpeedometer } from '@coreui/icons'
+} from '@coreui/react';
+import CIcon from '@coreui/icons-react';
+import { cilRecycle, cilSettings, cilDescription, cilCalendar, cilUser, cilHome, cilWarning, cilSpeedometer } from '@coreui/icons';
 
 function Sidebar({ sidebarWidth, setSidebarWidth }) {
-  const expandedWidth = 250
-  const collapsedWidth = 95
+  const expandedWidth = 250;
+  const collapsedWidth = 95;
 
-  return (
+  const [isMobile, setIsMobile] = useState(false);
+  const [isOpenMobile, setIsOpenMobile] = useState(false);
+
+  useEffect(() => {
+    const handleResize = () => setIsMobile(window.innerWidth < 768);
+    handleResize();
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  const toggleMobileSidebar = () => setIsOpenMobile(!isOpenMobile);
+
+  const renderNavItem = (to, icon, label) => (
+    <CNavItem key={to}>
+      <NavLink
+        to={to}
+        className={({ isActive }) =>
+          isActive
+            ? sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active"
+            : "nav-link"
+        }
+        onClick={() => isMobile && setIsOpenMobile(false)}
+      >
+        <CIcon customClassName="nav-icon" icon={icon} />
+        {(!isMobile && sidebarWidth !== collapsedWidth) || (isMobile && isOpenMobile) ? label : null}
+      </NavLink>
+    </CNavItem>
+  );
+
+  // Desktop sidebar
+  const desktopSidebar = (
     <CSidebar
       className="border-end sidebar-fixed"
-      style={{ width: sidebarWidth }}
-      onMouseEnter={() => setSidebarWidth(expandedWidth)}
-      onMouseLeave={() => setSidebarWidth(collapsedWidth)}
+      style={{
+        width: sidebarWidth,
+        transition: 'width 0.3s',
+      }}
+      onMouseEnter={() => !isMobile && setSidebarWidth(expandedWidth)}
+      onMouseLeave={() => !isMobile && setSidebarWidth(collapsedWidth)}
     >
-      {/* Logo */}
       <CSidebarHeader>
         <CSidebarBrand className="sidebar-logo">
           <img src={activ} alt="Logo Activ" />
         </CSidebarBrand>
         <div className='Titre-sidebar-header'>
-          {sidebarWidth === collapsedWidth ? null : 'Gestion des interventions'}
+          {sidebarWidth !== collapsedWidth ? 'Gestion des interventions' : null}
         </div>
       </CSidebarHeader>
 
-      {/* Menu */}
       <CSidebarNav className="sidebar-nav">
-        <CNavTitle className="sidebar-title">
-          {sidebarWidth === collapsedWidth ? '...' : 'Menu'}
-        </CNavTitle>
-        {/* Dashboard */}
-        <CNavItem>
-          <NavLink 
-            to="/dashboard" 
-            className={({ isActive }) => 
-              isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilSpeedometer} />
-            {sidebarWidth === collapsedWidth ? null : 'Dashboard'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Accueil */}
-        <CNavItem>
-          <NavLink 
-            to="/accueil" 
-            className={({ isActive }) => 
-              isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilHome} />
-            {sidebarWidth === collapsedWidth ? null : 'Accueil'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Incidents */}
-        <CNavItem>
-          <NavLink 
-            to="/incidents" 
-            className={({ isActive }) => 
-              isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilWarning} />
-            {sidebarWidth === collapsedWidth ? null : 'Incidents'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Calendrier */}
-        <CNavItem>
-          <NavLink 
-            to="/calendrier" 
-           className={({ isActive }) => 
-            isActive 
-             ? sidebarWidth === collapsedWidth 
-               ? "nav-link active collapsed"   // cas réduit
-               : "nav-link active"             // cas large
-               : "nav-link"
-          }
->
-          <CIcon customClassName="nav-icon" icon={cilCalendar} />
-          {sidebarWidth === collapsedWidth ? null : 'Calendrier'}
-        </NavLink>
-        </ CNavItem>
-       
-         {/* Intervention */}
-        <CNavItem>
-          <NavLink 
-            to="/interventions" 
-            className={({ isActive }) => 
-              isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilRecycle} />
-            {sidebarWidth === collapsedWidth ? null : 'interventions'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Rapports */}
-        <CNavItem>
-          <NavLink 
-            to="/rapports" 
-            className={({ isActive }) => isActive ?
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilDescription} />
-            {sidebarWidth === collapsedWidth ? null : 'Rapports'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Profil */}
-        <CNavItem>
-          <NavLink 
-            to="/profil" 
-            className={({ isActive }) => isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilUser} />
-            {sidebarWidth === collapsedWidth ? null : 'Profil'}
-          </NavLink>
-        </CNavItem>
-
-        {/* Paramètres */}
-        <CNavItem>
-          <NavLink 
-            to="/parametres" 
-            className={({ isActive }) => isActive ? 
-            (sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active") : "nav-link"}
-          >
-            <CIcon customClassName="nav-icon" icon={cilSettings} />
-            {sidebarWidth === collapsedWidth ? null : 'Paramètres'}
-          </NavLink>
-        </CNavItem>
-
+        <CNavTitle className="sidebar-title">{sidebarWidth !== collapsedWidth ? 'Menu' : '...'}</CNavTitle>
+        {renderNavItem("/dashboard", cilSpeedometer, "Dashboard")}
+        {renderNavItem("/accueil", cilHome, "Accueil")}
+        {renderNavItem("/incidents", cilWarning, "Incidents")}
+        {renderNavItem("/calendrier", cilCalendar, "Calendrier")}
+        {renderNavItem("/interventions", cilRecycle, "Interventions")}
+        {renderNavItem("/rapports", cilDescription, "Rapports")}
+        {renderNavItem("/profil", cilUser, "Profil")}
+        {renderNavItem("/parametres", cilSettings, "Paramètres")}
       </CSidebarNav>
     </CSidebar>
-  )
+  );
+
+  // Mobile sidebar
+  const mobileSidebar = (
+    <>
+      <div className={`mobile-sidebar ${isOpenMobile ? 'open' : ''}`}>
+        <div className="mobile-sidebar-content">
+          <CSidebarHeader>
+            <CSidebarBrand className="sidebar-logo">
+              <img src={activ} alt="Logo Activ" />
+            </CSidebarBrand>
+            <div className='Titre-sidebar-header'>
+              Gestion des interventions
+            </div>
+          </CSidebarHeader>
+          <CSidebarNav className="sidebar-nav">
+            <CNavTitle className="sidebar-title">Menu</CNavTitle>
+            {renderNavItem("/dashboard", cilSpeedometer, "Dashboard")}
+            {renderNavItem("/accueil", cilHome, "Accueil")}
+            {renderNavItem("/incidents", cilWarning, "Incidents")}
+            {renderNavItem("/calendrier", cilCalendar, "Calendrier")}
+            {renderNavItem("/interventions", cilRecycle, "Interventions")}
+            {renderNavItem("/rapports", cilDescription, "Rapports")}
+            {renderNavItem("/profil", cilUser, "Profil")}
+            {renderNavItem("/parametres", cilSettings, "Paramètres")}
+          </CSidebarNav>
+        </div>
+      </div>
+      {isOpenMobile && <div className="sidebar-overlay" onClick={toggleMobileSidebar}></div>}
+    </>
+  );
+
+  return (
+    <>
+      {isMobile && !isOpenMobile && (
+        <button className="hamburger-btn" onClick={toggleMobileSidebar}>
+          &#9776;
+        </button>
+      )}
+      {isMobile ? mobileSidebar : desktopSidebar}
+    </>
+  );
 }
 
-export default Sidebar
+export default Sidebar;

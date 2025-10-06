@@ -1,5 +1,5 @@
 // src/pages/Dashboard.jsx
-import React, { useContext } from "react";
+import React from "react";
 import "../assets/css/Dashboard.css";
 import { useInterventions } from "../context/InterventionContext";
 import { useRapports } from "../context/RapportContext";
@@ -12,7 +12,7 @@ import {
   Title,
   Tooltip,
   Legend,
-  ArcElement
+  ArcElement,
 } from "chart.js";
 
 ChartJS.register(
@@ -29,11 +29,10 @@ function Dashboard() {
   const { interventions } = useInterventions();
   const { rapports } = useRapports();
 
-  const enAttente = interventions.filter(i => i.statut === "En attente").length;
-  const enCours = interventions.filter(i => i.statut === "En cours").length;
-  const terminee = interventions.filter(i => i.statut === "Terminé").length;
+  const enAttente = interventions.filter((i) => i.statut === "En attente").length;
+  const enCours = interventions.filter((i) => i.statut === "En cours").length;
+  const terminee = interventions.filter((i) => i.statut === "Terminé").length;
 
-  // Données pour graphique interventions
   const interventionsData = {
     labels: ["En attente", "En cours", "Terminé"],
     datasets: [
@@ -45,7 +44,6 @@ function Dashboard() {
     ],
   };
 
-  // Données pour graphique rapports
   const rapportsData = {
     labels: ["Total Rapports"],
     datasets: [
@@ -61,7 +59,6 @@ function Dashboard() {
     <div className="dashboard-container">
       <h2>Tableau de bord</h2>
 
-      {/* Cartes statuts interventions */}
       <div className="cards-container">
         <div className="card card-attente">
           <h3>{enAttente}</h3>
@@ -77,16 +74,28 @@ function Dashboard() {
         </div>
       </div>
 
-      {/* Graphiques */}
       <div className="charts-container">
-        <div className="chart">
+        <div className="chart pie-chart">
           <h4>Répartition des interventions</h4>
-          <Pie data={interventionsData} />
+          <Pie
+            data={interventionsData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+              cutout: "40%", // rend le cercle plus fin (type donut)
+            }}
+          />
         </div>
 
-        <div className="chart">
+        <div className="chart bar-chart">
           <h4>Rapports générés</h4>
-          <Bar data={rapportsData} />
+          <Bar
+            data={rapportsData}
+            options={{
+              responsive: true,
+              maintainAspectRatio: false,
+            }}
+          />
         </div>
       </div>
     </div>

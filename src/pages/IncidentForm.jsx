@@ -5,8 +5,8 @@ import "bootstrap-icons/font/bootstrap-icons.css";
 import CIcon from "@coreui/icons-react";
 import { cilWarning } from "@coreui/icons";
 import { useIncident } from "../context/IncidentContext";
-import { toast } from "react-toastify"; // ✅ juste le toast, plus besoin de ToastContainer ici
-import "../assets/css/Incident.css";
+import { toast } from "react-toastify"; 
+import "../assets/css/IncidentForm.css";
 
 function IncidentForm() {
   const navigate = useNavigate();
@@ -30,8 +30,6 @@ function IncidentForm() {
     addIncident(form);
 
     toast.success(`✅ Vous avez déclaré un incident pour ${form.client} !`);
-
-    setTimeout(() => navigate("/incidents"), 1000);
   };
 
   return (

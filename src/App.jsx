@@ -1,6 +1,5 @@
-// src/App.jsx
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { Routes, Route } from "react-router-dom";
 import Layout from "./pages/Layout";
 import Calendrier from "./pages/Calendrier";
 import Rapports from "./pages/Rapports";
@@ -16,15 +15,14 @@ import InterventionForm from "./pages/InterventionForm";
 import IncidentForm from "./pages/IncidentForm";
 import Incident from "./pages/Incident";
 import Dashboard from "./pages/Dashboard";
-
-// Toastify global
+import RegisterPage from "./pages/RegisterPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 function App() {
   return (
-    <Router>
-      {/* Toast global pour toutes les pages */}
+    <>
+      {/* ✅ Toast global accessible sur toutes les pages */}
       <ToastContainer
         position="top-right"
         autoClose={3000}
@@ -37,8 +35,12 @@ function App() {
         pauseOnHover
       />
 
+      {/* ✅ Toutes les routes ici */}
       <Routes>
         <Route path="/login" element={<LoginPage />} />
+        <Route path="/register" element={<RegisterPage />} />
+
+        {/* Routes protégées par Layout */}
         <Route element={<Layout />}>
           <Route path="/" element={<Calendrier />} />
           <Route path="/calendrier" element={<Calendrier />} />
@@ -54,10 +56,9 @@ function App() {
           <Route path="/declarer_incident" element={<IncidentForm />} />
           <Route path="/incidents" element={<Incident />} />
           <Route path="/dashboard" element={<Dashboard />} />
-
         </Route>
       </Routes>
-    </Router>
+    </>
   );
 }
 
