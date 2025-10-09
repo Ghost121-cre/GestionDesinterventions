@@ -1,0 +1,269 @@
+.container {
+  margin: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Onglets */
+
+/* Onglets - Correction pour alignement horizontal */
+.tabs {
+  display: flex;
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.tabItem {
+  margin-bottom: -1px;
+}
+
+.tabLink {
+  cursor: pointer;
+  color: #333;
+  border: 1px solid transparent;
+  border-top-left-radius: 0.25rem;
+  border-top-right-radius: 0.25rem;
+  padding: 0.5rem 1rem;
+  background: none;
+  border: none;
+  text-decoration: none;
+  display: block;
+}
+
+.tabLink:hover {
+  border-color: #e9ecef #e9ecef #dee2e6;
+  background-color: #f8f9fa;
+}
+
+.tabLink.active {
+  background-color: #2563eb;
+  color: white;
+  font-weight: bold;
+  border-radius: 5px 5px 0 0;
+}
+
+/* Contenu */
+.content {
+  border: 1px solid #ddd;
+  border-top: none;
+  padding: 15px;
+  background-color: #fff;
+  border-radius: 0 0 5px 5px;
+}
+
+/* Tableau */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 10px;
+}
+
+.table th,
+.table td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: left;
+}
+
+.table th {
+  background-color: #f8f9fa;
+  font-weight: 600;
+}
+
+/* Icônes Actions */
+.actionIcon {
+  font-size: 1.2rem;
+  cursor: pointer;
+  margin-right: 8px;
+}
+
+.actionIcon:hover {
+  opacity: 0.7;
+}
+
+.actionIcon:last-child {
+  margin-right: 0;
+}
+
+/* Boutons */
+.btnCustomBlue {
+  background-color: #2563eb;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.btnContainer {
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: 10px;
+  margin-top: 10px;
+}
+
+.btnCustomBlue:hover {
+  background-color: #1d4ed8;
+}
+
+/* Badges statut */
+.statusBadge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 12px;
+  font-weight: 600;
+  font-size: 0.875rem;
+}
+
+.statusEnCours {
+  background: #fff3cd;
+  color: #856404;
+  border: 1px solid #ffeeba;
+}
+
+.statusTermine {
+  background: #d4edda;
+  color: #155724;
+  border: 1px solid #c3e6cb;
+}
+
+.statusEnAttente {
+  background: #cce5ff;
+  color: #004085;
+  border: 1px solid #b8daff;
+}
+
+/* Conteneur avec scroll */
+.tableContainer {
+  max-height: 400px;
+  overflow-y: auto;
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 20px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  border: 1px solid #007bff;
+  background: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.pageBtn:hover {
+  background-color: #e9ecef;
+}
+
+.activePage {
+  background-color: #007bff;
+  color: white;
+  border-color: #007bff;
+}
+
+/* Filtres */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.inputFilter {
+  flex: 1;
+  min-width: 150px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 0.875rem;
+}
+
+.inputFilter:focus {
+  outline: none;
+  border-color: #2563eb;
+  box-shadow: 0 0 0 2px rgba(37, 99, 235, 0.1);
+}
+
+/* Text alignment */
+.textCenter {
+  text-align: center !important;
+}
+
+/* Form styles */
+.formControl {
+  display: block;
+  width: 100%;
+  padding: 0.375rem 0.75rem;
+  font-size: 1rem;
+  font-weight: 400;
+  line-height: 1.5;
+  color: #212529;
+  background-color: #fff;
+  background-clip: padding-box;
+  border: 1px solid #ced4da;
+  border-radius: 0.375rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+}
+
+.formControl:focus {
+  color: #212529;
+  background-color: #fff;
+  border-color: #86b7fe;
+  outline: 0;
+  box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+}
+
+.mb3 {
+  margin-bottom: 1rem;
+}
+
+.w100 {
+  width: 100%;
+}
+
+/* Offcanvas styles */
+.offcanvasHeader {
+  padding: 1rem 1.5rem;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.offcanvasTitle {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+
+.offcanvasBody {
+  padding: 1.5rem;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .filters {
+    flex-direction: column;
+  }
+  
+  .inputFilter {
+    min-width: 100%;
+  }
+  
+  .table {
+    font-size: 0.875rem;
+  }
+  
+  .actionIcon {
+    font-size: 1rem;
+    margin-right: 5px;
+  }
+}

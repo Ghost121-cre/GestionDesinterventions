@@ -1,0 +1,196 @@
+/* Container global */
+.container {
+  padding: 20px;
+  font-family: "Inter", sans-serif;
+}
+
+/* Onglets */
+.tabs .nav-link {
+  color: #000; 
+}
+
+.tabs .nav-link.active {
+  background-color: #2563eb !important; 
+  color: white !important;
+  font-weight: 600;
+  border-radius: 6px 6px 0 0;
+}
+
+
+/* Filtres */
+.filters {
+  display: flex;
+  gap: 10px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.inputFilter {
+  flex: 1;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+}
+
+/* Table */
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table th, .table td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+.tableHeader {
+  background-color: #f1f1f1;
+}
+
+/* Badges */
+.badgePending {
+  background-color: #ffc107;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: #333;
+}
+
+.badgeResolved {
+  background-color: #28a745;
+  padding: 4px 8px;
+  border-radius: 4px;
+  color: white;
+}
+
+/* Pagination */
+.pagination {
+  margin-top: 10px;
+  display: flex;
+  gap: 5px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.pageBtn {
+  border: 1px solid #007bff;
+  background: white;
+  padding: 5px 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.activePage {
+  background-color: #007bff;
+  color: white;
+}
+
+/* ------------------------ */
+/* Preview Images */
+.previewContainer {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 6px;
+}
+
+.previewImage {
+  width: 70px;
+  height: 70px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  cursor: pointer;
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.previewImage:hover {
+  transform: scale(1.1);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+}
+
+/* ------------------------ */
+/* Lightbox Modal */
+.modalOverlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.85);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2000;
+}
+
+.modalContent {
+  position: relative;
+  max-width: 90%;
+  max-height: 90%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.modalImage {
+  max-width: 50%;
+  max-height: 100%;
+  border-radius: 8px;
+  object-fit: contain;
+  cursor: zoom-in;
+  transition: transform 0.3s ease;
+}
+
+.modalImage.zoomed {
+  transform: scale(1.5);
+  cursor: zoom-out;
+}
+
+/* Bouton fermeture fixe */
+.modalCloseFixed {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  background: red;
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 36px;
+  height: 36px;
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 2100;
+}
+.modalCloseFixed:hover { background: darkred; }
+
+/* Navigation images */
+.navLeft, .navRight {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background: rgba(0,0,0,0.5);
+  color: white;
+  border: none;
+  font-size: 32px;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  cursor: pointer;
+  z-index: 2100;
+}
+.navLeft { left: -60px; }
+.navRight { right: -60px; }
+.navLeft:hover, .navRight:hover { background: rgba(0,0,0,0.8); }
+
+/* ------------------------ */
+/* Responsive */
+@media (max-width: 600px) {
+  .previewImage { width: 60px; height: 60px; }
+  .navLeft { left: 10px; }
+  .navRight { right: 10px; }
+  .modalImage { max-height: 80vh; }
+  .modalCloseFixed { width: 32px; height: 32px; font-size: 16px; top: 10px; right: 10px; }
+}

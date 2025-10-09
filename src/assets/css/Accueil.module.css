@@ -1,0 +1,91 @@
+/* Conteneur principal */
+.accueilContainer {
+  max-width: 1000px;
+  margin: 0 auto;
+  padding: 40px 20px;
+  text-align: center;
+  font-family: "Inter", sans-serif;
+}
+
+.accueilContainer h2 {
+  font-size: 28px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 30px;
+}
+
+/* Cartes Glassy */
+.accueilCard {
+  background: rgba(255, 255, 255, 0.7);
+  border-radius: 20px;
+  padding: 30px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+  cursor: pointer;
+}
+
+.accueilCard:hover {
+  transform: translateY(-7px);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.18);
+  background: rgba(255, 255, 255, 0.85);
+}
+
+/* Titres et textes */
+.cardTitle {
+  font-size: 20px;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 12px;
+}
+
+.cardText {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 0;
+}
+
+/* Icônes */
+.ciIcon {
+  display: block;
+  margin: 0 auto 15px;
+  transition: transform 0.3s ease;
+}
+
+/* Animation rebond sur icône au hover */
+@keyframes bounce {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+.accueilCard:hover .ciIcon {
+  animation: bounce 0.4s ease;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .accueilCard {
+    padding: 25px 15px;
+  }
+  .accueilContainer h2 {
+    font-size: 24px;
+  }
+}
+
+@media (max-width: 576px) {
+  .accueilCard {
+    padding: 20px 12px;
+  }
+  .cardTitle {
+    font-size: 18px;
+  }
+  .cardText {
+    font-size: 13px;
+  }
+}
