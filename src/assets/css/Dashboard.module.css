@@ -1,0 +1,370 @@
+.container {
+  padding: 30px;
+  max-width: 1400px;
+  margin: 0 auto;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+  min-height: 100vh;
+}
+
+.header {
+  margin-bottom: 40px;
+  text-align: center;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: #2c3e50;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.subtitle {
+  color: #6c757d;
+  font-size: 1.1rem;
+  font-weight: 400;
+}
+
+/* Cards Section */
+.cardsContainer {
+  display: flex;
+  gap: 25px;
+  margin-bottom: 50px;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  flex: 1;
+  min-width: 200px;
+  max-width: 280px;
+  padding: 30px 25px;
+  border-radius: 20px;
+  color: #fff;
+  text-align: center;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.15),
+    0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
+  border: none;
+}
+
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.card::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  left: -50%;
+  width: 200%;
+  height: 200%;
+  background: linear-gradient(
+    45deg,
+    transparent,
+    rgba(255, 255, 255, 0.1),
+    transparent
+  );
+  transform: rotate(45deg);
+  transition: all 0.6s ease;
+  opacity: 0;
+}
+
+.card:hover {
+  transform: translateY(-8px) scale(1.02);
+  box-shadow: 
+    0 20px 40px rgba(0, 0, 0, 0.2),
+    0 8px 20px rgba(0, 0, 0, 0.15);
+}
+
+.card:hover::after {
+  opacity: 1;
+  animation: shimmer 1.5s ease-in-out;
+}
+
+@keyframes shimmer {
+  0% {
+    transform: rotate(45deg) translateX(-100%);
+  }
+  100% {
+    transform: rotate(45deg) translateX(100%);
+  }
+}
+
+.cardAttente { 
+  background: linear-gradient(135deg, #ffc107 0%, #ff8c00 100%);
+}
+
+.cardEncours { 
+  background: linear-gradient(135deg, #0d6efd 0%, #0056b3 100%);
+}
+
+.cardTerminee { 
+  background: linear-gradient(135deg, #198754 0%, #0f5132 100%);
+}
+
+.card h3 {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 10px;
+  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.card p {
+  font-size: 1.1rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  opacity: 0.9;
+  margin: 0;
+}
+
+/* Charts Section - TAILLES UNIFORMISÉES */
+.chartsContainer {
+  display: flex;
+  gap: 30px;
+  flex-wrap: wrap;
+  justify-content: center;
+  align-items: stretch; /* Même hauteur pour les deux cartes */
+}
+
+.chart {
+  background: #fff;
+  border-radius: 20px;
+  padding: 30px;
+  box-shadow: 
+    0 10px 30px rgba(0, 0, 0, 0.1),
+    0 4px 10px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  position: relative;
+  overflow: visible;
+  display: flex;
+  flex-direction: column;
+  flex: 1; /* Les deux cartes prennent la même largeur */
+  min-width: 450px; /* Largeur minimale identique */
+  max-width: 500px; /* Largeur maximale identique */
+  height: 500px; /* HAUTEUR IDENTIQUE POUR LES DEUX */
+  min-height: 500px;
+}
+
+.chart::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  opacity: 0.7;
+}
+
+.chart:hover {
+  transform: translateY(-5px);
+  box-shadow: 
+    0 15px 35px rgba(0, 0, 0, 0.15),
+    0 6px 15px rgba(0, 0, 0, 0.1);
+}
+
+.chart h4 {
+  margin-bottom: 20px;
+  text-align: center;
+  color: #2c3e50;
+  font-size: 1.3rem;
+  font-weight: 600;
+  position: relative;
+  padding-bottom: 10px;
+  flex-shrink: 0;
+}
+
+.chart h4::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 50px;
+  height: 3px;
+  background: linear-gradient(90deg, #667eea, #764ba2);
+  border-radius: 2px;
+}
+
+/* Conteneur pour le graphique */
+.chartCanvasContainer {
+  position: relative;
+  flex: 1;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 0;
+  height: 100%;
+}
+
+/* SUPPRIMER les classes spécifiques pieChart et barChart */
+/* Les deux graphiques utilisent maintenant la même taille via .chart */
+
+/* Options spécifiques pour améliorer l'affichage */
+.pieChartWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.barChartWrapper {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+/* Responsive Design */
+@media (max-width: 1200px) {
+  .chartsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .chart {
+    width: 100%;
+    max-width: 600px;
+    height: 450px; /* Légèrement plus petit sur tablette */
+    min-height: 450px;
+  }
+}
+
+@media (max-width: 768px) {
+  .container {
+    padding: 20px 15px;
+  }
+  
+  .title {
+    font-size: 2rem;
+  }
+  
+  .cardsContainer {
+    gap: 20px;
+  }
+  
+  .card {
+    min-width: 150px;
+    max-width: 200px;
+    padding: 25px 20px;
+  }
+  
+  .card h3 {
+    font-size: 2.5rem;
+  }
+  
+  .card p {
+    font-size: 1rem;
+  }
+  
+  .chartsContainer {
+    gap: 25px;
+  }
+  
+  .chart {
+    padding: 25px;
+    width: 100%;
+    min-width: 300px;
+    height: 400px; /* Plus petit sur mobile */
+    min-height: 400px;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 15px 10px;
+  }
+  
+  .title {
+    font-size: 1.8rem;
+  }
+  
+  .subtitle {
+    font-size: 1rem;
+  }
+  
+  .cardsContainer {
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .card {
+    min-width: 100%;
+    max-width: 100%;
+    padding: 20px;
+  }
+  
+  .chart {
+    padding: 20px;
+    width: 100%;
+    min-width: 280px;
+    height: 350px; /* Encore plus petit sur très petits écrans */
+    min-height: 350px;
+  }
+}
+
+/* Animations d'entrée */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.card {
+  animation: fadeInUp 0.6s ease;
+}
+
+.card:nth-child(1) { animation-delay: 0.1s; }
+.card:nth-child(2) { animation-delay: 0.2s; }
+.card:nth-child(3) { animation-delay: 0.3s; }
+
+.chart {
+  animation: fadeInUp 0.8s ease;
+}
+
+.chart:nth-child(1) { animation-delay: 0.4s; }
+.chart:nth-child(2) { animation-delay: 0.5s; }
+
+/* Support du dark mode */
+@media (prefers-color-scheme: dark) {
+  .container {
+    background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  }
+  
+  .title {
+    color: #ecf0f1;
+  }
+  
+  .subtitle {
+    color: #bdc3c7;
+  }
+  
+  .chart {
+    background: #34495e;
+    color: #ecf0f1;
+  }
+  
+  .chart h4 {
+    color: #ecf0f1;
+  }
+}

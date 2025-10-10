@@ -5,7 +5,7 @@ const IncidentContext = createContext();
 export const useIncident = () => useContext(IncidentContext);
 
 export const IncidentProvider = ({ children }) => {
-  const [incidents, setIncidents] = useState([]); // ← tableau vide
+  const [incidents, setIncidents] = useState([]);
 
   // Ajouter un incident
   const addIncident = (data) => {
@@ -23,10 +23,16 @@ export const IncidentProvider = ({ children }) => {
     }
   };
 
-  // ✅ Marquer comme résolu
+  // ✅ Marquer comme résolu AVEC DATE
   const handleMarkResolved = (id) => {
     setIncidents((prev) =>
-      prev.map((i) => (i.id === id ? { ...i, statut: "résolu" } : i))
+      prev.map((i) => 
+        i.id === id ? { 
+          ...i, 
+          statut: "résolu",
+          date_resolu: new Date().toISOString().split('T')[0] // Date du jour au format YYYY-MM-DD
+        } : i
+      )
     );
   };
 
