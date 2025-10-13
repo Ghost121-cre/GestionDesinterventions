@@ -7,6 +7,27 @@ import { generateRapportPDF } from "../utils/pdfGenerator";
 import { useRapports } from "../context/RapportContext";
 import { toast } from "react-toastify";
 import { NotificationContext } from "../context/NotificationContext";
+import CIcon from "@coreui/icons-react";
+import {
+  cilClock,
+  cilArrowRight,
+  cilBan,
+  cilMediaStop,
+  cilTrash,
+  cilInfo,
+  cilPlus,
+  cilMediaPlay,
+  cilCloudDownload,
+  cilFile,
+  cilMagnifyingGlass,
+  cilCalendar,
+  cilX,
+  cilChevronLeft,
+  cilChevronRight,
+  cilZoom,
+  cilCheckCircle,
+  cilWarning
+} from "@coreui/icons";
 
 function Interventions() {
   const { addNotification } = useContext(NotificationContext);
@@ -18,9 +39,6 @@ function Interventions() {
     deleteIntervention,
   } = useInterventions();
   const { addRapport, rapports } = useRapports();
-
-  // DEBUG
-  console.log("Interventions:", interventions);
 
   // États pour la pagination et filtres
   const [activeTab, setActiveTab] = useState("enattente");
@@ -36,6 +54,7 @@ function Interventions() {
   const [showDetailsModal, setShowDetailsModal] = useState(false);
   const [selectedInterventionDetails, setSelectedInterventionDetails] = useState(null);
   const [lightboxImage, setLightboxImage] = useState(null);
+  const [zoomed, setZoomed] = useState(false);
 
   const [rapport, setRapport] = useState({
     date: "",
@@ -150,6 +169,7 @@ function Interventions() {
     setShowDetailsModal(false);
     setSelectedInterventionDetails(null);
     setLightboxImage(null);
+    setZoomed(false);
   };
 
   const handleSaveRapport = () => {
@@ -188,13 +208,34 @@ function Interventions() {
     }
   };
 
+  // Fonction pour obtenir l'icône selon le statut
+  const getStatusIcon = (statut) => {
+    switch(statut) {
+      case "En cours": return cilArrowRight;
+      case "Terminé": return cilCheckCircle;
+      case "En attente": return cilClock;
+      default: return cilClock;
+    }
+  };
+
   // Fonction pour afficher le message quand le tableau est vide
   const renderEmptyMessage = (colSpan) => (
     <tr>
       <td colSpan={colSpan} className={styles.emptyCell}>
         <div className={styles.emptyMessage}>
-          <i className="bi bi-inbox" style={{ fontSize: '2rem', marginBottom: '10px', display: 'block' }}></i>
-          Pas d'intervention {activeTab === "enattente" ? "en attente" : activeTab === "encours" ? "en cours" : "terminée"}.
+          <CIcon icon={cilClock} size="3xl" className={styles.emptyIcon} />
+          <div className={styles.emptyText}>
+            Pas d'intervention {activeTab === "enattente" ? "en attente" : activeTab === "encours" ? "en cours" : "terminée"}.
+          </div>
+          {activeTab === "enattente" && (
+            <button 
+              className={styles.emptyAction}
+              onClick={() => navigate("/ajouter_intervention")}
+            >
+              <CIcon icon={cilPlus} className={styles.btnIcon} />
+              Créer une intervention
+            </button>
+          )}
         </div>
       </td>
     </tr>
@@ -205,12 +246,14 @@ function Interventions() {
     const hasRapportForThis = hasRapport(intervention.id);
     
     return (
-      <i
-        className={`bi bi-download ${hasRapportForThis ? 'text-success' : 'text-muted'} ${styles.actionIcon}`}
+      <button
+        className={`${styles.actionBtn} ${hasRapportForThis ? styles.downloadBtn : styles.disabledBtn}`}
         title={hasRapportForThis ? "Télécharger rapport" : "Vous devez d'abord générer le rapport"}
         onClick={() => hasRapportForThis ? handleDownloadRapport(intervention) : toast.error("⚠️ Vous devez d'abord générer le rapport")}
-        style={{ cursor: hasRapportForThis ? 'pointer' : 'not-allowed', opacity: hasRapportForThis ? 1 : 0.5 }}
-      />
+        disabled={!hasRapportForThis}
+      >
+        <CIcon icon={cilCloudDownload} />
+      </button>
     );
   };
 
@@ -232,6 +275,7 @@ function Interventions() {
                 className={styles.detailImage}
                 onClick={() => setLightboxImage({ src: imageUrl, index })}
               />
+              <div className={styles.imageNumber}>{index + 1}</div>
             </div>
           );
         })}
@@ -239,247 +283,494 @@ function Interventions() {
     );
   };
 
+  // Navigation lightbox
+  const prevImage = () => {
+    if (!lightboxImage) return;
+    const totalImages = selectedInterventionDetails?.images?.length || 0;
+    setLightboxImage(prev => ({
+      ...prev,
+      index: prev.index === 0 ? totalImages - 1 : prev.index - 1
+    }));
+  };
+
+  const nextImage = () => {
+    if (!lightboxImage) return;
+    const totalImages = selectedInterventionDetails?.images?.length || 0;
+    setLightboxImage(prev => ({
+      ...prev,
+      index: prev.index === totalImages - 1 ? 0 : prev.index + 1
+    }));
+  };
+
+  const toggleZoom = () => setZoomed(prev => !prev);
+
+  // Obtenir la couleur de priorité
+  const getPriorityColor = (priority) => {
+    switch(priority) {
+      case "low": return "#10b981";
+      case "medium": return "#f59e0b";
+      case "high": return "#ef4444";
+      default: return "#6b7280";
+    }
+  };
+
+  const getPriorityLabel = (priority) => {
+    switch(priority) {
+      case "low": return "Basse";
+      case "medium": return "Moyenne";
+      case "high": return "Haute";
+      default: return "Non définie";
+    }
+  };
+
+  // Statistiques
+  const stats = {
+    total: interventions.length,
+    enAttente: interventionsEnAttente.length,
+    enCours: interventionsEnCours.length,
+    terminees: interventionsTerminees.length
+  };
+
   return (
     <div className={styles.container}>
+      {/* En-tête avec statistiques */}
+      <div className={styles.header}>
+        <div className={styles.headerContent}>
+          <h1 className={styles.title}>
+            <CIcon icon={cilClock} className={styles.titleIcon} />
+            Gestion des Interventions
+          </h1>
+          <p className={styles.subtitle}>
+            Suivez et gérez toutes vos interventions techniques
+          </p>
+        </div>
+        <div className={styles.stats}>
+          <div className={styles.statCard}>
+            <div className={styles.statValue}>{stats.total}</div>
+            <div className={styles.statLabel}>Total</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statPending}`}>
+            <div className={styles.statValue}>{stats.enAttente}</div>
+            <div className={styles.statLabel}>En attente</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statProgress}`}>
+            <div className={styles.statValue}>{stats.enCours}</div>
+            <div className={styles.statLabel}>En cours</div>
+          </div>
+          <div className={`${styles.statCard} ${styles.statCompleted}`}>
+            <div className={styles.statValue}>{stats.terminees}</div>
+            <div className={styles.statLabel}>Terminées</div>
+          </div>
+        </div>
+      </div>
+
+      {/* Actions rapides */}
+      <div className={styles.quickActions}>
+        <button 
+          className={styles.primaryBtn}
+          onClick={() => navigate("/ajouter_intervention")}
+        >
+          <CIcon icon={cilPlus} className={styles.btnIcon} />
+          Nouvelle intervention
+        </button>
+        <button 
+          className={styles.secondaryBtn}
+          onClick={() => navigate("/incidents")}
+        >
+          <CIcon icon={cilWarning} className={styles.btnIcon} />
+          Voir les incidents
+        </button>
+      </div>
+
       {/* Onglets */}
-      <ul className={styles.tabs}>
-        <li className={styles.tabItem}>
+      <div className={styles.tabsContainer}>
+        <div className={styles.tabs}>
           <button
-            className={`${styles.tabLink} ${activeTab === "enattente" ? styles.active : ""}`}
+            className={`${styles.tab} ${activeTab === "enattente" ? styles.tabActive : ""}`}
             onClick={() => { setActiveTab("enattente"); setCurrentPage(1); }}
           >
-            En attente ({interventionsEnAttente.length})
+            <CIcon icon={cilClock} className={styles.tabIcon} />
+            En attente
+            <span className={styles.tabBadge}>{interventionsEnAttente.length}</span>
           </button>
-        </li>
-        <li className={styles.tabItem}>
           <button
-            className={`${styles.tabLink} ${activeTab === "encours" ? styles.active : ""}`}
+            className={`${styles.tab} ${activeTab === "encours" ? styles.tabActive : ""}`}
             onClick={() => { setActiveTab("encours"); setCurrentPage(1); }}
           >
-            En cours ({interventionsEnCours.length})
+            <CIcon icon={cilArrowRight} className={styles.tabIcon} />
+            En cours
+            <span className={styles.tabBadge}>{interventionsEnCours.length}</span>
           </button>
-        </li>
-        <li className={styles.tabItem}>
           <button
-            className={`${styles.tabLink} ${activeTab === "termine" ? styles.active : ""}`}
+            className={`${styles.tab} ${activeTab === "termine" ? styles.tabActive : ""}`}
             onClick={() => { setActiveTab("termine"); setCurrentPage(1); }}
           >
-            Terminé ({interventionsTerminees.length})
+            <CIcon icon={cilCheckCircle} className={styles.tabIcon} />
+            Terminé
+            <span className={styles.tabBadge}>{interventionsTerminees.length}</span>
           </button>
-        </li>
-      </ul>
+        </div>
+      </div>
 
       {/* Filtres */}
       <div className={styles.filters}>
-        <input
-          type="text"
-          placeholder="Recherche..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
-          className={styles.inputFilter}
-        />
-        <input
-          type="date"
-          value={startDate}
-          onChange={e => setStartDate(e.target.value)}
-          className={styles.inputFilter}
-        />
-        <input
-          type="date"
-          value={endDate}
-          onChange={e => setEndDate(e.target.value)}
-          className={styles.inputFilter}
-        />
+        <div className={styles.searchBox}>
+          <CIcon icon={cilMagnifyingGlass} className={styles.searchIcon} />
+          <input
+            type="text"
+            placeholder="Rechercher une intervention..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+            className={styles.searchInput}
+          />
+        </div>
+        <div className={styles.dateFilters}>
+          <div className={styles.dateGroup}>
+            <CIcon icon={cilCalendar} className={styles.filterIcon} />
+            <input
+              type="date"
+              value={startDate}
+              onChange={e => setStartDate(e.target.value)}
+              className={styles.dateInput}
+              placeholder="Date début"
+            />
+          </div>
+          <span className={styles.dateSeparator}>à</span>
+          <div className={styles.dateGroup}>
+            <input
+              type="date"
+              value={endDate}
+              onChange={e => setEndDate(e.target.value)}
+              className={styles.dateInput}
+              placeholder="Date fin"
+            />
+          </div>
+        </div>
+        {(search || startDate || endDate) && (
+          <button 
+            className={styles.clearFilters}
+            onClick={() => {
+              setSearch("");
+              setStartDate("");
+              setEndDate("");
+            }}
+          >
+            <CIcon icon={cilX} />
+            Effacer les filtres
+          </button>
+        )}
       </div>
 
+      {/* Contenu principal */}
       <div className={styles.content}>
         {/* EN ATTENTE */}
         {activeTab === "enattente" && (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Incidents</th>
-                <th>Client</th>
-                <th>Produit</th>
-                <th>Statut</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedInterventions.length === 0 
-                ? renderEmptyMessage(6)
-                : paginatedInterventions.map((i) => (
-                  <tr key={i.id}>
-                    <td>{i.id}</td>
-                    <td>{i.incidentId || '-'}</td>
-                    <td>{i.client}</td>
-                    <td>{i.produit}</td>
-                    <td>
-                      <span className={getStatusBadgeClass(i.statut)}>{i.statut}</span>
-                    </td>
-                    <td>
-                      <button 
-                        className={styles.detailsBtn}
-                        onClick={() => openDetailsModal(i)}
-                        title="Voir les détails"
-                      >
-                        <i className="bi bi-eye"></i>
-                      </button>
-                      <i
-                        className={`bi bi-play-circle-fill text-success ${styles.actionIcon}`}
-                        title="Démarrer"
-                        onClick={() => startIntervention(i.id)}
-                      />
-                      <i
-                        className={`bi bi-trash-fill text-danger ${styles.actionIcon}`}
-                        title="Supprimer"
-                        onClick={() => deleteIntervention(i.id)}
-                      />
-                    </td>
-                  </tr>
-                ))
-              }
-            </tbody>
-          </table>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr className={styles.tableHeader}>
+                  <th>ID</th>
+                  <th>Incident</th>
+                  <th>Client</th>
+                  <th>Produit</th>
+                  <th>Priorité</th>
+                  <th>Statut</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedInterventions.length === 0 
+                  ? renderEmptyMessage(7)
+                  : paginatedInterventions.map((i) => (
+                    <tr key={i.id} className={styles.tableRow}>
+                      <td className={styles.idCell}>#{i.id}</td>
+                      <td className={styles.incidentCell}>
+                        {i.incidentId ? `#${i.incidentId}` : '-'}
+                      </td>
+                      <td className={styles.clientCell}>{i.client}</td>
+                      <td className={styles.productCell}>{i.produit}</td>
+                      <td className={styles.priorityCell}>
+                        <span 
+                          className={styles.priorityBadge}
+                          style={{ 
+                            backgroundColor: `${getPriorityColor(i.priorite)}20`,
+                            color: getPriorityColor(i.priorite),
+                            borderColor: getPriorityColor(i.priorite)
+                          }}
+                        >
+                          {getPriorityLabel(i.priorite)}
+                        </span>
+                      </td>
+                      <td className={styles.statusCell}>
+                        <span className={getStatusBadgeClass(i.statut)}>
+                          <CIcon icon={getStatusIcon(i.statut)} className={styles.statusIcon} />
+                          {i.statut}
+                        </span>
+                      </td>
+                      <td className={styles.actionsCell}>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={styles.viewBtn}
+                            onClick={() => openDetailsModal(i)}
+                            title="Voir les détails"
+                          >
+                            <CIcon icon={cilInfo} />
+                          </button>
+                          <button
+                            className={styles.startBtn}
+                            onClick={() => startIntervention(i.id)}
+                            title="Démarrer l'intervention"
+                          >
+                            <CIcon icon={cilArrowRight} />
+                          </button>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => {
+                              if (window.confirm(`Supprimer l'intervention #${i.id} ?`)) {
+                                deleteIntervention(i.id);
+                                toast.success(`🗑️ Intervention #${i.id} supprimée !`);
+                              }
+                            }}
+                            title="Supprimer"
+                          >
+                            <CIcon icon={cilTrash} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* EN COURS */}
         {activeTab === "encours" && (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Incidents</th>
-                <th>Client</th>
-                <th>Produit</th>
-                <th>Démarrée le</th>
-                <th>Statut</th>
-                <th>Rapport</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedInterventions.length === 0 
-                ? renderEmptyMessage(8)
-                : paginatedInterventions.map((i) => (
-                  <tr key={i.id}>
-                    <td>{i.id}</td>
-                    <td>{i.incidentId || '-'}</td>
-                    <td>{i.client}</td>
-                    <td>{i.produit}</td>
-                    <td>{formatDateTime(i.startedAt)}</td>
-                    <td>
-                      <span className={getStatusBadgeClass(i.statut)}>{i.statut}</span>
-                    </td>
-                    <td>
-                      <i
-                        className={`bi bi-journal-text text-info ${styles.actionIcon}`}
-                        title="Générer rapport"
-                        onClick={() => openReportForm(i)}
-                      />
-                      {renderDownloadIcon(i)}
-                    </td>
-                    <td>
-                      <button 
-                        className={styles.detailsBtn}
-                        onClick={() => openDetailsModal(i)}
-                        title="Voir les détails"
-                      >
-                        <i className="bi bi-eye"></i>
-                      </button>
-                      <i
-                        className={`bi bi-stop-circle-fill text-success ${styles.actionIcon}`}
-                        title="Terminer"
-                        onClick={() => handleFinishIntervention(i)}
-                      />
-                      <i
-                        className={`bi bi-trash-fill text-danger ${styles.actionIcon}`}
-                        title="Supprimer"
-                        onClick={() => deleteIntervention(i.id)}
-                      />
-                    </td>
-                  </tr>
-                ))
-              }
-            </tbody>
-          </table>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr className={styles.tableHeader}>
+                  <th>ID</th>
+                  <th>Incident</th>
+                  <th>Client</th>
+                  <th>Produit</th>
+                  <th>Démarrée le</th>
+                  <th>Priorité</th>
+                  <th>Statut</th>
+                  <th>Rapport</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedInterventions.length === 0 
+                  ? renderEmptyMessage(9)
+                  : paginatedInterventions.map((i) => (
+                    <tr key={i.id} className={styles.tableRow}>
+                      <td className={styles.idCell}>#{i.id}</td>
+                      <td className={styles.incidentCell}>
+                        {i.incidentId ? `#${i.incidentId}` : '-'}
+                      </td>
+                      <td className={styles.clientCell}>{i.client}</td>
+                      <td className={styles.productCell}>{i.produit}</td>
+                      <td className={styles.dateCell}>{formatDateTime(i.startedAt)}</td>
+                      <td className={styles.priorityCell}>
+                        <span 
+                          className={styles.priorityBadge}
+                          style={{ 
+                            backgroundColor: `${getPriorityColor(i.priorite)}20`,
+                            color: getPriorityColor(i.priorite),
+                            borderColor: getPriorityColor(i.priorite)
+                          }}
+                        >
+                          {getPriorityLabel(i.priorite)}
+                        </span>
+                      </td>
+                      <td className={styles.statusCell}>
+                        <span className={getStatusBadgeClass(i.statut)}>
+                          <CIcon icon={getStatusIcon(i.statut)} className={styles.statusIcon} />
+                          {i.statut}
+                        </span>
+                      </td>
+                      <td className={styles.reportCell}>
+                        <div className={styles.reportActions}>
+                          <button
+                            className={styles.reportBtn}
+                            onClick={() => openReportForm(i)}
+                            title="Générer rapport"
+                          >
+                            <CIcon icon={cilFile} />
+                          </button>
+                          {renderDownloadIcon(i)}
+                        </div>
+                      </td>
+                      <td className={styles.actionsCell}>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={styles.viewBtn}
+                            onClick={() => openDetailsModal(i)}
+                            title="Voir les détails"
+                          >
+                            <CIcon icon={cilInfo} />
+                          </button>
+                          <button
+                            className={styles.finishBtn}
+                            onClick={() => handleFinishIntervention(i)}
+                            title="Terminer l'intervention"
+                          >
+                            <CIcon icon={cilBan} />
+                          </button>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => {
+                              if (window.confirm(`Supprimer l'intervention #${i.id} ?`)) {
+                                deleteIntervention(i.id);
+                                toast.success(`🗑️ Intervention #${i.id} supprimée !`);
+                              }
+                            }}
+                            title="Supprimer"
+                          >
+                            <CIcon icon={cilTrash} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
         )}
 
         {/* TERMINE */}
         {activeTab === "termine" && (
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Incidents</th>
-                <th>Client</th>
-                <th>Produit</th>
-                <th>Démarrée le</th>
-                <th>Terminée le</th>
-                <th>Statut</th>
-                <th>Rapport</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {paginatedInterventions.length === 0 
-                ? renderEmptyMessage(9)
-                : paginatedInterventions.map((i) => (
-                  <tr key={i.id}>
-                    <td>{i.id}</td>
-                    <td>{i.incidentId || '-'}</td>
-                    <td>{i.client}</td>
-                    <td>{i.produit}</td>
-                    <td>{formatDateTime(i.startedAt)}</td>
-                    <td>{formatDateTime(i.endedAt)}</td>
-                    <td>
-                      <span className={getStatusBadgeClass(i.statut)}>{i.statut}</span>
-                    </td>
-                    <td>
-                      <i
-                        className={`bi bi-journal-text text-info ${styles.actionIcon}`}
-                        title="Voir/modifier rapport"
-                        onClick={() => openReportForm(i)}
-                      />
-                      {renderDownloadIcon(i)}
-                    </td>
-                    <td>
-                      <button 
-                        className={styles.detailsBtn}
-                        onClick={() => openDetailsModal(i)}
-                        title="Voir les détails"
-                      >
-                        <i className="bi bi-eye"></i>
-                      </button>
-                      <i
-                        className={`bi bi-trash-fill text-danger ${styles.actionIcon}`}
-                        title="Supprimer"
-                        onClick={() => deleteIntervention(i.id)}
-                      />
-                    </td>
-                  </tr>
-                ))
-              }
-            </tbody>
-          </table>
+          <div className={styles.tableContainer}>
+            <table className={styles.table}>
+              <thead>
+                <tr className={styles.tableHeader}>
+                  <th>ID</th>
+                  <th>Incident</th>
+                  <th>Client</th>
+                  <th>Produit</th>
+                  <th>Démarrée le</th>
+                  <th>Terminée le</th>
+                  <th>Priorité</th>
+                  <th>Statut</th>
+                  <th>Rapport</th>
+                  <th>Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {paginatedInterventions.length === 0 
+                  ? renderEmptyMessage(10)
+                  : paginatedInterventions.map((i) => (
+                    <tr key={i.id} className={styles.tableRow}>
+                      <td className={styles.idCell}>#{i.id}</td>
+                      <td className={styles.incidentCell}>
+                        {i.incidentId ? `#${i.incidentId}` : '-'}
+                      </td>
+                      <td className={styles.clientCell}>{i.client}</td>
+                      <td className={styles.productCell}>{i.produit}</td>
+                      <td className={styles.dateCell}>{formatDateTime(i.startedAt)}</td>
+                      <td className={styles.dateCell}>{formatDateTime(i.endedAt)}</td>
+                      <td className={styles.priorityCell}>
+                        <span 
+                          className={styles.priorityBadge}
+                          style={{ 
+                            backgroundColor: `${getPriorityColor(i.priorite)}20`,
+                            color: getPriorityColor(i.priorite),
+                            borderColor: getPriorityColor(i.priorite)
+                          }}
+                        >
+                          {getPriorityLabel(i.priorite)}
+                        </span>
+                      </td>
+                      <td className={styles.statusCell}>
+                        <span className={getStatusBadgeClass(i.statut)}>
+                          <CIcon icon={getStatusIcon(i.statut)} className={styles.statusIcon} />
+                          {i.statut}
+                        </span>
+                      </td>
+                      <td className={styles.reportCell}>
+                        <div className={styles.reportActions}>
+                          <button
+                            className={styles.reportBtn}
+                            onClick={() => openReportForm(i)}
+                            title="Voir/modifier rapport"
+                          >
+                            <CIcon icon={cilFile} />
+                          </button>
+                          {renderDownloadIcon(i)}
+                        </div>
+                      </td>
+                      <td className={styles.actionsCell}>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={styles.viewBtn}
+                            onClick={() => openDetailsModal(i)}
+                            title="Voir les détails"
+                          >
+                            <CIcon icon={cilInfo} />
+                          </button>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => {
+                              if (window.confirm(`Supprimer l'intervention #${i.id} ?`)) {
+                                deleteIntervention(i.id);
+                                toast.success(`🗑️ Intervention #${i.id} supprimée !`);
+                              }
+                            }}
+                            title="Supprimer"
+                          >
+                            <CIcon icon={cilTrash} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                }
+              </tbody>
+            </table>
+          </div>
         )}
       </div>
 
       {/* Pagination */}
       {totalPages > 1 && (
         <div className={styles.pagination}>
-          {Array.from({ length: totalPages }, (_, idx) => (
-            <button
-              key={idx}
-              className={`${styles.pageBtn} ${currentPage === idx + 1 ? styles.activePage : ""}`}
-              onClick={() => setCurrentPage(idx + 1)}
-            >
-              {idx + 1}
-            </button>
-          ))}
+          <button
+            className={styles.paginationBtn}
+            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            disabled={currentPage === 1}
+          >
+            <CIcon icon={cilChevronLeft} />
+            Précédent
+          </button>
+          
+          <div className={styles.paginationNumbers}>
+            {Array.from({ length: totalPages }, (_, idx) => (
+              <button
+                key={idx}
+                className={`${styles.pageBtn} ${currentPage === idx + 1 ? styles.activePage : ""}`}
+                onClick={() => setCurrentPage(idx + 1)}
+              >
+                {idx + 1}
+              </button>
+            ))}
+          </div>
+
+          <button
+            className={styles.paginationBtn}
+            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            disabled={currentPage === totalPages}
+          >
+            Suivant
+            <CIcon icon={cilChevronRight} />
+          </button>
         </div>
       )}
+
+      
 
       {/* Modale de détails */}
       {showDetailsModal && selectedInterventionDetails && (
@@ -487,10 +778,11 @@ function Interventions() {
           <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>
+                <CIcon icon={getStatusIcon(selectedInterventionDetails.statut)} className={styles.modalTitleIcon} />
                 Détails de l'intervention #{selectedInterventionDetails.id}
               </h2>
               <button className={styles.modalClose} onClick={closeDetailsModal}>
-                ✕
+                <CIcon icon={cilX} />
               </button>
             </div>
             
@@ -510,7 +802,17 @@ function Interventions() {
                   <div className={styles.detailItem}>
                     <span className={styles.detailLabel}>Statut:</span>
                     <span className={getStatusBadgeClass(selectedInterventionDetails.statut)}>
+                      <CIcon icon={getStatusIcon(selectedInterventionDetails.statut)} className={styles.statusIcon} />
                       {selectedInterventionDetails.statut}
+                    </span>
+                  </div>
+                  <div className={styles.detailItem}>
+                    <span className={styles.detailLabel}>Priorité:</span>
+                    <span 
+                      className={styles.detailValue}
+                      style={{ color: getPriorityColor(selectedInterventionDetails.priorite) }}
+                    >
+                      {getPriorityLabel(selectedInterventionDetails.priorite)}
                     </span>
                   </div>
                   <div className={styles.detailItem}>
@@ -557,16 +859,57 @@ function Interventions() {
               <div className={styles.detailSection}>
                 <h3 className={styles.sectionTitle}>Description</h3>
                 <div className={styles.detailItem}>
-                  <span className={styles.detailValue}>
+                  <p className={styles.detailDescription}>
                     {selectedInterventionDetails.description || 'Aucune description'}
-                  </span>
+                  </p>
                 </div>
               </div>
 
               {/* Images */}
-              <div className={styles.detailSection}>
-                <h3 className={styles.sectionTitle}>Images ({selectedInterventionDetails.images?.length || 0})</h3>
-                {renderImages(selectedInterventionDetails.images)}
+              {selectedInterventionDetails.images && selectedInterventionDetails.images.length > 0 && (
+                <div className={styles.detailSection}>
+                  <h3 className={styles.sectionTitle}>Images ({selectedInterventionDetails.images.length})</h3>
+                  {renderImages(selectedInterventionDetails.images)}
+                </div>
+              )}
+
+              {/* Actions dans la modale */}
+              <div className={styles.modalActions}>
+                {selectedInterventionDetails.statut === "En attente" && (
+                  <button 
+                    className={styles.startBtn}
+                    onClick={() => {
+                      startIntervention(selectedInterventionDetails.id);
+                      closeDetailsModal();
+                      toast.success(`🚀 Intervention #${selectedInterventionDetails.id} démarrée !`);
+                    }}
+                  >
+                    <CIcon icon={cilMediaPlay} />
+                    Démarrer l'intervention
+                  </button>
+                )}
+                {selectedInterventionDetails.statut === "En cours" && (
+                  <button 
+                    className={styles.finishBtn}
+                    onClick={() => {
+                      handleFinishIntervention(selectedInterventionDetails);
+                      closeDetailsModal();
+                    }}
+                  >
+                    <CIcon icon={cilMediaStop} />
+                    Terminer l'intervention
+                  </button>
+                )}
+                <button 
+                  className={styles.reportBtn}
+                  onClick={() => {
+                    openReportForm(selectedInterventionDetails);
+                    closeDetailsModal();
+                  }}
+                >
+                  <CIcon icon={cilFile} />
+                  {hasRapport(selectedInterventionDetails.id) ? 'Modifier le rapport' : 'Créer un rapport'}
+                </button>
               </div>
             </div>
           </div>
@@ -581,13 +924,38 @@ function Interventions() {
               className={styles.lightboxClose}
               onClick={() => setLightboxImage(null)}
             >
-              ✕
+              <CIcon icon={cilX} />
             </button>
-            <img 
-              src={lightboxImage.src} 
-              alt="Détail" 
-              className={styles.lightboxImage}
-            />
+
+            <div className={styles.lightboxImageContainer}>
+              <img 
+                src={lightboxImage.src} 
+                alt="Détail" 
+                className={`${styles.lightboxImage} ${zoomed ? styles.zoomed : ""}`}
+                onClick={toggleZoom}
+              />
+              <button 
+                className={styles.zoomHint}
+                onClick={toggleZoom}
+              >
+                <CIcon icon={cilZoom} />
+                {zoomed ? 'Dézoomer' : 'Zoomer'}
+              </button>
+            </div>
+
+            {selectedInterventionDetails?.images && selectedInterventionDetails.images.length > 1 && (
+              <>
+                <button className={styles.lightboxNav} onClick={prevImage} title="Image précédente">
+                  <CIcon icon={cilChevronLeft} />
+                </button>
+                <button className={styles.lightboxNav} onClick={nextImage} title="Image suivante">
+                  <CIcon icon={cilChevronRight} />
+                </button>
+                <div className={styles.lightboxCounter}>
+                  {lightboxImage.index + 1} / {selectedInterventionDetails.images.length}
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}
@@ -598,9 +966,11 @@ function Interventions() {
         onHide={() => setShowOffcanvas(false)}
         placement="end"
         style={{ width: "600px" }}
+        className={styles.offcanvas}
       >
         <Offcanvas.Header closeButton className={styles.offcanvasHeader}>
           <Offcanvas.Title className={styles.offcanvasTitle}>
+            <CIcon icon={cilFile} className={styles.offcanvasTitleIcon} />
             Rapport d'intervention {selectedIntervention ? `#${selectedIntervention.id}` : ''}
           </Offcanvas.Title>
         </Offcanvas.Header>
@@ -688,7 +1058,7 @@ function Interventions() {
                 className="btn btn-success" 
                 onClick={handleSaveRapport}
               >
-                <i className="bi bi-check-circle me-2"></i>
+                <CIcon icon={cilCheckCircle} className="me-2" />
                 Enregistrer le rapport
               </button>
               
@@ -698,7 +1068,7 @@ function Interventions() {
                   className="btn btn-primary" 
                   onClick={() => handleDownloadRapport(selectedIntervention)}
                 >
-                  <i className="bi bi-download me-2"></i>
+                  <CIcon icon={cilCloudDownload} className="me-2" />
                   Télécharger le rapport PDF
                 </button>
               )}

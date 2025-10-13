@@ -3,124 +3,316 @@
   top: 0;
   left: 0;
   height: 100vh;
-  transition: width 0.15s ease; /* deux fois plus rapide */
+  transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   z-index: 1000;
+  background: var(--bg-primary);
+  border-right: 1px solid var(--border-color);
+  box-shadow: 2px 0 20px rgba(0, 0, 0, 0.1);
+  display: flex;
+  flex-direction: column;
 }
 
-.Titre-sidebar-header {
-  font-size: 20px;        /* taille du texte */
-  font-weight: 600;       /* gras moyen */
-  color: #9ca3af;         /* couleur gris clair */
-  margin-left: 12px;      /* espace entre logo et texte */
-  /* white-space: nowrap;    empêche le texte de passer à la ligne */
-  transition: width 0.15s ease; /* deux fois plus rapide */ /* animation si sidebar se rétracte */
-  margin-top: -15px;
-  font-family: Georgia, serif;
+/* Reset complet pour tous les éléments du header */
+.sidebar-header * {
+  text-decoration: none !important;
+  border-bottom: none !important;
 }
-.CSidebarHeader {
+
+.sidebar-header a,
+.sidebar-header span,
+.sidebar-header div {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* Force la suppression des styles de lien */
+.sidebar-header .logo-title:hover,
+.sidebar-header .logo-subtitle:hover,
+.sidebar-header .logo-text:hover {
+  text-decoration: none !important;
+  border-bottom: none !important;
+}
+
+/* Header amélioré */
+.sidebar-header {
+  padding: 20px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  min-height: 80px;
   display: flex;
   align-items: center;
+  justify-content: center;
 }
 
-.sidebar-nav{
-  margin-top: -40px;
-  
+.sidebar-brand {
+  width: 100%;
+}
+
+.logo-container {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  transition: all 0.3s ease;
+}
+
+/* ✅ Styles améliorés pour l'image avec fallback */
+.logo-img {
+  width: 40px;
+  height: 40px;
+  object-fit: contain;
+  transition: transform 0.3s ease;
+  border-radius: 6px;
+  background: rgba(255, 255, 255, 0.2); /* Fond de fallback */
+}
+
+/* Fallback si l'image ne charge pas */
+.logo-img:before {
+  content: "A";
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  height: 100%;
+  background: var(--primary-color);
+  color: white;
+  font-weight: bold;
+  font-size: 18px;
+  border-radius: 6px;
+}
+
+.logo-container:hover .logo-img {
+  transform: scale(1.1);
+}
+
+.logo-text {
+  display: flex;
+  flex-direction: column;
+  line-height: 1.2;
+}
+
+.logo-title {
+  font-size: 1.25rem;
+  font-weight: 800;
+  color: white;
+  letter-spacing: 0.5px;
+}
+
+.logo-subtitle {
+  font-size: 0.75rem;
+  font-weight: 500;
+  color: rgba(255, 255, 255, 0.8);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: all 0.3s ease;
+}
+
+.sidebar-fixed:hover .logo-subtitle {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Navigation améliorée */
+.sidebar-nav {
+  flex: 1;
+  padding: 20px 12px;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
 }
 
 .sidebar-title {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 16px;
+  padding: 0 12px;
+}
+
+/* Sections de navigation */
+.nav-section {
+  margin-bottom: 24px;
+}
+
+.section-label {
+  font-size: 0.7rem;
+  font-weight: 600;
+  color: var(--text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 12px;
+  margin-bottom: 8px;
+  border-left: 2px solid var(--primary-color);
+  background: var(--bg-secondary);
+  border-radius: 0 6px 6px 0;
+}
+
+/* Items de navigation améliorés */
+.nav-item-content {
   display: flex;
   align-items: center;
- margin-left: 5px;
-}
-
-/* Logo */
-.sidebar-logo {
-  display: flex;
-  margin-top: -15px;
-  justify-content: center;
-}
-
-.sidebar-logo img {
-  width: 70px;
-  height: 70px;
-  object-fit: contain;
-}
-
-.sidebar{
-  justify-content: center;
-  /* align-items: center; */
-}
-
-/* Lien actif */
-.nav-link.active {
-  background-color: #e5e7eb; /* gris clair */
-  color: #1f2937;            /* texte sombre */
-  font-weight: 600;
+  gap: 12px;
+  padding: 3px 8px;
   border-radius: 8px;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Hover pour tous les liens */
+.nav-item-content::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 3px;
+  background: var(--primary-color);
+  transform: scaleY(0);
+  transition: transform 0.3s ease;
+}
+
+.nav-link {
+  color: var(--text-secondary);
+  text-decoration: none;
+  border-radius: 8px;
+  transition: all 0.3s ease;
+  margin-bottom: 4px;
+}
+
 .nav-link:hover {
-  background-color: #f3f4f6;
-  color: #111827;
+  background: var(--gray-100);
+  color: var(--text-primary);
+  transform: translateX(4px);
 }
 
-/* Optionnel : icône active */
-.nav-link.active .nav-icon {
-  color: #1d4ed8; /* bleu */
+.nav-link:hover .nav-item-content::before {
+  transform: scaleY(1);
 }
-/* État actif quand sidebar réduite */
+
+/* Lien actif amélioré */
+.nav-link.active {
+  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  color: white;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+.nav-link.active .nav-item-content::before {
+  transform: scaleY(1);
+  background: white;
+}
+
+.nav-link.active .nav-icon {
+  color: white;
+  transform: scale(1.1);
+}
+
+.nav-link.active .nav-label {
+  color: white;
+  font-weight: 600;
+}
+
+/* État réduit */
 .nav-link.active.collapsed {
-  background-color: transparent; /* pas de fond large */
+  background: transparent;
+  box-shadow: none;
+}
+
+.nav-link.active.collapsed .nav-item-content {
+  background: var(--primary-color);
+  color: white;
 }
 
 .nav-link.active.collapsed .nav-icon {
-  background-color: #e5e7eb; /* gris clair autour */
-  color: #1f2937;            /* couleur icône */
-  border-radius: 8px;
-  width: 40px;               /* largeur fixe */
-  height: 25px;              /* hauteur fixe */
-  display: flex;             /* centrage */
-  align-items: center;
-  justify-content: center;
-  font-size: 25px;           /* taille icône */
+  color: white;
+  transform: scale(1.1);
 }
 
-/* Hamburger button */
+.nav-link.active.collapsed .nav-item-content::before {
+  display: none;
+}
+
+/* Icônes */
+.nav-icon {
+  width: 20px;
+  height: 20px;
+  color: var(--text-muted);
+  transition: all 0.3s ease;
+  flex-shrink: 0;
+}
+
+.nav-link:hover .nav-icon {
+  color: var(--primary-color);
+  transform: scale(1.1);
+}
+
+/* Labels */
+.nav-label {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: inherit;
+  transition: all 0.3s ease;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Mobile improvements */
 .hamburger-btn {
   position: fixed;
   top: 15px;
   left: 15px;
   z-index: 1200;
-  font-size: 28px;
-  background: transparent;
+  background: var(--primary-color);
+  color: white;
   border: none;
+  border-radius: 8px;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
 
-/* Overlay */
-.sidebar-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  background: rgba(0,0,0,0.3);
-  z-index: 1100;
+.hamburger-btn:hover {
+  background: var(--primary-hover);
+  transform: scale(1.05);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
 }
 
-/* Sidebar mobile */
+/* ✅ Assurer que le bouton n'apparaît qu'en mobile */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex !important;
+  }
+}
+
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none !important;
+  }
+}
+
 .mobile-sidebar {
   position: fixed;
   top: 0;
-  left: -250px;
-  width: 250px;
+  left: -280px;
+  width: 280px;
   height: 100%;
-  background-color: #fff;
-  box-shadow: 2px 0 12px rgba(0,0,0,0.2);
+  background: var(--bg-primary);
+  box-shadow: 4px 0 30px rgba(0, 0, 0, 0.3);
   z-index: 1150;
-  transition: left 0.3s ease;
+  transition: left 0.4s cubic-bezier(0.4, 0, 0.2, 1);
   overflow-y: auto;
+  border-right: 1px solid var(--border-color);
 }
 
 .mobile-sidebar.open {
@@ -128,40 +320,255 @@
 }
 
 .mobile-sidebar-content {
-  padding: 10px;
+  padding: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
-/* Sidebar desktop */
-.sidebar-fixed {
+.sidebar-overlay {
   position: fixed;
   top: 0;
   left: 0;
-  height: 100vh;
-  transition: width 0.3s;
-  z-index: 1000;
-}
-
-.Titre-sidebar-header {
-  font-size: 20px;
-  font-weight: 600;
-  color: #9ca3af;
-  margin-left: 12px;
-  margin-top: -15px;
-  font-family: Georgia, serif;
-  transition: opacity 0.3s;
-}
-
-/* Navbar */
-.custom-navbar {
-  position: fixed;
-  top: 0;
-  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.6);
   z-index: 1100;
-  transition: margin-left 0.3s, width 0.3s;
-  padding-right: 20px;
+  backdrop-filter: blur(4px);
+  animation: fadeIn 0.3s ease;
 }
 
-.layout-main {
-  padding: 20px;
-  transition: margin-left 0.3s;
+/* Scrollbar personnalisée */
+.sidebar-nav::-webkit-scrollbar,
+.mobile-sidebar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-nav::-webkit-scrollbar-track,
+.mobile-sidebar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb,
+.mobile-sidebar::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 2px;
+}
+
+.sidebar-nav::-webkit-scrollbar-thumb:hover,
+.mobile-sidebar::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
+}
+
+/* Animations */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideOut {
+  from {
+    transform: translateX(0);
+    opacity: 1;
+  }
+  to {
+    transform: translateX(-100%);
+    opacity: 0;
+  }
+}
+
+.mobile-sidebar.open {
+  animation: slideIn 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.mobile-sidebar:not(.open) {
+  animation: slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==================== */
+/* STYLES MODE SOMBRE - ICÔNES & TEXTE */
+/* ==================== */
+
+/* 🎯 ICÔNES EN MODE SOMBRE */
+[data-theme="dark"] .nav-icon {
+  color: var(--text-secondary) !important; /* Gris clair pour les icônes normales */
+  transition: all 0.3s ease;
+}
+
+/* Icônes au survol en mode sombre */
+[data-theme="dark"] .nav-link:hover .nav-icon {
+  color: var(--primary-color) !important; /* Bleu au survol */
+  transform: scale(1.1);
+}
+
+/* Icônes des liens actifs en mode sombre */
+[data-theme="dark"] .nav-link.active .nav-icon {
+  color: white !important; /* Blanc pour les liens actifs */
+}
+
+/* 🎯 TEXTE EN MODE SOMBRE */
+[data-theme="dark"] .nav-label {
+  color: var(--text-secondary) !important; /* Gris clair pour le texte normal */
+}
+
+/* Texte au survol en mode sombre */
+[data-theme="dark"] .nav-link:hover .nav-label {
+  color: var(--text-primary) !important; /* Blanc pur au survol */
+}
+
+/* Texte des liens actifs en mode sombre */
+[data-theme="dark"] .nav-link.active .nav-label {
+  color: white !important; /* Blanc pour les liens actifs */
+}
+
+/* 🎯 TITRES ET SECTIONS EN MODE SOMBRE */
+[data-theme="dark"] .sidebar-title {
+  color: var(--text-muted) !important; /* Gris moyen pour les titres */
+}
+
+[data-theme="dark"] .section-label {
+  color: var(--primary-color) !important; /* Bleu pour les labels de section */
+  background: rgba(59, 130, 246, 0.1) !important; /* Fond bleu très transparent */
+  border-left-color: var(--primary-color) !important; /* Bordure bleue */
+}
+
+/* 🎯 COULEURS DIFFÉRENTES PAR SECTION EN MODE SOMBRE */
+/* Section Dashboard/Accueil - Vert */
+[data-theme="dark"] .nav-section:nth-of-type(1) .nav-icon {
+  color: var(--success-color) !important;
+}
+
+/* Section Gestion - Orange */
+[data-theme="dark"] .nav-section:nth-of-type(2) .nav-icon {
+  color: var(--warning-color) !important;
+}
+
+/* Section Documents - Cyan */
+[data-theme="dark"] .nav-section:nth-of-type(3) .nav-icon {
+  color: var(--info-color) !important;
+}
+
+/* Section Compte - Bleu */
+[data-theme="dark"] .nav-section:nth-of-type(4) .nav-icon {
+  color: var(--primary-color) !important;
+}
+
+/* 🎯 SCROLLBAR EN MODE SOMBRE */
+[data-theme="dark"] .sidebar-nav::-webkit-scrollbar-thumb {
+  background: var(--gray-400) !important; /* Gris moyen pour la scrollbar */
+}
+
+[data-theme="dark"] .sidebar-nav::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-300) !important; /* Gris plus clair au survol */
+}
+
+/* Styles existants pour le dark mode - CONSERVER */
+[data-theme="dark"] .sidebar-fixed {
+  background: var(--bg-primary);
+  box-shadow: 2px 0 30px rgba(0, 0, 0, 0.5);
+}
+
+[data-theme="dark"] .sidebar-header {
+  background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
+}
+
+[data-theme="dark"] .logo-container {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+[data-theme="dark"] .nav-link:hover {
+  background: var(--gray-800);
+}
+
+[data-theme="dark"] .mobile-sidebar {
+  background: var(--bg-primary);
+  box-shadow: 4px 0 40px rgba(0, 0, 0, 0.6);
+}
+
+[data-theme="dark"] .sidebar-overlay {
+  background: rgba(0, 0, 0, 0.8);
+}
+
+/* Indicateur de statut pour les items */
+.nav-item {
+  position: relative;
+}
+
+.nav-badge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: var(--danger-color);
+  color: white;
+  border-radius: 50%;
+  width: 18px;
+  height: 18px;
+  font-size: 0.7rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .sidebar-fixed {
+    transform: translateX(-100%);
+  }
+  
+  .hamburger-btn {
+    display: flex;
+  }
+}
+
+@media (min-width: 769px) {
+  .hamburger-btn {
+    display: none;
+  }
+  
+  .sidebar-overlay {
+    display: none;
+  }
+}
+
+/* Transition fluide pour tous les éléments */
+.sidebar-fixed,
+.nav-link,
+.nav-item-content,
+.nav-icon,
+.nav-label,
+.logo-container {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Amélioration de la lisibilité en mode réduit */
+.sidebar-fixed:not(:hover) .nav-section {
+  margin-bottom: 16px;
+}
+
+.sidebar-fixed:not(:hover) .section-label {
+  font-size: 0.6rem;
+  padding: 6px 8px;
+  margin-bottom: 4px;
 }

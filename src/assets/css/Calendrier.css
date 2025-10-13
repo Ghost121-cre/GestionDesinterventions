@@ -1,65 +1,133 @@
+/* Calendrier.css - Version avec support dark mode */
 
-  .calendar-container {
+.calendar-container {
   max-width: 1500px;
   padding: 0px;
   margin: auto;
-  background: #f2f2f5;
+  background: var(--bg-secondary);
   border-radius: 20px;
 }
 
+/* FullCalendar dark mode support */
+[data-theme="dark"] .fc {
+  --fc-border-color: var(--border-color);
+  --fc-button-bg-color: var(--primary-color);
+  --fc-button-border-color: var(--primary-color);
+  --fc-button-hover-bg-color: var(--primary-hover);
+  --fc-button-hover-border-color: var(--primary-hover);
+  --fc-button-active-bg-color: var(--primary-hover);
+  --fc-button-active-border-color: var(--primary-hover);
+  --fc-page-bg-color: var(--bg-primary);
+  --fc-neutral-bg-color: var(--bg-secondary);
+  --fc-list-event-hover-bg-color: var(--gray-800);
+}
 
 .fc-toolbar-title {
-  color: #2563eb;
+  color: var(--primary-color);
   font-size: 22px;
   font-weight: bold;
   padding: 20px;
   border-radius: 12px;
 }
 
-.fc-button-group{
-    gap: 10px;
+.fc-button-group {
+  gap: 10px;
 }
 
 .fc-button {
-  background: #3b82f6 !important;
+  background: var(--primary-color) !important;
   border: none !important;
   color: white !important;
   border-radius: 8px !important;
   padding: 6px 12px !important;
 }
-/*les éléments dans .fc-toolbar-chunk*/
-.fc-toolbar-chunk{
-    margin-left: 50px;
-    margin-right: 50px;
-    margin-top: 10px;
-    margin-bottom: -10px;
-}
-.fc-button-active {
-  background: #2563eb !important;
-}
-.fc-col-header-cell-cushion {
-    text-decoration: none;
-    text-transform: uppercase;
-    color: #fdf9f9;
+
+/* Les éléments dans .fc-toolbar-chunk */
+.fc-toolbar-chunk {
+  margin-left: 50px;
+  margin-right: 50px;
+  margin-top: 10px;
+  margin-bottom: -10px;
 }
 
-/*header du fullcalendar */
+.fc-button-active {
+  background: var(--primary-hover) !important;
+}
+
+.fc-col-header-cell-cushion {
+  text-decoration: none;
+  text-transform: uppercase;
+  color: var(--text-primary);
+}
+
+/* Header du fullcalendar */
 .fc .fc-col-header-cell {
-  background-color: #2563eb; /* fond pour uniformiser avec ton thème */
-  border: none; 
+  background-color: var(--primary-color);
+  border: none;
   padding: 10px;
 }
 
-/*numéro des cases*/
-.fc-daygrid-day-number{
-    margin-top: 5px;
-    text-decoration: none;
-}
-.fc-daygrid-day-top{
-    display: flex;
-    justify-content: start;
-    height: 100%;
+/* Numéro des cases */
+.fc-daygrid-day-number {
+  margin-top: 5px;
+  text-decoration: none;
+  color: var(--text-primary);
 }
 
+.fc-daygrid-day-top {
+  display: flex;
+  justify-content: start;
+  height: 100%;
+}
 
+/* Styles spécifiques pour le dark mode */
+[data-theme="dark"] .fc-theme-standard td,
+[data-theme="dark"] .fc-theme-standard th {
+  border-color: var(--border-color);
+}
 
+[data-theme="dark"] .fc .fc-daygrid-day.fc-day-today {
+  background-color: var(--primary-color);
+  opacity: 0.1;
+}
+
+[data-theme="dark"] .fc .fc-daygrid-day-frame {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="dark"] .fc .fc-scrollgrid {
+  border-color: var(--border-color);
+}
+
+[data-theme="dark"] .fc .fc-daygrid-day {
+  background-color: var(--bg-primary);
+}
+
+[data-theme="dark"] .fc .fc-daygrid-day:hover {
+  background-color: var(--gray-800);
+}
+
+/* Correction pour les événements */
+[data-theme="dark"] .fc-event {
+  background-color: var(--primary-color);
+  border-color: var(--primary-color);
+  color: white;
+}
+
+[data-theme="dark"] .fc-event:hover {
+  background-color: var(--primary-hover);
+  border-color: var(--primary-hover);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .fc-toolbar-chunk {
+    margin-left: 20px;
+    margin-right: 20px;
+  }
+  
+  .fc-toolbar-title {
+    font-size: 18px;
+    padding: 15px;
+  }
+}

@@ -7,14 +7,14 @@ import CIcon from "@coreui/icons-react";
 import { 
   cilWarning, 
   cilCheckCircle, 
-  cilMagnifyingGlass,  // ✅ Recherche
+  cilMagnifyingGlass,
   cilCalendar,
   cilTrash,
-  cilInfo,             // ✅ Voir détails
+  cilInfo,
   cilX,
   cilChevronLeft,
   cilChevronRight,
-  cilZoomIn,           // ✅ Zoom
+  cilZoomIn,
   cilPlus,
   cilFilter
 } from "@coreui/icons";
@@ -39,17 +39,39 @@ function Incident() {
   // 🔎 Filtrage selon onglet, recherche et dates
   const filteredIncidents = incidents
     .filter(i => i.statut === (activeTab === "nonresolu" ? "non résolu" : "résolu"))
-    .filter(i =>
-      search === "" ||
-      i.client?.toLowerCase().includes(search.toLowerCase()) ||
-      i.produit?.toLowerCase().includes(search.toLowerCase()) ||
-      i.description?.toLowerCase().includes(search.toLowerCase())
-    )
     .filter(i => {
+      if (!search) return true;
+      const searchLower = search.toLowerCase();
+      return (
+        i.client?.toLowerCase().includes(searchLower) ||
+        i.produit?.toLowerCase().includes(searchLower) ||
+        i.description?.toLowerCase().includes(searchLower)
+      );
+    })
+    .filter(i => {
+      if (!startDate && !endDate) return true;
+      
+      const dateField = activeTab === "nonresolu" ? i.date_survenu : i.date_resolu || i.date_survenu;
+      if (!dateField) return false;
+      
+      const incidentDate = new Date(dateField);
+      
       if (startDate && endDate) {
-        const dateField = activeTab === "nonresolu" ? i.date_survenu : i.date_resolu || i.date_survenu;
-        return dateField >= startDate && dateField <= endDate;
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+        return incidentDate >= start && incidentDate <= end;
       }
+      
+      if (startDate) {
+        const start = new Date(startDate);
+        return incidentDate >= start;
+      }
+      
+      if (endDate) {
+        const end = new Date(endDate);
+        return incidentDate <= end;
+      }
+      
       return true;
     });
 
@@ -62,9 +84,16 @@ function Incident() {
   // Navigation lightbox
   const prevImage = () =>
     setLightboxIndex(prev => (prev === 0 ? lightboxImages.length - 1 : prev - 1));
+  
   const nextImage = () =>
     setLightboxIndex(prev => (prev === lightboxImages.length - 1 ? 0 : prev + 1));
+  
   const toggleZoom = () => setZoomed(prev => !prev);
+
+  const closeLightbox = () => {
+    setLightboxIndex(null);
+    setZoomed(false);
+  };
 
   // Ouvrir les détails d'un incident
   const openDetailsModal = (incident) => {
@@ -117,11 +146,15 @@ function Incident() {
   // Formater la date
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      day: '2-digit',
-      month: '2-digit',
-      year: 'numeric'
-    });
+    try {
+      return new Date(dateString).toLocaleDateString('fr-FR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+      });
+    } catch (error) {
+      return "-";
+    }
   };
 
   // Obtenir les URLs des images
@@ -129,14 +162,36 @@ function Incident() {
     if (!images || images.length === 0) return [];
     return images.map(img => {
       if (typeof img === "string") return img;
-      return URL.createObjectURL(img);
+      if (img instanceof File || img instanceof Blob) {
+        return URL.createObjectURL(img);
+      }
+      return img;
     });
   };
 
-  // Nettoyer les URLs
+  // Ouvrir la lightbox depuis le tableau
+  const openLightboxFromTable = (images, index) => {
+    const urls = getImageUrls(images);
+    setLightboxImages(urls);
+    setLightboxIndex(index);
+  };
+
+  // Ouvrir la lightbox depuis la modal de détails
+  const openLightboxFromModal = (images, index) => {
+    const urls = getImageUrls(images);
+    setLightboxImages(urls);
+    setLightboxIndex(index);
+    closeDetailsModal(); // Fermer la modal de détails
+  };
+
+  // Nettoyer les URLs des images créées
   useEffect(() => {
     return () => {
-      lightboxImages.forEach(url => URL.revokeObjectURL(url));
+      lightboxImages.forEach(url => {
+        if (url.startsWith('blob:')) {
+          URL.revokeObjectURL(url);
+        }
+      });
     };
   }, [lightboxImages]);
 
@@ -146,6 +201,11 @@ function Incident() {
     nonResolus: incidents.filter(i => i.statut === "non résolu").length,
     resolus: incidents.filter(i => i.statut === "résolu").length
   };
+
+  // Réinitialiser la page quand les filtres changent
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [activeTab, search, startDate, endDate]);
 
   return (
     <div className={styles.container}>
@@ -199,7 +259,7 @@ function Incident() {
         <div className={styles.tabs}>
           <button
             className={`${styles.tab} ${activeTab === "nonresolu" ? styles.tabActive : ""}`}
-            onClick={() => { setActiveTab("nonresolu"); setCurrentPage(1); }}
+            onClick={() => setActiveTab("nonresolu")}
           >
             <CIcon icon={cilWarning} className={styles.tabIcon} />
             Incidents non résolus
@@ -207,7 +267,7 @@ function Incident() {
           </button>
           <button
             className={`${styles.tab} ${activeTab === "resolu" ? styles.tabActive : ""}`}
-            onClick={() => { setActiveTab("resolu"); setCurrentPage(1); }}
+            onClick={() => setActiveTab("resolu")}
           >
             <CIcon icon={cilCheckCircle} className={styles.tabIcon} />
             Incidents résolus
@@ -224,7 +284,7 @@ function Incident() {
             type="text"
             placeholder="Rechercher un incident..."
             value={search}
-            onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+            onChange={e => setSearch(e.target.value)}
             className={styles.searchInput}
           />
         </div>
@@ -236,7 +296,6 @@ function Incident() {
               value={startDate}
               onChange={e => setStartDate(e.target.value)}
               className={styles.dateInput}
-              placeholder="Date début"
             />
           </div>
           <span className={styles.dateSeparator}>à</span>
@@ -246,7 +305,6 @@ function Incident() {
               value={endDate}
               onChange={e => setEndDate(e.target.value)}
               className={styles.dateInput}
-              placeholder="Date fin"
             />
           </div>
         </div>
@@ -329,11 +387,7 @@ function Incident() {
                               src={typeof img === "string" ? img : URL.createObjectURL(img)}
                               alt={`Incident ${i.id} - ${idx + 1}`}
                               className={styles.previewImage}
-                              onClick={() => {
-                                const urls = getImageUrls(i.images);
-                                setLightboxImages(urls);
-                                setLightboxIndex(idx);
-                              }}
+                              onClick={() => openLightboxFromTable(i.images, idx)}
                             />
                             {i.images.length > 3 && idx === 2 && (
                               <div className={styles.moreImages}>+{i.images.length - 3}</div>
@@ -499,11 +553,7 @@ function Incident() {
                         src={src}
                         alt={`Incident ${selectedIncident.id} - ${idx + 1}`}
                         className={styles.modalImage}
-                        onClick={() => {
-                          setLightboxImages(getImageUrls(selectedIncident.images));
-                          setLightboxIndex(idx);
-                          closeDetailsModal();
-                        }}
+                        onClick={() => openLightboxFromModal(selectedIncident.images, idx)}
                       />
                     ))}
                   </div>
@@ -551,11 +601,11 @@ function Incident() {
 
       {/* Lightbox Modal amélioré */}
       {lightboxIndex !== null && (
-        <div className={styles.lightboxOverlay} onClick={() => setLightboxIndex(null)}>
+        <div className={styles.lightboxOverlay} onClick={closeLightbox}>
           <div className={styles.lightboxContent} onClick={e => e.stopPropagation()}>
             <button 
               className={styles.lightboxClose}
-              onClick={() => setLightboxIndex(null)}
+              onClick={closeLightbox}
               title="Fermer"
             >
               <CIcon icon={cilX} />

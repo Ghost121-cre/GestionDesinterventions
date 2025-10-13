@@ -1,24 +1,74 @@
- .layout {
+/* Layout.css - Version avec support dark mode */
+
+.layout {
   display: flex;
   flex-direction: column;
   height: 100vh;
-} 
+  background-color: var(--bg-primary);
+}
 
 /* Conteneur sous la navbar */
 .layout-body {
   display: flex;
   flex: 1;
-} 
+  background-color: var(--bg-primary);
+}
 
 /* Contenu principal */
- .layout-content {
+.layout-content {
   flex: 1;
   padding: 20px;
   transition: margin-left 0.3s;
-} 
+  background-color: var(--bg-primary);
+}
+
 .layout-main {
   padding: 1rem;
   transition: margin-left 0.3s, margin-top 0.3s;
-  min-height: calc(100vh - 60px); /* prend tout l'écran sauf la navbar */
-  background: #f9f9f9; /* couleur claire de fond */
+  min-height: calc(100vh - 60px);
+  background: var(--bg-secondary);
+}
+
+/* Support pour le mode somme dans le layout */
+[data-theme="dark"] .layout-main {
+  background: var(--bg-gradient);
+}
+
+/* Ajustements pour les transitions en mode sombre */
+.layout-main,
+.layout-content,
+.layout-body {
+  transition: 
+    margin-left 0.3s,
+    margin-top 0.3s,
+    background-color 0.3s ease,
+    color 0.3s ease;
+}
+
+/* Styles pour le contenu des pages dans le layout */
+.layout-main > * {
+  background: transparent;
+}
+
+/* Correction pour le contraste en mode sombre */
+[data-theme="dark"] .layout-main {
+  color: var(--text-primary);
+}
+
+/* Ajustement pour le scrollbar en mode sombre */
+[data-theme="dark"] .layout-main::-webkit-scrollbar {
+  width: 8px;
+}
+
+[data-theme="dark"] .layout-main::-webkit-scrollbar-track {
+  background: var(--gray-800);
+}
+
+[data-theme="dark"] .layout-main::-webkit-scrollbar-thumb {
+  background: var(--gray-600);
+  border-radius: 4px;
+}
+
+[data-theme="dark"] .layout-main::-webkit-scrollbar-thumb:hover {
+  background: var(--gray-500);
 }

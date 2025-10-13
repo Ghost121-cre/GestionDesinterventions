@@ -1,42 +1,167 @@
 import React from "react";
-import { Container, Row, Col, Card, Button } from "react-bootstrap";
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { Link } from "react-router-dom";
+import CIcon from "@coreui/icons-react";
+import { 
+  cilCog, 
+  cilStorage, 
+  cilUser, 
+  cilPeople,
+  cilSettings,
+  cilShieldAlt
+} from "@coreui/icons";
 import 'bootstrap/dist/css/bootstrap.min.css';
-import "../assets/css/Paramètres.css";
-
-import Produit from "../assets/images/SIB.png";
-import Client from "../assets/images/Client.png";
-import CompteUser from "../assets/images/use.png";
+import styles from "../assets/css/Paramètres.module.css";
 
 function Parametres() {
-  const cards = [
-    { title: "Produit", image: Produit, link: "/produit" },
-    { title: "Client", image: Client, link: "/client" },
-    { title: "Compte Utilisateur", image: CompteUser, link: "/compte_utilisateur" },
+  const settingsCards = [
+    { 
+      title: "Gestion des Produits", 
+      description: "Gérez votre catalogue de produits et services",
+      icon: cilStorage, 
+      link: "/produit",
+      color: "primary",
+      count: 12 // Exemple de métrique
+    },
+    { 
+      title: "Gestion des Clients", 
+      description: "Administrez votre base de données clients",
+      icon: cilUser, 
+      link: "/client",
+      color: "success",
+      count: 48
+    },
+    { 
+      title: "Comptes Utilisateurs", 
+      description: "Gérez les accès et permissions des utilisateurs",
+      icon: cilPeople, 
+      link: "/compte_utilisateur",
+      color: "warning",
+      count: 8
+    },
+    { 
+      title: "Paramètres Système", 
+      description: "Configuration avancée du système",
+      icon: cilSettings, 
+      link: "/system-settings",
+      color: "info",
+      count: null
+    },
+    { 
+      title: "Sécurité", 
+      description: "Paramètres de sécurité et authentification",
+      icon: cilShieldAlt, 
+      link: "/security",
+      color: "danger",
+      count: null
+    },
   ];
 
+  const getCardClass = (color) => {
+    const colorMap = {
+      primary: styles.cardPrimary,
+      success: styles.cardSuccess,
+      warning: styles.cardWarning,
+      info: styles.cardInfo,
+      danger: styles.cardDanger
+    };
+    return colorMap[color] || styles.cardPrimary;
+  };
+
   return (
-    <Container className="parametres-container mt-5">
-      <h2 className="text-center mb-4 fw-bold titre-page">Paramètres</h2>
-      <Row className="g-4 justify-content-center">
-        {cards.map((card, index) => (
-          <Col key={index} xs={12} sm={6} md={4} lg={3} className="d-flex justify-content-center">
-            <Card className="param-card text-center">
-              <div className="card-img-container">
-                <Card.Img src={card.image} alt={card.title} className="card-img-top" />
+    <div className={styles.pageContainer}>
+      <Container className={styles.container}>
+        {/* En-tête */}
+        <div className={styles.header}>
+          <div className={styles.headerContent}>
+            <h1 className={styles.title}>
+              <CIcon icon={cilCog} className={styles.titleIcon} />
+              Paramètres du Système
+            </h1>
+            <p className={styles.subtitle}>
+              Configurez et gérez tous les aspects de votre application
+            </p>
+          </div>
+        </div>
+
+        {/* Grille des cartes */}
+        <Row className="g-4 justify-content-center">
+          {settingsCards.map((card, index) => (
+            <Col key={index} xs={12} sm={6} lg={4} className="d-flex justify-content-center">
+              <Card className={`${styles.settingsCard} ${getCardClass(card.color)}`}>
+                <Card.Body className={styles.cardBody}>
+                  <div className={styles.cardHeader}>
+                    <div className={styles.cardIcon}>
+                      <CIcon icon={card.icon} className={styles.icon} />
+                    </div>
+                    {card.count !== null && (
+                      <div className={styles.cardBadge}>
+                        {card.count}
+                      </div>
+                    )}
+                  </div>
+                  
+                  <Card.Title className={styles.cardTitle}>
+                    {card.title}
+                  </Card.Title>
+                  
+                  <Card.Text className={styles.cardDescription}>
+                    {card.description}
+                  </Card.Text>
+
+                  <div className={styles.cardFooter}>
+                    <Link 
+                      to={card.link} 
+                      className={styles.cardLink}
+                    >
+                      <span>Configurer</span>
+                      <CIcon icon={cilCog} className={styles.linkIcon} />
+                    </Link>
+                  </div>
+                </Card.Body>
+                
+                {/* Effet de bordure colorée */}
+                <div className={styles.cardBorder}></div>
+              </Card>
+            </Col>
+          ))}
+        </Row>
+
+        {/* Section statistiques rapides */}
+        <div className={styles.quickStats}>
+          <Row className="g-3">
+            <Col xs={6} md={3}>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>12</div>
+                <div className={styles.statLabel}>Produits</div>
               </div>
-              <Card.Body className="d-flex flex-column justify-content-between">
-                <Card.Title>{card.title}</Card.Title>
-                <Button as={Link} to={card.link} className="bouton w-100 mt-3">
-                  Accéder
-                </Button>
-              </Card.Body>
-            </Card>
-          </Col>
-        ))}
-      </Row>
-    </Container>
+            </Col>
+            <Col xs={6} md={3}>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>48</div>
+                <div className={styles.statLabel}>Clients</div>
+              </div>
+            </Col>
+            <Col xs={6} md={3}>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>8</div>
+                <div className={styles.statLabel}>Utilisateurs</div>
+              </div>
+            </Col>
+            <Col xs={6} md={3}>
+              <div className={styles.statItem}>
+                <div className={styles.statValue}>156</div>
+                <div className={styles.statLabel}>Interventions</div>
+              </div>
+            </Col>
+          </Row>
+        </div>
+      </Container>
+    </div>
   );
 }
 
 export default Parametres;
+
+
+  

@@ -1,15 +1,85 @@
-import React, { useContext, useState } from "react";
-import "../assets/css/Profil.css";
+import React, { useContext, useState, useEffect } from "react";
+import styles from "../assets/css/Profil.module.css";
 import { UserContext } from "../context/UserContext";
+import { useInterventions } from "../context/InterventionContext";
+import { useIncident } from "../context/IncidentContext";
 import CIcon from "@coreui/icons-react";
-import { cilPencil, cilCheck, cilX } from "@coreui/icons";
+import { 
+  cilPencil, 
+  cilCheck, 
+  cilX, 
+  cilUser,
+  cilEnvelopeOpen,
+  cilPhone,
+  cilMap,
+  cilGlobeAlt,
+  cilBriefcase,
+  cilDescription,
+  cilClock,
+  cilCheckCircle,
+  cilWarning,
+  cilChartLine
+} from "@coreui/icons";
 
 function Profil() {
   const { user, setUser } = useContext(UserContext);
+  const { interventions } = useInterventions();
+  const { incidents } = useIncident();
+  
   const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState(user);
+  const [formData, setFormData] = useState(user || {
+    prenom: "",
+    nom: "",
+    email: "",
+    telephone: "",
+    bio: "",
+    role: "Technicien",
+    pays: "",
+    ville: "",
+    codePostal: "",
+    avatar: "/default-avatar.png"
+  });
 
-  if (!user) return <p>Utilisateur non connecté</p>;
+  // Calcul des statistiques réelles
+  const getRealStats = () => {
+    const userInterventions = interventions.filter(i => i.technicien === `${formData.prenom} ${formData.nom}`.trim());
+    const interventionsTerminees = userInterventions.filter(i => i.statut === "Terminé").length;
+    const interventionsEnCours = userInterventions.filter(i => i.statut === "En cours").length;
+    const userIncidents = incidents.filter(inc => inc.statut === "non résolu").length;
+    
+    // Calcul du taux de satisfaction (simulé pour l'exemple)
+    const satisfaction = userInterventions.length > 0 
+      ? Math.min(100, Math.floor((interventionsTerminees / userInterventions.length) * 100) + 20)
+      : 0;
+
+    return {
+      totalInterventions: userInterventions.length,
+      interventionsTerminees,
+      interventionsEnCours,
+      incidentsNonResolus: userIncidents,
+      satisfaction
+    };
+  };
+
+  const stats = getRealStats();
+
+  useEffect(() => {
+    if (user) {
+      setFormData(user);
+    }
+  }, [user]);
+
+  if (!user) {
+    return (
+      <div className={styles.container}>
+        <div className={styles.emptyState}>
+          <CIcon icon={cilUser} size="3xl" className={styles.emptyIcon} />
+          <h2 className={styles.emptyTitle}>Utilisateur non connecté</h2>
+          <p className={styles.emptyText}>Veuillez vous connecter pour accéder à votre profil</p>
+        </div>
+      </div>
+    );
+  }
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -27,6 +97,7 @@ function Profil() {
   const handleSave = () => {
     setUser(formData);
     setEditMode(false);
+    // Ici vous pourriez ajouter un appel API pour sauvegarder les données
   };
 
   const handleCancel = () => {
@@ -34,97 +105,292 @@ function Profil() {
     setEditMode(false);
   };
 
+  const getFieldIcon = (field) => {
+    switch(field) {
+      case 'prenom':
+      case 'nom':
+        return cilUser;
+      case 'email':
+        return cilEnvelopeOpen;
+      case 'telephone':
+        return cilPhone;
+      case 'bio':
+        return cilDescription;
+      case 'role':
+        return cilBriefcase;
+      case 'pays':
+        return cilGlobeAlt;
+      case 'ville':
+      case 'codePostal':
+        return cilMap;
+      default:
+        return cilUser;
+    }
+  };
+
+  const getFieldLabel = (field) => {
+    const labels = {
+      prenom: "Prénom",
+      nom: "Nom",
+      email: "Email",
+      telephone: "Téléphone",
+      bio: "Biographie",
+      role: "Rôle",
+      pays: "Pays",
+      ville: "Ville",
+      codePostal: "Code Postal"
+    };
+    return labels[field] || field;
+  };
+
+  const getFieldType = (field) => {
+    if (field === 'email') return 'email';
+    if (field === 'telephone') return 'tel';
+    return 'text';
+  };
+
+  // Interventions récentes
+  const recentInterventions = interventions
+    .filter(i => i.technicien === `${formData.prenom} ${formData.nom}`.trim())
+    .sort((a, b) => new Date(b.datetime || b.createdAt) - new Date(a.datetime || a.createdAt))
+    .slice(0, 5);
+
   return (
-    <div className="profil-container">
-      <h2 className="profil-title">Profil</h2>
-
-      {/* Header */}
-      <div className="profil-header">
-        <div className="avatar-wrapper">
-          <img src={formData.avatar} alt="avatar" className="profil-avatar" />
-          {editMode && (
-            <label className="avatar-edit-label">
-              <CIcon icon={cilPencil} />
-              <input
-                type="file"
-                accept="image/*"
-                onChange={handleAvatarChange}
-                style={{ display: "none" }}
+    <div className={styles.fullScreenContainer}>
+      {/* Carte principale en plein écran */}
+      <div className={styles.fullScreenCard}>
+        {/* Header du profil */}
+        <div className={styles.profileHeader}>
+          <div className={styles.avatarSection}>
+            <div className={styles.avatarWrapper}>
+              <img 
+                src={formData.avatar} 
+                alt="Avatar" 
+                className={styles.avatar}
               />
-            </label>
-          )}
-        </div>
-
-        <div className="profil-info">
-          <h3 className="profil-name">{formData.prenom} {formData.nom}</h3>
-          <p className="profil-role">{formData.role}</p>
-        </div>
-
-        <div className="profil-actions">
-          {editMode ? (
-            <>
-              <button className="save-btn" onClick={handleSave}>
-                <CIcon icon={cilCheck} /> Sauvegarder
-              </button>
-              <button className="cancel-btn" onClick={handleCancel}>
-                <CIcon icon={cilX} /> Annuler
-              </button>
-            </>
-          ) : (
-            <button className="edit-btn" onClick={() => setEditMode(true)}>
-              <CIcon icon={cilPencil} /> Modifier
-            </button>
-          )}
-        </div>
-      </div>
-
-      {/* Informations personnelles */}
-      <div className="profil-card">
-        <div className="card-header">
-          <h4>Informations personnelles</h4>
-        </div>
-        <div className="card-grid">
-          {["prenom", "nom", "email", "telephone", "bio"].map(field => (
-            <div key={field}>
-              <p className="label">{field.charAt(0).toUpperCase() + field.slice(1)}</p>
-              {editMode ? (
-                <input
-                  type="text"
-                  name={field}
-                  value={formData[field] || ""}
-                  onChange={handleChange}
-                  placeholder={`Entrez votre ${field}`}
-                />
-              ) : (
-                <p className="value">{formData[field] || "-"}</p>
+              {editMode && (
+                <label className={styles.avatarEdit}>
+                  <CIcon icon={cilPencil} className={styles.avatarEditIcon} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className={styles.avatarInput}
+                  />
+                </label>
               )}
             </div>
-          ))}
-        </div>
-      </div>
-
-      {/* Adresse */}
-      <div className="profil-card">
-        <div className="card-header">
-          <h4>Adresse</h4>
-        </div>
-        <div className="card-grid">
-          {["pays", "ville", "codePostal"].map(field => (
-            <div key={field}>
-              <p className="label">{field.charAt(0).toUpperCase() + field.slice(1)}</p>
-              {editMode ? (
-                <input
-                  type="text"
-                  name={field}
-                  value={formData[field] || ""}
-                  onChange={handleChange}
-                  placeholder={`Entrez votre ${field}`}
-                />
-              ) : (
-                <p className="value">{formData[field] || "-"}</p>
+            <div className={styles.profileInfo}>
+              <h2 className={styles.profileName}>
+                {formData.prenom} {formData.nom}
+              </h2>
+              <div className={styles.profileRole}>
+                <CIcon icon={cilBriefcase} className={styles.roleIcon} />
+                {formData.role}
+              </div>
+              {formData.bio && (
+                <p className={styles.profileBio}>{formData.bio}</p>
               )}
             </div>
-          ))}
+          </div>
+
+          <div className={styles.actions}>
+            {editMode ? (
+              <div className={styles.editActions}>
+                <button className={styles.saveBtn} onClick={handleSave}>
+                  <CIcon icon={cilCheck} className={styles.btnIcon} />
+                  Sauvegarder
+                </button>
+                <button className={styles.cancelBtn} onClick={handleCancel}>
+                  <CIcon icon={cilX} className={styles.btnIcon} />
+                  Annuler
+                </button>
+              </div>
+            ) : (
+              <button 
+                className={styles.editBtn}
+                onClick={() => setEditMode(true)}
+              >
+                <CIcon icon={cilPencil} className={styles.btnIcon} />
+                Modifier le profil
+              </button>
+            )}
+          </div>
+        </div>
+
+        <div className={styles.mainContent}>
+          {/* Colonne gauche - Informations personnelles */}
+          <div className={styles.leftColumn}>
+            {/* Informations personnelles */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>
+                <CIcon icon={cilUser} className={styles.sectionIcon} />
+                Informations personnelles
+              </h3>
+              <div className={styles.fieldsGrid}>
+                {['prenom', 'nom', 'email', 'telephone', 'bio'].map(field => (
+                  <div key={field} className={styles.field}>
+                    <label className={styles.fieldLabel}>
+                      <CIcon icon={getFieldIcon(field)} className={styles.fieldIcon} />
+                      {getFieldLabel(field)}
+                    </label>
+                    {editMode ? (
+                      field === 'bio' ? (
+                        <textarea
+                          name={field}
+                          value={formData[field] || ''}
+                          onChange={handleChange}
+                          placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                          className={styles.textarea}
+                          rows={3}
+                        />
+                      ) : (
+                        <input
+                          type={getFieldType(field)}
+                          name={field}
+                          value={formData[field] || ''}
+                          onChange={handleChange}
+                          placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                          className={styles.input}
+                        />
+                      )
+                    ) : (
+                      <div className={styles.fieldValue}>
+                        {formData[field] || (
+                          <span className={styles.placeholder}>Non renseigné</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Adresse */}
+            <div className={styles.section}>
+              <h3 className={styles.sectionTitle}>
+                <CIcon icon={cilMap} className={styles.sectionIcon} />
+                Adresse
+              </h3>
+              <div className={styles.fieldsGrid}>
+                {['pays', 'ville', 'codePostal'].map(field => (
+                  <div key={field} className={styles.field}>
+                    <label className={styles.fieldLabel}>
+                      <CIcon icon={getFieldIcon(field)} className={styles.fieldIcon} />
+                      {getFieldLabel(field)}
+                    </label>
+                    {editMode ? (
+                      <input
+                        type="text"
+                        name={field}
+                        value={formData[field] || ''}
+                        onChange={handleChange}
+                        placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                        className={styles.input}
+                      />
+                    ) : (
+                      <div className={styles.fieldValue}>
+                        {formData[field] || (
+                          <span className={styles.placeholder}>Non renseigné</span>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+
+          {/* Colonne droite - Statistiques et activité */}
+          <div className={styles.rightColumn}>
+            {/* Statistiques */}
+            <div className={styles.statsSection}>
+              <h3 className={styles.sectionTitle}>
+                <CIcon icon={cilChartLine} className={styles.sectionIcon} />
+                Mes Statistiques
+              </h3>
+              <div className={styles.statsGrid}>
+                <div className={styles.statItem}>
+                  <div className={styles.statIconWrapper}>
+                    <CIcon icon={cilBriefcase} className={styles.statIcon} />
+                  </div>
+                  <div className={styles.statValue}>{stats.totalInterventions}</div>
+                  <div className={styles.statLabel}>Interventions totales</div>
+                </div>
+                <div className={styles.statItem}>
+                  <div className={styles.statIconWrapper}>
+                    <CIcon icon={cilCheckCircle} className={styles.statIcon} />
+                  </div>
+                  <div className={styles.statValue}>{stats.interventionsTerminees}</div>
+                  <div className={styles.statLabel}>Terminées</div>
+                </div>
+                <div className={styles.statItem}>
+                  <div className={styles.statIconWrapper}>
+                    <CIcon icon={cilClock} className={styles.statIcon} />
+                  </div>
+                  <div className={styles.statValue}>{stats.interventionsEnCours}</div>
+                  <div className={styles.statLabel}>En cours</div>
+                </div>
+                <div className={styles.statItem}>
+                  <div className={styles.statIconWrapper}>
+                    <CIcon icon={cilWarning} className={styles.statIcon} />
+                  </div>
+                  <div className={styles.statValue}>{stats.incidentsNonResolus}</div>
+                  <div className={styles.statLabel}>Incidents actifs</div>
+                </div>
+                <div className={styles.statItem}>
+                  <div className={styles.statIconWrapper}>
+                    <CIcon icon={cilChartLine} className={styles.statIcon} />
+                  </div>
+                  <div className={styles.statValue}>{stats.satisfaction}%</div>
+                  <div className={styles.statLabel}>Satisfaction</div>
+                </div>
+              </div>
+            </div>
+
+            {/* Interventions récentes */}
+            <div className={styles.activitySection}>
+              <h3 className={styles.sectionTitle}>
+                <CIcon icon={cilClock} className={styles.sectionIcon} />
+                Interventions Récentes
+              </h3>
+              <div className={styles.activityList}>
+                {recentInterventions.length > 0 ? (
+                  recentInterventions.map((intervention, index) => (
+                    <div key={intervention.id} className={styles.activityItem}>
+                      <div className={styles.activityIcon}>
+                        <CIcon icon={
+                          intervention.statut === "Terminé" ? cilCheckCircle :
+                          intervention.statut === "En cours" ? cilClock : cilWarning
+                        } />
+                      </div>
+                      <div className={styles.activityContent}>
+                        <div className={styles.activityTitle}>
+                          {intervention.client} - {intervention.produit}
+                        </div>
+                        <div className={styles.activityDetails}>
+                          <span className={`${styles.statusBadge} ${
+                            intervention.statut === "Terminé" ? styles.statusCompleted :
+                            intervention.statut === "En cours" ? styles.statusInProgress : styles.statusPending
+                          }`}>
+                            {intervention.statut}
+                          </span>
+                          <span className={styles.activityDate}>
+                            {intervention.datetime ? new Date(intervention.datetime).toLocaleDateString('fr-FR') : 'Date non définie'}
+                          </span>
+                        </div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className={styles.noActivity}>
+                    <CIcon icon={cilBriefcase} className={styles.noActivityIcon} />
+                    <p>Aucune intervention récente</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

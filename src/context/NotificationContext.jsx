@@ -5,6 +5,9 @@ export const NotificationContext = createContext()
 export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState([])
 
+  // ✅ CALCUL DU NOMBRE DE NOTIFICATIONS NON LUES
+  const unreadCount = notifications.filter(notification => !notification.read).length
+
   // Ajouter une notification
   const addNotification = (message) => {
     const newNotification = {
@@ -23,14 +26,20 @@ export const NotificationProvider = ({ children }) => {
     )
   }
 
-  // Tout marquer comme lu (optionnel)
+  // Tout marquer comme lu
   const markAllAsRead = () => {
     setNotifications((prev) => prev.map((n) => ({ ...n, read: true })))
   }
 
   return (
     <NotificationContext.Provider
-      value={{ notifications, addNotification, markAsRead, markAllAsRead }}
+      value={{ 
+        notifications, 
+        unreadCount, // ✅ AJOUTEZ CETTE LIGNE
+        addNotification, 
+        markAsRead, 
+        markAllAsRead 
+      }}
     >
       {children}
     </NotificationContext.Provider>
