@@ -39,22 +39,6 @@ function Parametres() {
       color: "warning",
       count: 8
     },
-    { 
-      title: "Paramètres Système", 
-      description: "Configuration avancée du système",
-      icon: cilSettings, 
-      link: "/system-settings",
-      color: "info",
-      count: null
-    },
-    { 
-      title: "Sécurité", 
-      description: "Paramètres de sécurité et authentification",
-      icon: cilShieldAlt, 
-      link: "/security",
-      color: "danger",
-      count: null
-    },
   ];
 
   const getCardClass = (color) => {

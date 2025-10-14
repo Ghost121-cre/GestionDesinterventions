@@ -13,6 +13,7 @@
 /* Breadcrumb amélioré */
 .breadcrumb {
   margin-bottom: 30px;
+  cursor: pointer;
 }
 
 .breadcrumb .breadcrumb-item {
@@ -32,7 +33,27 @@
   width: 16px;
   height: 16px;
 }
+/* Bouton supprimer tout */
+.clearAllBtn {
+  background: var(--gray-200);
+  color: var(--text-primary);
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 10px 16px;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: auto;
+}
 
+.clearAllBtn:hover {
+  background: var(--gray-300);
+  color: var(--danger-color);
+}
 /* Card principale */
 .card {
   background: var(--bg-primary);
@@ -649,5 +670,12 @@
 }
 
 [data-theme="dark"] .backBtn:hover {
+  background: var(--gray-600);
+}
+[data-theme="dark"] .clearAllBtn {
+  background: var(--gray-700);
+}
+
+[data-theme="dark"] .clearAllBtn:hover {
   background: var(--gray-600);
 }

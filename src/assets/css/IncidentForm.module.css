@@ -13,6 +13,7 @@
 /* Breadcrumb amélioré */
 .breadcrumb {
   margin-bottom: 30px;
+  cursor: pointer;
 }
 
 .breadcrumb .breadcrumb-item {

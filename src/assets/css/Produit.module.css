@@ -541,3 +541,47 @@
   background: var(--gray-800);
   color: var(--text-primary);
 }
+
+/* 🎯 STYLES COMPLETS POUR L'OFFCANVAS EN MODE SOMBRE */
+[data-theme="dark"] .offcanvasHeader {
+  background: linear-gradient(135deg, var(--primary-color), #6366f1) !important;
+  color: white !important;
+  border-bottom: 1px solid var(--border-color) !important;
+}
+
+[data-theme="dark"] .offcanvasBody {
+  background: var(--bg-primary) !important; /* #111827 */
+  color: var(--text-primary) !important;    /* #f9fafb */
+}
+
+[data-theme="dark"] .offcanvasTitle {
+  color: white !important;
+}
+
+[data-theme="dark"] .formLabel {
+  color: white !important; 
+}
+
+[data-theme="dark"] .formControl {
+  background: var(--bg-secondary) !important; /* #1f2937 */
+  border-color: var(--border-color) !important; /* #374151 */
+  color: var(--text-primary) !important; /* #f9fafb */
+}
+
+[data-theme="dark"] .formControl:focus {
+  border-color: var(--primary-color) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+}
+
+[data-theme="dark"] .cancelBtn {
+  background: var(--gray-700) !important; /* #374151 */
+  color: var(--text-primary) !important; /* #f9fafb */
+}
+
+[data-theme="dark"] .cancelBtn:hover {
+  background: var(--gray-600) !important; /* #4b5563 */
+}
+
+[data-theme="dark"] .table .tableRow:hover {
+  background-color: var(--gray-700) !important;
+}

@@ -67,27 +67,32 @@ function Interventions() {
   });
 
   // Vérifier si un rapport existe pour une intervention
-  const hasRapport = (interventionId) => {
-    return rapports.some(rapport => rapport.interventionId === interventionId);
-  };
+const hasRapport = (interventionId) => {
+  return rapports.some(rapport => rapport.interventionId === interventionId);
+};
 
-  // Obtenir le rapport pour une intervention
-  const getRapportForIntervention = (interventionId) => {
-    return rapports.find(rapport => rapport.interventionId === interventionId);
-  };
+// Obtenir le rapport pour une intervention
+const getRapportForIntervention = (interventionId) => {
+  return rapports.find(rapport => rapport.interventionId === interventionId);
+};
 
-  const handleDownloadRapport = (intervention) => {
-    const rapportExistant = getRapportForIntervention(intervention.id);
-    
-    if (!rapportExistant) {
-      toast.error("⚠️ Vous devez d'abord générer le rapport avant de pouvoir le télécharger.");
-      return;
-    }
+// Télécharger le rapport PDF
+const handleDownloadRapport = async (intervention) => {
+  const rapportExistant = getRapportForIntervention(intervention.id);
+  
+  if (!rapportExistant) {
+    toast.error("⚠️ Vous devez d'abord générer le rapport avant de pouvoir le télécharger.");
+    return;
+  }
 
-    generateRapportPDF(rapportExistant, intervention);
+  try {
+    await generateRapportPDF(rapportExistant, intervention);
     toast.success("📄 Rapport téléchargé avec succès !");
-  };
-
+  } catch (error) {
+    toast.error("❌ Erreur lors de la génération du PDF");
+    console.error(error);
+  }
+};
   // 🔎 Filtrage
   const filteredInterventions = interventions
     .filter(i => {
@@ -1063,15 +1068,15 @@ function Interventions() {
               </button>
               
               {hasRapport(selectedIntervention?.id) && (
-                <button 
-                  type="button" 
-                  className="btn btn-primary" 
-                  onClick={() => handleDownloadRapport(selectedIntervention)}
-                >
-                  <CIcon icon={cilCloudDownload} className="me-2" />
-                  Télécharger le rapport PDF
-                </button>
-              )}
+  <button 
+    type="button" 
+    className="btn btn-primary" 
+    onClick={() => handleDownloadRapport(selectedIntervention)}
+  >
+    <CIcon icon={cilCloudDownload} className="me-2" />
+    Télécharger le rapport PDF
+  </button>
+)}
             </div>
           </form>
         </Offcanvas.Body>

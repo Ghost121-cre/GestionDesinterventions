@@ -520,7 +520,7 @@
 
 .cancelBtn {
   flex: 1;
-  background: var(--gray-200);
+  background: #1f2937;
   color: var(--text-primary);
   border: none;
   border-radius: var(--border-radius);
@@ -544,7 +544,7 @@
   font-weight: 600;
   transition: var(--transition);
   cursor: pointer;
-}
+} 
 
 .saveBtn:hover {
   transform: translateY(-1px);
@@ -637,4 +637,7 @@
 
 [data-theme="dark"] .editBtn:hover {
   background: var(--gray-600);
+}
+[data-theme="dark"] .tableRow:hover {
+  background: var(--gray-700);
 }

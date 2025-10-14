@@ -433,7 +433,7 @@
 
 /* Texte des liens actifs en mode sombre */
 [data-theme="dark"] .nav-link.active .nav-label {
-  color: white !important; /* Blanc pour les liens actifs */
+  color: black !important; /* Noir pour les liens actifs */
 }
 
 /* 🎯 TITRES ET SECTIONS EN MODE SOMBRE */

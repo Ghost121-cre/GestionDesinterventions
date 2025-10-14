@@ -18,6 +18,8 @@ import Dashboard from "./pages/Dashboard";
 import RegisterPage from "./pages/RegisterPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import ParamètresSystème from "./pages/ParamètresSystème";
+import Sécurité from "./pages/Sécurité";
 
 function App() {
   return (
@@ -56,6 +58,8 @@ function App() {
           <Route path="/declarer_incident" element={<IncidentForm />} />
           <Route path="/incidents" element={<Incident />} />
           <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/system-settings" element={<ParamètresSystème />} />
+          <Route path="/security" element={<Sécurité />} />
         </Route>
       </Routes>
     </>

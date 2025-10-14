@@ -145,3 +145,8 @@ body {
   border-color: var(--border-color);
   color: var(--text-primary);
 }
+[data-theme="dark"] .offcanvas {
+  background-color: var(--bg-primary) !important;
+  color: var(--text-primary) !important;
+  border-left: 1px solid var(--border-color);
+}

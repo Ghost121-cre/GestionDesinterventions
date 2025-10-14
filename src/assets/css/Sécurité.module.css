@@ -1,0 +1,567 @@
+/* Sécurité.module.css - Version avec support dark mode */
+
+.pageContainer {
+  background: var(--bg-gradient);
+  min-height: 100vh;
+  padding: 30px 0;
+}
+
+.container {
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* En-tête */
+.header {
+  background: var(--bg-primary);
+  border-radius: var(--border-radius-lg);
+  padding: 40px;
+  margin-bottom: 40px;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--border-color);
+  text-align: center;
+}
+
+.headerContent {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.title {
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.titleIcon {
+  color: var(--primary-color);
+  width: 48px;
+  height: 48px;
+}
+
+.subtitle {
+  color: var(--text-muted);
+  font-size: 1.2rem;
+  margin: 0;
+  line-height: 1.6;
+}
+
+/* Alertes */
+.alert {
+  margin-bottom: 24px;
+  border-radius: var(--border-radius);
+  border: none;
+  box-shadow: var(--shadow-sm);
+}
+
+/* Cartes de sécurité */
+.securityCard {
+  border: none;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  transition: var(--transition);
+  height: 100%;
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.securityCard:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+  border-color: var(--primary-color);
+}
+
+.securityCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: var(--primary-color);
+  transition: var(--transition);
+}
+
+.securityCard:hover::before {
+  height: 6px;
+}
+
+.cardHeader {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.sectionIcon {
+  color: var(--primary-color);
+  width: 24px;
+  height: 24px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+/* Indicateur de force mot de passe */
+.forceIndicator {
+  margin-bottom: 8px;
+}
+
+.forceBadge {
+  padding: 4px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.forceBadge.danger {
+  background: var(--danger-color);
+  color: white;
+}
+
+.forceBadge.warning {
+  background: var(--warning-color);
+  color: white;
+}
+
+.forceBadge.success {
+  background: var(--success-color);
+  color: white;
+}
+
+.forceBadge.primary {
+  background: var(--primary-color);
+  color: white;
+}
+
+/* Informations de session */
+.sessionInfo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 12px;
+  background: var(--bg-secondary);
+  border-radius: var(--border-radius);
+  border-left: 4px solid var(--warning-color);
+  margin-top: 16px;
+}
+
+.infoIcon {
+  color: var(--warning-color);
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
+}
+
+.sessionInfo small {
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* Alertes d'information */
+.infoAlert {
+  background: var(--info-color);
+  color: white;
+  border: none;
+  border-radius: var(--border-radius);
+  padding: 12px 16px;
+  margin-top: 16px;
+}
+
+.alertIcon {
+  width: 16px;
+  height: 16px;
+  margin-right: 8px;
+}
+
+/* Statistiques d'audit */
+.auditStats {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+.stat {
+  text-align: center;
+  flex: 1;
+}
+
+.statValue {
+  display: block;
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--primary-color);
+  line-height: 1;
+  margin-bottom: 4px;
+}
+
+.statLabel {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  font-weight: 500;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+/* Carte d'actions */
+.actionsCard {
+  margin-top: 40px;
+  border: none;
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-md);
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  position: relative;
+  overflow: hidden;
+}
+
+.actionsCard::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 4px;
+  background: linear-gradient(135deg, var(--success-color), var(--primary-color));
+}
+
+.actionsBody {
+  padding: 30px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 20px;
+}
+
+.securityLevel {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+}
+
+.shieldIcon {
+  width: 40px;
+  height: 40px;
+  color: var(--success-color);
+}
+
+.levelInfo h6 {
+  margin: 0;
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
+.levelInfo small {
+  color: var(--text-muted);
+  font-size: 0.875rem;
+}
+
+.actionsButtons {
+  flex-shrink: 0;
+}
+
+.saveBtn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: var(--border-radius);
+  font-weight: 600;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--success-color);
+  color: white;
+}
+
+.saveBtn:hover {
+  background: #059669;
+  transform: translateY(-1px);
+  box-shadow: var(--shadow-md);
+}
+
+.btnIcon {
+  width: 16px;
+  height: 16px;
+}
+
+/* Modal personnalisé */
+.modalContent {
+  background: var(--bg-primary);
+  border: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg);
+  box-shadow: var(--shadow-lg);
+}
+
+.modalHeader {
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border-color);
+  border-radius: var(--border-radius-lg) var(--border-radius-lg) 0 0;
+}
+
+.modalTitle {
+  color: var(--text-primary);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.modalBody {
+  color: var(--text-primary);
+  padding: 24px;
+}
+
+.modalFooter {
+  border-top: 1px solid var(--border-color);
+  background: var(--bg-secondary);
+  border-radius: 0 0 var(--border-radius-lg) var(--border-radius-lg);
+}
+
+/* Styles pour les formulaires dans le dark mode */
+.formLabel {
+  color: var(--text-secondary);
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+
+.formControl, .formSelect {
+  background: var(--bg-primary);
+  border: 2px solid var(--border-color);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.formControl:focus, .formSelect:focus {
+  background: var(--bg-primary);
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+  color: var(--text-primary);
+}
+
+.formText {
+  color: var(--text-muted) !important;
+}
+
+/* Switch personnalisé */
+.form-check-input:checked {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+.form-check-input:focus {
+  border-color: var(--primary-color);
+  box-shadow: 0 0 0 0.25rem rgba(37, 99, 235, 0.25);
+}
+
+/* Responsive */
+@media (max-width: 1024px) {
+  .actionsBody {
+    flex-direction: column;
+    align-items: stretch;
+    gap: 20px;
+  }
+  
+  .securityLevel {
+    justify-content: center;
+    text-align: center;
+  }
+  
+  .auditStats {
+    justify-content: center;
+  }
+}
+
+@media (max-width: 768px) {
+  .header {
+    padding: 30px 20px;
+  }
+  
+  .title {
+    font-size: 2rem;
+    flex-direction: column;
+    gap: 12px;
+  }
+  
+  .titleIcon {
+    width: 40px;
+    height: 40px;
+  }
+  
+  .subtitle {
+    font-size: 1.1rem;
+  }
+  
+  .cardHeader {
+    padding: 16px 20px;
+  }
+  
+  .actionsBody {
+    padding: 20px;
+  }
+  
+  .auditStats {
+    flex-direction: column;
+    gap: 16px;
+  }
+  
+  .stat {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+  }
+  
+  .saveBtn {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+@media (max-width: 480px) {
+  .pageContainer {
+    padding: 20px 0;
+  }
+  
+  .header {
+    padding: 25px 15px;
+    margin-bottom: 30px;
+  }
+  
+  .title {
+    font-size: 1.75rem;
+  }
+  
+  .securityLevel {
+    flex-direction: column;
+    text-align: center;
+    gap: 8px;
+  }
+}
+
+/* Animations */
+@keyframes pulse {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.4);
+  }
+  70% {
+    box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
+  }
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
+.securityCard.highPriority {
+  animation: pulse 2s infinite;
+}
+
+/* Indicateur de sécurité */
+.securityIndicator {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.securityHigh {
+  background: var(--success-color);
+  color: white;
+}
+
+.securityMedium {
+  background: var(--warning-color);
+  color: white;
+}
+
+.securityLow {
+  background: var(--danger-color);
+  color: white;
+}
+
+/* Styles spécifiques dark mode */
+[data-theme="dark"] .form-check-input {
+  background-color: var(--gray-600);
+  border-color: var(--gray-500);
+}
+
+[data-theme="dark"] .form-check-input:checked {
+  background-color: var(--success-color);
+  border-color: var(--success-color);
+}
+
+[data-theme="dark"] .sessionInfo {
+  background: var(--gray-800);
+}
+
+[data-theme="dark"] .auditStats {
+  border-top-color: var(--gray-700);
+}
+
+/* Amélioration de la lisibilité */
+.securityCard .card-body {
+  padding: 24px;
+}
+
+.securityCard .form-group {
+  margin-bottom: 20px;
+}
+
+.securityCard .form-label {
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin-bottom: 8px;
+}
+
+/* Badge de statut de sécurité */
+.securityStatus {
+  position: absolute;
+  top: 20px;
+  right: 20px;
+  padding: 4px 8px;
+  border-radius: 12px;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.statusActive {
+  background: var(--success-color);
+  color: white;
+}
+
+.statusWarning {
+  background: var(--warning-color);
+  color: white;
+}
+
+.statusCritical {
+  background: var(--danger-color);
+  color: white;
+  animation: pulse 2s infinite;
+}
