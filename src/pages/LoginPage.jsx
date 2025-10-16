@@ -1,4 +1,4 @@
-import React, { useContext, useState } from "react";
+import React, { useContext, useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { 
@@ -15,7 +15,7 @@ import styles from "../assets/css/LoginPage.module.css";
 import { UserContext } from "../context/UserContext";
 
 function LoginPage() {
-  const { setUser } = useContext(UserContext);
+  const { setUser, user } = useContext(UserContext); // Ajoutez user ici
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -26,27 +26,12 @@ function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
 
-  // Comptes de démonstration
-  const demoAccounts = [
-    {
-      nom: "Touré",
-      prenom: "Issouf",
-      email: "demo@activ.com",
-      password: "demo123",
-      avatar: "https://www.w3schools.com/howto/img_avatar.png",
-      role: "Administrateur",
-      status: "online",
-    },
-    {
-      nom: "Messou",
-      prenom: "Ghost",
-      email: "technicien@activ.com",
-      password: "tech123",
-      avatar: "https://www.w3schools.com/howto/img_avatar2.png",
-      role: "Technicien",
-      status: "online",
+  // Rediriger si l'utilisateur est déjà connecté
+  useEffect(() => {
+    if (user) {
+      navigate("/accueil", { replace: true });
     }
-  ];
+  }, [user, navigate]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -54,13 +39,18 @@ function LoginPage() {
       ...prev,
       [name]: value
     }));
-    // Effacer l'erreur quand l'utilisateur tape
     if (error) setError("");
   };
 
+  const handleLoginSuccess = (userData) => {
+    setUser(userData);
+    
+    // IMPORTANT: Utiliser replace: true pour supprimer la page de login de l'historique
+    navigate("/accueil", { replace: true });
+  };
+
   const handleDemoLogin = (demoAccount) => {
-    setUser(demoAccount);
-    navigate("/accueil");
+    handleLoginSuccess(demoAccount);
   };
 
   const handleSubmit = async (e) => {
@@ -68,7 +58,6 @@ function LoginPage() {
     setIsLoading(true);
     setError("");
 
-    // Simulation de délai réseau
     await new Promise(resolve => setTimeout(resolve, 1000));
 
     const foundUser = demoAccounts.find(
@@ -76,14 +65,13 @@ function LoginPage() {
     );
 
     if (foundUser) {
-      setUser(foundUser);
       if (rememberMe) {
         localStorage.setItem('rememberedUser', JSON.stringify({
           email: formData.email,
           remember: true
         }));
       }
-      navigate("/accueil");
+      handleLoginSuccess(foundUser);
     } else {
       setError("Email ou mot de passe incorrect");
     }
@@ -100,8 +88,7 @@ function LoginPage() {
       role: "Utilisateur",
       status: "online",
     };
-    setUser(googleUser);
-    navigate("/accueil");
+    handleLoginSuccess(googleUser);
   };
 
   return (
@@ -125,31 +112,6 @@ function LoginPage() {
             <div className={styles.formHeader}>
               <h2>Connexion à votre compte</h2>
               <p>Accédez à votre espace de gestion d'interventions</p>
-            </div>
-
-            {/* Comptes de démonstration */}
-            <div className={styles.demoAccounts}>
-              <h3>Comptes de démonstration</h3>
-              <div className={styles.demoGrid}>
-                {demoAccounts.map((account, index) => (
-                  <button
-                    key={index}
-                    className={styles.demoBtn}
-                    onClick={() => handleDemoLogin(account)}
-                  >
-                    <CIcon icon={cilUser} className={styles.demoIcon} />
-                    <div className={styles.demoInfo}>
-                      <strong>{account.prenom} {account.nom}</strong>
-                      <span>{account.role}</span>
-                    </div>
-                    <CIcon icon={cilCheckCircle} className={styles.chevronIcon} />
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className={styles.separator}>
-              <span>Ou connectez-vous avec</span>
             </div>
 
             {/* Bouton Google */}

@@ -468,6 +468,39 @@
   font-size: 0.9rem;
   color: var(--text-secondary);
 }
+/* Ajoutez ces styles à votre fichier CSS existant */
+
+/* Actions pour les mots de passe */
+.passwordActions {
+  display: flex;
+  gap: 12px;
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid var(--border-color);
+}
+
+/* Style pour les champs d'erreur */
+.inputError {
+  border-color: #ef4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.1) !important;
+}
+
+.errorText {
+  color: #ef4444;
+  font-size: 0.875rem;
+  margin-top: 5px;
+  display: block;
+}
+
+/* Styles pour le dark mode */
+[data-theme="dark"] .inputError {
+  border-color: #f87171 !important;
+  box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1) !important;
+}
+
+[data-theme="dark"] .errorText {
+  color: #f87171;
+}
 
 /* État vide */
 .emptyState {

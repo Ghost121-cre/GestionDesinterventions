@@ -10,7 +10,9 @@ import {
   cilDescription,
   cilCheckCircle,
   cilWarning,
-  cilShieldAlt
+  cilShieldAlt,
+  cilLowVision,
+  cilBriefcase
 } from "@coreui/icons";
 import Activ from "../assets/images/activ.png";
 import userAvatar from "../assets/images/user.png";
@@ -39,6 +41,8 @@ function RegisterPage() {
   const [errors, setErrors] = useState({});
   const [isLoading, setIsLoading] = useState(false);
   const [currentStep, setCurrentStep] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -54,6 +58,14 @@ function RegisterPage() {
         [name]: ""
       }));
     }
+  };
+
+  const togglePasswordVisibility = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const toggleConfirmPasswordVisibility = () => {
+    setShowConfirmPassword(!showConfirmPassword);
   };
 
   const validateStep1 = () => {
@@ -229,14 +241,23 @@ function RegisterPage() {
                       <CIcon icon={cilLockLocked} className={styles.inputIcon} />
                       Mot de passe *
                     </label>
-                    <input
-                      type="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${errors.password ? styles.error : ''}`}
-                      placeholder="Au moins 6 caractères"
-                    />
+                    <div className={styles.passwordInputContainer}>
+                      <input
+                        type={showPassword ? "text" : "password"}
+                        name="password"
+                        value={formData.password}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${styles.passwordInput} ${errors.password ? styles.error : ''}`}
+                        placeholder="Au moins 6 caractères"
+                      />
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={togglePasswordVisibility}
+                      >
+                        <CIcon icon={showPassword ? cilLowVision : cilLowVision} className={styles.passwordToggleIcon} />
+                      </button>
+                    </div>
                     {errors.password && <span className={styles.errorText}>{errors.password}</span>}
                   </div>
 
@@ -245,14 +266,23 @@ function RegisterPage() {
                       <CIcon icon={cilLockLocked} className={styles.inputIcon} />
                       Confirmer le mot de passe *
                     </label>
-                    <input 
-                      type="password"
-                      name="confirmPassword"
-                      value={formData.confirmPassword}
-                      onChange={handleChange}
-                      className={`${styles.formInput} ${errors.confirmPassword ? styles.error : ''}`}
-                      placeholder="Retapez votre mot de passe"
-                    />
+                    <div className={styles.passwordInputContainer}>
+                      <input 
+                        type={showConfirmPassword ? "text" : "password"}
+                        name="confirmPassword"
+                        value={formData.confirmPassword}
+                        onChange={handleChange}
+                        className={`${styles.formInput} ${styles.passwordInput} ${errors.confirmPassword ? styles.error : ''}`}
+                        placeholder="Retapez votre mot de passe"
+                      />
+                      <button
+                        type="button"
+                        className={styles.passwordToggle}
+                        onClick={toggleConfirmPasswordVisibility}
+                      >
+                        <CIcon icon={showConfirmPassword ? cilLowVision : cilLowVision} className={styles.passwordToggleIcon} />
+                      </button>
+                    </div>
                     {errors.confirmPassword && (
                       <span className={styles.errorText}>{errors.confirmPassword}</span>
                     )}
@@ -281,6 +311,24 @@ function RegisterPage() {
                 </div>
 
                 <div className={styles.formGrid}>
+                  <div className={styles.inputGroup}>
+                    <label className={styles.inputLabel}>
+                      <CIcon icon={cilBriefcase} className={styles.inputIcon} />
+                      Rôle *
+                    </label>
+                    <select
+                      name="role"
+                      value={formData.role}
+                      onChange={handleChange}
+                      className={styles.formSelect}
+                    >
+                      <option value="Gestionnaire">Gestionnaire</option>
+                      <option value="Technicien">Technicien</option>
+                      <option value="Administrateur">Administrateur</option>
+                      <option value="Chef Technique">Chef Technique</option>
+                    </select>
+                  </div>
+
                   <div className={styles.inputGroup}>
                     <label className={styles.inputLabel}>
                       <CIcon icon={cilDescription} className={styles.inputIcon} />

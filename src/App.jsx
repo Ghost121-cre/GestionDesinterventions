@@ -41,10 +41,10 @@ function App() {
       <Routes>
         <Route path="/login" element={<LoginPage />} />
         <Route path="/register" element={<RegisterPage />} />
+        <Route path="/" element={<LoginPage />} />
 
         {/* Routes protégées par Layout */}
         <Route element={<Layout />}>
-          <Route path="/" element={<Calendrier />} />
           <Route path="/calendrier" element={<Calendrier />} />
           <Route path="/rapports" element={<Rapports />} />
           <Route path="/parametres" element={<Parametres />} />

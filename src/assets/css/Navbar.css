@@ -539,6 +539,7 @@
   background: none;
   width: 100%;
   text-align: left;
+  cursor: pointer;
 }
 li::marker {
   content: "";

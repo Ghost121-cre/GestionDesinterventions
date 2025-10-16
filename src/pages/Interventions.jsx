@@ -39,6 +39,8 @@ function Interventions() {
     deleteIntervention,
   } = useInterventions();
   const { addRapport, rapports } = useRapports();
+  const techniciens = ["Nacro", "Youssouf", "Issouf"];
+  const typeIntervention = ["Maintenance", "Installation", "Dépannage"];
 
   // États pour la pagination et filtres
   const [activeTab, setActiveTab] = useState("enattente");
@@ -905,6 +907,7 @@ const handleDownloadRapport = async (intervention) => {
                     Terminer l'intervention
                   </button>
                 )}
+                {selectedInterventionDetails.statut !== "En attente" && (
                 <button 
                   className={styles.reportBtn}
                   onClick={() => {
@@ -915,7 +918,9 @@ const handleDownloadRapport = async (intervention) => {
                   <CIcon icon={cilFile} />
                   {hasRapport(selectedInterventionDetails.id) ? 'Modifier le rapport' : 'Créer un rapport'}
                 </button>
+                )}
               </div>
+                
             </div>
           </div>
         </div>
@@ -1003,25 +1008,40 @@ const handleDownloadRapport = async (intervention) => {
             </div>
 
             <div className="mb-3">
-              <label className="form-label">Intervenant</label>
-              <input
-                type="text"
-                className="form-control"
-                value={rapport.intervenant}
-                onChange={(e) => setRapport({ ...rapport, intervenant: e.target.value })}
-                placeholder="Nom de l'intervenant"
-              />
-            </div>
+  <label className="form-label">Intervenant</label>
+  <select
+    className="form-select"
+    value={rapport.intervenant}
+    onChange={(e) => setRapport({ ...rapport, intervenant: e.target.value })}
+  >
+    <option value="" disabled>
+      -- Sélectionner un intervenant --
+    </option>
+    {techniciens.map((t, idx) => (
+      <option key={idx} value={t}>
+        {t}
+      </option>
+    ))}
+  </select>
+</div>
+
 
             <div className="mb-3">
               <label className="form-label">Type d'intervention</label>
-              <input
-                type="text"
-                className="form-control"
+              <select
+                className="form-select"
                 value={rapport.type}
                 onChange={(e) => setRapport({ ...rapport, type: e.target.value })}
-                placeholder="Type d'intervention"
-              />
+              >
+                <option value="" disabled>
+                  -- Sélectionner un type d'intervention --
+                </option>
+                {typeIntervention.map((type, idx) => (
+                  <option key={idx} value={type}>
+                    {type}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="mb-3">

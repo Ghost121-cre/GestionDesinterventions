@@ -266,6 +266,84 @@
   margin-top: 32px;
 }
 
+/* Ajoutez ces styles à votre fichier CSS existant */
+
+/* Container pour les champs mot de passe */
+.passwordInputContainer {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInput {
+  padding-right: 50px !important;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--gray-500);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.passwordToggle:hover {
+  background: var(--gray-200);
+  color: var(--gray-700);
+}
+
+.passwordToggleIcon {
+  width: 18px;
+  height: 18px;
+}
+
+/* Styles pour les sélecteurs de rôle */
+.formSelect {
+  appearance: none;
+  background-image: url("data:image/svg+xml;charset=US-ASCII,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 4 5'><path fill='%236b7280' d='M2 0L0 2h4zm0 5L0 3h4z'/></svg>");
+  background-repeat: no-repeat;
+  background-position: right 16px center;
+  background-size: 12px;
+  padding-right: 40px !important;
+}
+
+/* Responsive pour les champs mot de passe */
+@media (max-width: 768px) {
+  .passwordInput {
+    padding-right: 45px !important;
+  }
+  
+  .passwordToggle {
+    right: 10px;
+  }
+}
+
+/* Animation pour le toggle */
+.passwordToggle {
+  transition: all 0.2s ease-in-out;
+}
+
+.passwordToggle:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+/* Styles spécifiques pour dark mode */
+@media (prefers-color-scheme: dark) {
+  .passwordToggle:hover {
+    background: var(--gray-600);
+    color: var(--gray-300);
+  }
+}
+
 .backBtn,
 .nextBtn,
 .submitBtn {

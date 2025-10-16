@@ -18,7 +18,8 @@ import {
   cilClock,
   cilCheckCircle,
   cilWarning,
-  cilChartLine
+  cilChartLine,
+  cilLockLocked
 } from "@coreui/icons";
 
 function Profil() {
@@ -27,6 +28,7 @@ function Profil() {
   const { incidents } = useIncident();
   
   const [editMode, setEditMode] = useState(false);
+  const [passwordEditMode, setPasswordEditMode] = useState(false);
   const [formData, setFormData] = useState(user || {
     prenom: "",
     nom: "",
@@ -38,6 +40,18 @@ function Profil() {
     ville: "",
     codePostal: "",
     avatar: "/default-avatar.png"
+  });
+
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
+  });
+
+  const [passwordErrors, setPasswordErrors] = useState({
+    currentPassword: "",
+    newPassword: "",
+    confirmPassword: ""
   });
 
   // Calcul des statistiques réelles
@@ -86,12 +100,83 @@ function Profil() {
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  const handlePasswordChange = (e) => {
+    const { name, value } = e.target;
+    setPasswordData(prev => ({ ...prev, [name]: value }));
+    
+    // Effacer l'erreur quand l'utilisateur commence à taper
+    if (passwordErrors[name]) {
+      setPasswordErrors(prev => ({ ...prev, [name]: "" }));
+    }
+  };
+
   const handleAvatarChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       const url = URL.createObjectURL(file);
       setFormData(prev => ({ ...prev, avatar: url }));
     }
+  };
+
+  const validatePassword = () => {
+    const errors = {};
+    let isValid = true;
+
+    if (!passwordData.currentPassword) {
+      errors.currentPassword = "Le mot de passe actuel est requis";
+      isValid = false;
+    }
+
+    if (!passwordData.newPassword) {
+      errors.newPassword = "Le nouveau mot de passe est requis";
+      isValid = false;
+    } else if (passwordData.newPassword.length < 6) {
+      errors.newPassword = "Le mot de passe doit contenir au moins 6 caractères";
+      isValid = false;
+    }
+
+    if (!passwordData.confirmPassword) {
+      errors.confirmPassword = "Veuillez confirmer le nouveau mot de passe";
+      isValid = false;
+    } else if (passwordData.newPassword !== passwordData.confirmPassword) {
+      errors.confirmPassword = "Les mots de passe ne correspondent pas";
+      isValid = false;
+    }
+
+    setPasswordErrors(errors);
+    return isValid;
+  };
+
+  const handlePasswordUpdate = () => {
+    if (validatePassword()) {
+      // Ici vous ajouteriez l'appel API pour changer le mot de passe
+      console.log("Mot de passe changé avec succès");
+      
+      // Réinitialiser les champs
+      setPasswordData({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
+      setPasswordEditMode(false);
+      
+      // Afficher un message de succès (vous pourriez utiliser un toast)
+      alert("Mot de passe modifié avec succès !");
+    }
+  };
+
+  const handleCancelPassword = () => {
+    setPasswordData({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+    setPasswordErrors({
+      currentPassword: "",
+      newPassword: "",
+      confirmPassword: ""
+    });
+    setPasswordEditMode(false);
   };
 
   const handleSave = () => {
@@ -207,13 +292,22 @@ function Profil() {
                 </button>
               </div>
             ) : (
-              <button 
-                className={styles.editBtn}
-                onClick={() => setEditMode(true)}
-              >
-                <CIcon icon={cilPencil} className={styles.btnIcon} />
-                Modifier le profil
-              </button>
+              <div className={styles.editActions}>
+                <button 
+                  className={styles.editBtn}
+                  onClick={() => setEditMode(true)}
+                >
+                  <CIcon icon={cilPencil} className={styles.btnIcon} />
+                  Modifier le profil
+                </button>
+                <button 
+                  className={styles.editBtn}
+                  onClick={() => setPasswordEditMode(true)}
+                >
+                  <CIcon icon={cilLockLocked} className={styles.btnIcon} />
+                  Modifier le mot de passe
+                </button>
+              </div>
             )}
           </div>
         </div>
@@ -299,6 +393,82 @@ function Profil() {
                 ))}
               </div>
             </div>
+
+            {/* Modification du mot de passe */}
+            {passwordEditMode && (
+              <div className={styles.section}>
+                <h3 className={styles.sectionTitle}>
+                  <CIcon icon={cilLockLocked} className={styles.sectionIcon} />
+                  Modifier le mot de passe
+                </h3>
+                <div className={styles.fieldsGrid}>
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>
+                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      Mot de passe actuel
+                    </label>
+                    <input
+                      type="password"
+                      name="currentPassword"
+                      value={passwordData.currentPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Entrez votre mot de passe actuel"
+                      className={`${styles.input} ${passwordErrors.currentPassword ? styles.inputError : ''}`}
+                    />
+                    {passwordErrors.currentPassword && (
+                      <span className={styles.errorText}>{passwordErrors.currentPassword}</span>
+                    )}
+                  </div>
+                  
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>
+                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      Nouveau mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      name="newPassword"
+                      value={passwordData.newPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Entrez votre nouveau mot de passe"
+                      className={`${styles.input} ${passwordErrors.newPassword ? styles.inputError : ''}`}
+                    />
+                    {passwordErrors.newPassword && (
+                      <span className={styles.errorText}>{passwordErrors.newPassword}</span>
+                    )}
+                  </div>
+                  
+                  <div className={styles.field}>
+                    <label className={styles.fieldLabel}>
+                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      Confirmer le mot de passe
+                    </label>
+                    <input
+                      type="password"
+                      name="confirmPassword"
+                      value={passwordData.confirmPassword}
+                      onChange={handlePasswordChange}
+                      placeholder="Confirmez votre nouveau mot de passe"
+                      className={`${styles.input} ${passwordErrors.confirmPassword ? styles.inputError : ''}`}
+                    />
+                    {passwordErrors.confirmPassword && (
+                      <span className={styles.errorText}>{passwordErrors.confirmPassword}</span>
+                    )}
+                  </div>
+                </div>
+                
+                <div className={styles.passwordActions}>
+                  <button className={styles.saveBtn} onClick={handlePasswordUpdate}>
+                    <CIcon icon={cilCheck} className={styles.btnIcon} />
+                    Mettre à jour le mot de passe
+                  </button>
+                  <button className={styles.cancelBtn} onClick={handleCancelPassword}>
+                    <CIcon icon={cilX} className={styles.btnIcon} />
+                    Annuler
+                  </button>
+                </div>
+              </div>
+            )}
           </div>
 
           {/* Colonne droite - Statistiques et activité */}
