@@ -74,11 +74,6 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
     navigate("/login");
   };
 
-  // ✅ SUPPRIMEZ cette fonction - utilisez directement toggleDarkMode du contexte
-  // const toggleDarkMode = () => {
-  //   setDarkMode(!darkMode);
-  //   document.body.classList.toggle("dark-mode");
-  // };
 
   const handleSearch = (e) => {
     if (e.key === "Enter") {

@@ -1,10 +1,9 @@
-import React, { useContext, useState, useEffect } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
 import { 
   cilEnvelopeOpen, 
   cilLockLocked, 
-  cilUser, 
   cilShieldAlt,
   cilCheckCircle,
   cilWarning
@@ -12,10 +11,11 @@ import {
 import Login from "../assets/images/Login.jpg";
 import Activ from "../assets/images/activ.png";
 import styles from "../assets/css/LoginPage.module.css";
-import { UserContext } from "../context/UserContext";
+import { useUser } from "../context/UserContext";
+import FirstLoginModal from "../pages/FirstLoginModal.jsx";
 
 function LoginPage() {
-  const { setUser, user } = useContext(UserContext); // Ajoutez user ici
+  const { user, login, changePasswordFirstLogin, loading, error: contextError } = useUser();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
@@ -23,15 +23,24 @@ function LoginPage() {
     password: ""
   });
   const [error, setError] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
   const [rememberMe, setRememberMe] = useState(false);
+  const [showFirstLoginModal, setShowFirstLoginModal] = useState(false);
 
-  // Rediriger si l'utilisateur est déjà connecté
+  // Rediriger si l'utilisateur est déjà connecté et n'a pas de première connexion
   useEffect(() => {
-    if (user) {
+    if (user && !user.premiereConnexion) {
       navigate("/accueil", { replace: true });
+    } else if (user && user.premiereConnexion) {
+      setShowFirstLoginModal(true);
     }
   }, [user, navigate]);
+
+  // Synchroniser les erreurs du contexte
+  useEffect(() => {
+    if (contextError) {
+      setError(contextError);
+    }
+  }, [contextError]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -42,53 +51,32 @@ function LoginPage() {
     if (error) setError("");
   };
 
-  const handleLoginSuccess = (userData) => {
-    setUser(userData);
-    
-    // IMPORTANT: Utiliser replace: true pour supprimer la page de login de l'historique
-    navigate("/accueil", { replace: true });
-  };
-
-  const handleDemoLogin = (demoAccount) => {
-    handleLoginSuccess(demoAccount);
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setIsLoading(true);
     setError("");
 
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    const foundUser = demoAccounts.find(
-      user => user.email === formData.email && user.password === formData.password
-    );
-
-    if (foundUser) {
+    try {
+      await login(formData.email, formData.password);
+      
       if (rememberMe) {
         localStorage.setItem('rememberedUser', JSON.stringify({
           email: formData.email,
           remember: true
         }));
       }
-      handleLoginSuccess(foundUser);
-    } else {
-      setError("Email ou mot de passe incorrect");
+    } catch (err) {
+      console.error("Erreur de connexion:", err);
     }
-    
-    setIsLoading(false);
   };
 
-  const handleGoogleLogin = () => {
-    const googleUser = {
-      nom: "Touré",
-      prenom: "Issouf",
-      email: "toureissouf390@gmail.com",
-      avatar: "https://www.w3schools.com/howto/img_avatar.png",
-      role: "Utilisateur",
-      status: "online",
-    };
-    handleLoginSuccess(googleUser);
+  const handleFirstLoginPasswordChange = async (newPassword) => {
+    try {
+      await changePasswordFirstLogin(newPassword);
+      setShowFirstLoginModal(false);
+      navigate("/accueil", { replace: true });
+    } catch (error) {
+      throw error;
+    }
   };
 
   return (
@@ -114,24 +102,6 @@ function LoginPage() {
               <p>Accédez à votre espace de gestion d'interventions</p>
             </div>
 
-            {/* Bouton Google */}
-            <button 
-              className={styles.googleBtn}
-              onClick={handleGoogleLogin}
-              type="button"
-            >
-              <img
-                src="https://www.svgrepo.com/show/355037/google.svg"
-                alt="Google"
-                className={styles.googleIcon}
-              />
-              Continuer avec Google
-            </button>
-
-            <div className={styles.separator}>
-              <span>Ou avec email et mot de passe</span>
-            </div>
-
             {/* Formulaire de connexion */}
             <form className={styles.loginForm} onSubmit={handleSubmit}>
               <div className={styles.inputGroup}>
@@ -147,6 +117,7 @@ function LoginPage() {
                   placeholder="votre@email.com"
                   className={styles.formInput}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -163,6 +134,7 @@ function LoginPage() {
                   placeholder="Votre mot de passe"
                   className={styles.formInput}
                   required
+                  disabled={loading}
                 />
               </div>
 
@@ -173,12 +145,10 @@ function LoginPage() {
                     checked={rememberMe}
                     onChange={(e) => setRememberMe(e.target.checked)}
                     className={styles.checkbox}
+                    disabled={loading}
                   />
                   <span className={styles.checkboxText}>Se souvenir de moi</span>
                 </label>
-                <Link to="/reset-password" className={styles.forgotLink}>
-                  Mot de passe oublié ?
-                </Link>
               </div>
 
               {error && (
@@ -191,9 +161,9 @@ function LoginPage() {
               <button 
                 type="submit" 
                 className={styles.submitBtn}
-                disabled={isLoading}
+                disabled={loading}
               >
-                {isLoading ? (
+                {loading ? (
                   <>
                     <div className={styles.spinner}></div>
                     Connexion...
@@ -206,13 +176,6 @@ function LoginPage() {
                 )}
               </button>
             </form>
-
-            <div className={styles.registerSection}>
-              <p>Nouveau sur Activ Management ?</p>
-              <Link to="/register" className={styles.registerLink}>
-                Créer un compte
-              </Link>
-            </div>
           </div>
 
           {/* Section droite - Illustration */}
@@ -249,6 +212,13 @@ function LoginPage() {
       <footer className={styles.footer}>
         <p>&copy; 2024 Activ Management. Tous droits réservés.</p>
       </footer>
+
+      {/* Modal pour première connexion */}
+      <FirstLoginModal
+        isOpen={showFirstLoginModal}
+        onClose={() => setShowFirstLoginModal(false)}
+        onChangePassword={handleFirstLoginPasswordChange}
+      />
     </div>
   );
 }

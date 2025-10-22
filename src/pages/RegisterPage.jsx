@@ -20,7 +20,7 @@ import styles from "../assets/css/RegisterPage.module.css";
 import { UserContext } from "../context/UserContext";
 
 function RegisterPage() {
-  const { setUser } = useContext(UserContext);
+  const { register, loading, error: contextError } = useContext(UserContext);
   const navigate = useNavigate();
   
   const [formData, setFormData] = useState({
@@ -51,7 +51,6 @@ function RegisterPage() {
       [name]: value 
     }));
     
-    // Effacer l'erreur du champ quand l'utilisateur tape
     if (errors[name]) {
       setErrors(prev => ({
         ...prev,
@@ -111,21 +110,21 @@ function RegisterPage() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    if (!validateStep1()) {
+      return;
+    }
+
     setIsLoading(true);
 
-    // Simulation de délai d'inscription
-    await new Promise(resolve => setTimeout(resolve, 1500));
-
-    const userWithId = {
-      ...formData,
-      id: Date.now(),
-      dateCreation: new Date().toISOString(),
-      status: "active"
-    };
-
-    setUser(userWithId);
-    navigate("/profil");
-    setIsLoading(false);
+    try {
+      await register(formData);
+      navigate("/profil");
+    } catch (error) {
+      setErrors({ submit: error.message });
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const steps = [
@@ -185,6 +184,7 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={`${styles.formInput} ${errors.prenom ? styles.error : ''}`}
                       placeholder="Votre prénom"
+                      disabled={isLoading}
                     />
                     {errors.prenom && <span className={styles.errorText}>{errors.prenom}</span>}
                   </div>
@@ -201,6 +201,7 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={`${styles.formInput} ${errors.nom ? styles.error : ''}`}
                       placeholder="Votre nom"
+                      disabled={isLoading}
                     />
                     {errors.nom && <span className={styles.errorText}>{errors.nom}</span>}
                   </div>
@@ -217,6 +218,7 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={`${styles.formInput} ${errors.email ? styles.error : ''}`}
                       placeholder="votre@email.com"
+                      disabled={isLoading}
                     />
                     {errors.email && <span className={styles.errorText}>{errors.email}</span>}
                   </div>
@@ -233,6 +235,7 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={styles.formInput}
                       placeholder="+225 00 00 00 00"
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -249,11 +252,13 @@ function RegisterPage() {
                         onChange={handleChange}
                         className={`${styles.formInput} ${styles.passwordInput} ${errors.password ? styles.error : ''}`}
                         placeholder="Au moins 6 caractères"
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         className={styles.passwordToggle}
                         onClick={togglePasswordVisibility}
+                        disabled={isLoading}
                       >
                         <CIcon icon={showPassword ? cilLowVision : cilLowVision} className={styles.passwordToggleIcon} />
                       </button>
@@ -274,11 +279,13 @@ function RegisterPage() {
                         onChange={handleChange}
                         className={`${styles.formInput} ${styles.passwordInput} ${errors.confirmPassword ? styles.error : ''}`}
                         placeholder="Retapez votre mot de passe"
+                        disabled={isLoading}
                       />
                       <button
                         type="button"
                         className={styles.passwordToggle}
                         onClick={toggleConfirmPasswordVisibility}
+                        disabled={isLoading}
                       >
                         <CIcon icon={showConfirmPassword ? cilLowVision : cilLowVision} className={styles.passwordToggleIcon} />
                       </button>
@@ -289,11 +296,19 @@ function RegisterPage() {
                   </div>
                 </div>
 
+                {errors.submit && (
+                  <div className={styles.errorMessage}>
+                    <CIcon icon={cilWarning} className={styles.errorIcon} />
+                    {errors.submit}
+                  </div>
+                )}
+
                 <div className={styles.formActions}>
                   <button 
                     type="button" 
                     className={styles.nextBtn}
                     onClick={nextStep}
+                    disabled={isLoading}
                   >
                     Suivant
                     <CIcon icon={cilCheckCircle} className={styles.btnIcon} />
@@ -321,6 +336,7 @@ function RegisterPage() {
                       value={formData.role}
                       onChange={handleChange}
                       className={styles.formSelect}
+                      disabled={isLoading}
                     >
                       <option value="Gestionnaire">Gestionnaire</option>
                       <option value="Technicien">Technicien</option>
@@ -341,6 +357,7 @@ function RegisterPage() {
                       className={styles.formTextarea}
                       placeholder="Décrivez-vous en quelques mots..."
                       rows="3"
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -354,6 +371,7 @@ function RegisterPage() {
                       value={formData.pays}
                       onChange={handleChange}
                       className={styles.formSelect}
+                      disabled={isLoading}
                     >
                       <option value="Côte d'Ivoire">Côte d'Ivoire</option>
                       <option value="Sénégal">Sénégal</option>
@@ -375,6 +393,7 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={styles.formInput}
                       placeholder="Votre ville"
+                      disabled={isLoading}
                     />
                   </div>
 
@@ -390,15 +409,24 @@ function RegisterPage() {
                       onChange={handleChange}
                       className={styles.formInput}
                       placeholder="00225"
+                      disabled={isLoading}
                     />
                   </div>
                 </div>
+
+                {errors.submit && (
+                  <div className={styles.errorMessage}>
+                    <CIcon icon={cilWarning} className={styles.errorIcon} />
+                    {errors.submit}
+                  </div>
+                )}
 
                 <div className={styles.formActions}>
                   <button 
                     type="button" 
                     className={styles.backBtn}
                     onClick={prevStep}
+                    disabled={isLoading}
                   >
                     Retour
                   </button>

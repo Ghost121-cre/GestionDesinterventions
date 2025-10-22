@@ -6,6 +6,121 @@
   min-height: 100vh;
 }
 
+/* Styles pour le groupe de champ mot de passe */
+.passwordInputGroup {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.passwordInputGroup .formControl {
+  padding-right: 50px;
+}
+
+.passwordToggleBtn {
+  position: absolute;
+  right: 12px;
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+}
+
+.passwordToggleBtn:hover {
+  color: var(--primary-color);
+  background: var(--gray-200);
+}
+
+.passwordHelp {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  margin-top: 4px;
+}
+
+/* Styles pour le champ mot de passe dans le tableau */
+.passwordCell {
+  min-width: 150px;
+}
+
+.passwordField {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  background: var(--gray-100);
+  border-radius: var(--border-radius);
+  border: 1px solid var(--border-color);
+}
+
+.passwordIcon {
+  width: 14px;
+  height: 14px;
+  color: var(--text-muted);
+  flex-shrink: 0;
+}
+
+.passwordText {
+  font-family: 'Courier New', monospace;
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  flex: 1;
+}
+
+.passwordToggle {
+  background: none;
+  border: none;
+  color: var(--primary-color);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.passwordToggle:hover {
+  background: var(--gray-200);
+}
+
+.copyButton {
+  background: var(--success-color);
+  color: white;
+  border: none;
+  border-radius: 4px;
+  padding: 4px 6px;
+  cursor: pointer;
+  transition: var(--transition);
+  display: flex;
+  align-items: center;
+}
+
+.copyButton:hover {
+  background: #059669;
+  transform: scale(1.05);
+}
+
+/* Style pour les champs obligatoires */
+.formLabel::after {
+  content: " *";
+  color: var(--danger-color);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .passwordField {
+    flex-direction: column;
+    gap: 4px;
+    align-items: flex-start;
+  }
+  
+  .passwordText {
+    font-size: 0.8rem;
+  }
+}
+
 .container {
   max-width: 1400px;
   margin: 0 auto;
@@ -641,3 +756,4 @@
 [data-theme="dark"] .tableRow:hover {
   background: var(--gray-700);
 }
+

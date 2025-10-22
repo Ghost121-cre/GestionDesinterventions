@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import CIcon from "@coreui/icons-react";
+import { clientService } from "../services/apiService";
 import { 
   cilPencil, 
   cilTrash, 
@@ -19,6 +20,8 @@ import styles from "../assets/css/Client.module.css";
 function Client() {
   const navigate = useNavigate();
   const [clients, setClients] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
   const [newClient, setNewClient] = useState({ 
     id: "", 
     nom: "", 
@@ -27,8 +30,8 @@ function Client() {
     adresse: "",
     ville: "",
     codePostal: "",
-    pays: "France",
-    type: "Entreprise"
+    pays: "",
+    type: ""
   });
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -37,23 +40,31 @@ function Client() {
   const typesClient = ["Entreprise", "Particulier", "Administration", "Association"];
 
   useEffect(() => {
-    const saved = localStorage.getItem("clients");
-    if (saved) setClients(JSON.parse(saved));
+    loadClients();
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem("clients", JSON.stringify(clients));
-  }, [clients]);
+  const loadClients = async () => {
+    try {
+      setLoading(true);
+      const clientsData = await clientService.getClients();
+      setClients(clientsData);
+    } catch (error) {
+      toast.error("Erreur lors du chargement des clients");
+      console.error("Erreur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const filteredClients = clients.filter(client => {
     const matchesSearch = client.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
                          client.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         client.ville.toLowerCase().includes(searchTerm.toLowerCase());
+                         (client.ville && client.ville.toLowerCase().includes(searchTerm.toLowerCase()));
     const matchesType = !filterType || client.type === filterType;
     return matchesSearch && matchesType;
   });
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!newClient.nom.trim() || !newClient.email.trim()) {
       toast.error("Le nom et l'email sont requis");
       return;
@@ -64,37 +75,78 @@ function Client() {
       return;
     }
 
-    if (isEditing) {
-      setClients(clients.map(c => (c.id === newClient.id ? newClient : c)));
-      toast.success("✅ Client modifié avec succès");
-    } else {
-      const clientAvecId = { 
-        ...newClient, 
-        id: Date.now(),
-        dateCreation: new Date().toISOString()
+    setSaving(true);
+    try {
+      const clientData = {
+        id: parseInt(newClient.id),
+        nom: newClient.nom.trim(),
+        email: newClient.email.trim(),
+        telephone: newClient.telephone.trim(),
+        adresse: newClient.adresse.trim(),
+        ville: newClient.ville.trim(),
+        codePostal: newClient.codePostal.trim(),
+        pays: newClient.pays,
+        type: newClient.type
       };
-      setClients([...clients, clientAvecId]);
-      toast.success("✅ Client ajouté avec succès");
-    }
 
-    resetForm();
-    hideOffcanvas();
+      console.log('Données client à sauvegarder:', clientData);
+
+      if (isEditing) {
+        const result = await clientService.updateClient(newClient.id, clientData);
+        setClients(clients.map(c => 
+          c.id === newClient.id ? { 
+            ...c,
+            ...clientData
+          } : c
+        ));
+        toast.success("✅ Client modifié avec succès");
+      } else {
+        const result = await clientService.createClient(clientData);
+        setClients([...clients, result]);
+        toast.success("✅ Client ajouté avec succès");
+      }
+
+      resetForm();
+      hideOffcanvas();
+    } catch (error) {
+      console.error('💥 Erreur:', error);
+      toast.error(error.message);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const isValidEmail = (email) => {
     return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
   };
 
-  const handleDelete = (id) => {
+  const handleDelete = async (id) => {
     const client = clients.find(c => c.id === id);
+    if (!client) return;
+
     if (window.confirm(`Êtes-vous sûr de vouloir supprimer le client "${client.nom}" ?`)) {
-      setClients(clients.filter(c => c.id !== id));
-      toast.info("🗑️ Client supprimé");
+      try {
+        await clientService.deleteClient(id);
+        setClients(clients.filter(c => c.id !== id));
+        toast.info("🗑️ Client supprimé");
+      } catch (error) {
+        toast.error(error.message || "Erreur lors de la suppression du client");
+      }
     }
   };
 
   const handleEdit = (client) => {
-    setNewClient(client);
+    setNewClient({
+      id: client.id,
+      nom: client.nom || "",
+      email: client.email || "",
+      telephone: client.telephone || "",
+      adresse: client.adresse || "",
+      ville: client.ville || "",
+      codePostal: client.codePostal || "",
+      pays: client.pays || "",
+      type: client.type || ""
+    });
     setIsEditing(true);
     showOffcanvas();
   };
@@ -145,6 +197,39 @@ function Client() {
     return typeMap[type] || styles.typeEntreprise;
   };
 
+  const handlePhoneChange = (e) => {
+  const input = e.target.value;
+  
+  // Garder seulement chiffres et espaces
+  const cleanValue = input.replace(/[^\d\s]/g, '');
+  
+  // Enlever les espaces pour compter les chiffres
+  const digitsOnly = cleanValue.replace(/\s/g, '');
+  
+  // Limiter à 10 chiffres et reformater
+  const limitedDigits = digitsOnly.substring(0, 10);
+  const formatted = formatPhoneNumber(limitedDigits);
+  
+  setNewClient({ ...newClient, telephone: formatted });
+};
+
+// Fonction formatPhoneNumber modifiée pour mieux gérer la saisie
+const formatPhoneNumber = (value) => {
+  const cleanValue = value.replace(/\s/g, '');
+  let formatted = '';
+  
+  for (let i = 0; i < cleanValue.length; i++) {
+    if (i > 0 && i % 2 === 0) {
+      formatted += ' ';
+    }
+    formatted += cleanValue[i];
+  }
+  
+  return formatted;
+};
+
+  
+
   return (
     <div className={styles.page}>
       <div className={styles.container}>
@@ -170,9 +255,10 @@ function Client() {
             </h1>
             <p className={styles.subtitle}>
               {clients.length} client(s) dans votre base de données
+              {loading && " (Chargement...)"}
             </p>
           </div>
-          <button className={styles.addButton} onClick={handleAddClick}>
+          <button className={styles.addButton} onClick={handleAddClick} disabled={loading}>
             <CIcon icon={cilPlus} className={styles.btnIcon} />
             Nouveau Client
           </button>
@@ -188,6 +274,7 @@ function Client() {
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className={styles.searchInput}
+              disabled={loading}
             />
           </div>
           <div className={styles.filterGroup}>
@@ -196,6 +283,7 @@ function Client() {
               value={filterType}
               onChange={(e) => setFilterType(e.target.value)}
               className={styles.filterSelect}
+              disabled={loading}
             >
               <option value="">Tous les types</option>
               {typesClient.map(type => (
@@ -210,102 +298,112 @@ function Client() {
           <div className={styles.tableHeader}>
             <div className={styles.tableTitle}>
               Liste des Clients ({filteredClients.length})
+              {loading && " - Chargement..."}
             </div>
           </div>
-          <table className={styles.table}>
-            <thead>
-              <tr>
-                <th>ID</th>
-                <th>Nom/Entreprise</th>
-                <th>Contact</th>
-                <th>Adresse</th>
-                <th>Type</th>
-                <th>Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              {filteredClients.length === 0 ? (
+          
+          {loading ? (
+            <div className={styles.emptyState}>
+              <div className={styles.emptyText}>Chargement des clients...</div>
+            </div>
+          ) : (
+            <table className={styles.table}>
+              <thead>
                 <tr>
-                  <td colSpan="6" className={styles.emptyState}>
-                    <CIcon icon={cilWarning} className={styles.emptyIcon} />
-                    <div className={styles.emptyText}>
-                      {clients.length === 0 
-                        ? "Aucun client n'a été créé pour le moment" 
-                        : "Aucun client ne correspond à votre recherche"
-                      }
-                    </div>
-                    {clients.length === 0 && (
-                      <button className={styles.emptyAction} onClick={handleAddClick}>
-                        <CIcon icon={cilPlus} />
-                        Ajouter le premier client
-                      </button>
-                    )}
-                  </td>
+                  <th>ID</th>
+                  <th>Nom/Entreprise</th>
+                  <th>Contact</th>
+                  <th>Adresse</th>
+                  <th>Type</th>
+                  <th>Actions</th>
                 </tr>
-              ) : (
-                filteredClients.map((client) => (
-                  <tr key={client.id} className={styles.tableRow}>
-                    <td className={styles.idCell}>#{client.id}</td>
-                    <td className={styles.nomCell}>
-                      <div className={styles.clientInfo}>
-                        <strong>{client.nom}</strong>
-                        <div className={styles.clientEmail}>
-                          <CIcon icon={cilEnvelopeOpen} className={styles.infoIcon} />
-                          {client.email}
-                        </div>
+              </thead>
+              <tbody>
+                {filteredClients.length === 0 ? (
+                  <tr>
+                    <td colSpan="6" className={styles.emptyState}>
+                      <CIcon icon={cilWarning} className={styles.emptyIcon} />
+                      <div className={styles.emptyText}>
+                        {clients.length === 0 
+                          ? "Aucun client n'a été créé pour le moment" 
+                          : "Aucun client ne correspond à votre recherche"
+                        }
                       </div>
-                    </td>
-                    <td className={styles.contactCell}>
-                      {client.telephone && (
-                        <div className={styles.contactInfo}>
-                          <CIcon icon={cilPhone} className={styles.infoIcon} />
-                          {client.telephone}
-                        </div>
-                      )}
-                    </td>
-                    <td className={styles.adresseCell}>
-                      {client.adresse && (
-                        <div className={styles.adresseInfo}>
-                          <CIcon icon={cilMap} className={styles.infoIcon} />
-                          <div>
-                            <div>{client.adresse}</div>
-                            {client.ville && (
-                              <div className={styles.ville}>
-                                {client.codePostal} {client.ville}
-                              </div>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </td>
-                    <td className={styles.typeCell}>
-                      <span className={`${styles.typeBadge} ${getTypeBadgeClass(client.type)}`}>
-                        {client.type}
-                      </span>
-                    </td>
-                    <td className={styles.actionsCell}>
-                      <div className={styles.actionButtons}>
-                        <button
-                          className={styles.editBtn}
-                          onClick={() => handleEdit(client)}
-                          title="Modifier"
-                        >
-                          <CIcon icon={cilPencil} />
+                      {clients.length === 0 && (
+                        <button className={styles.emptyAction} onClick={handleAddClick}>
+                          <CIcon icon={cilPlus} />
+                          Ajouter le premier client
                         </button>
-                        <button
-                          className={styles.deleteBtn}
-                          onClick={() => handleDelete(client.id)}
-                          title="Supprimer"
-                        >
-                          <CIcon icon={cilTrash} />
-                        </button>
-                      </div>
+                      )}
                     </td>
                   </tr>
-                ))
-              )}
-            </tbody>
-          </table>
+                ) : (
+                  filteredClients.map((client) => (
+                    <tr key={client.id} className={styles.tableRow}>
+                      <td className={styles.idCell}>#{client.id}</td>
+                      <td className={styles.nomCell}>
+                        <div className={styles.clientInfo}>
+                          <strong>{client.nom}</strong>
+                          <div className={styles.clientEmail}>
+                            <CIcon icon={cilEnvelopeOpen} className={styles.infoIcon} />
+                            {client.email}
+                          </div>
+                        </div>
+                      </td>
+                      <td className={styles.contactCell}>
+                        {client.telephone && (
+                          <div className={styles.contactInfo}>
+                            <CIcon icon={cilPhone} className={styles.infoIcon} />
+                            {client.telephone}
+                          </div>
+                        )}
+                      </td>
+                      <td className={styles.adresseCell}>
+                        {client.adresse && (
+                          <div className={styles.adresseInfo}>
+                            <CIcon icon={cilMap} className={styles.infoIcon} />
+                            <div>
+                              <div>{client.adresse}</div>
+                              {client.ville && (
+                                <div className={styles.ville}>
+                                  {client.codePostal} {client.ville}
+                                </div>
+                              )}
+                            </div>
+                          </div>
+                        )}
+                      </td>
+                      <td className={styles.typeCell}>
+                        <span className={`${styles.typeBadge} ${getTypeBadgeClass(client.type)}`}>
+                          {client.type}
+                        </span>
+                      </td>
+                      <td className={styles.actionsCell}>
+                        <div className={styles.actionButtons}>
+                          <button
+                            className={styles.editBtn}
+                            onClick={() => handleEdit(client)}
+                            title="Modifier"
+                            disabled={saving}
+                          >
+                            <CIcon icon={cilPencil} />
+                          </button>
+                          <button
+                            className={styles.deleteBtn}
+                            onClick={() => handleDelete(client.id)}
+                            title="Supprimer"
+                            disabled={saving}
+                          >
+                            <CIcon icon={cilTrash} />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
+                )}
+              </tbody>
+            </table>
+          )}
         </div>
 
         {/* Offcanvas pour ajouter/modifier */}
@@ -319,6 +417,7 @@ function Client() {
               className="btn-close" 
               data-bs-dismiss="offcanvas"
               aria-label="Close"
+              disabled={saving}
             ></button>
           </div>
           <div className="offcanvas-body">
@@ -331,6 +430,7 @@ function Client() {
                   value={newClient.nom}
                   onChange={(e) => setNewClient({ ...newClient, nom: e.target.value })}
                   required
+                  disabled={saving}
                 />
               </div>
               
@@ -342,6 +442,7 @@ function Client() {
                   value={newClient.email}
                   onChange={(e) => setNewClient({ ...newClient, email: e.target.value })}
                   required
+                  disabled={saving}
                 />
               </div>
               
@@ -351,7 +452,9 @@ function Client() {
                   type="tel"
                   className={styles.formControl}
                   value={newClient.telephone}
-                  onChange={(e) => setNewClient({ ...newClient, telephone: e.target.value })}
+                  onChange={handlePhoneChange}
+                  disabled={saving}
+                  minLength={14}
                 />
               </div>
               
@@ -361,6 +464,7 @@ function Client() {
                   className={styles.formControl}
                   value={newClient.type}
                   onChange={(e) => setNewClient({ ...newClient, type: e.target.value })}
+                  disabled={saving}
                 >
                   {typesClient.map(type => (
                     <option key={type} value={type}>{type}</option>
@@ -376,6 +480,7 @@ function Client() {
                   value={newClient.adresse}
                   onChange={(e) => setNewClient({ ...newClient, adresse: e.target.value })}
                   placeholder="Rue, numéro..."
+                  disabled={saving}
                 />
               </div>
               
@@ -387,6 +492,7 @@ function Client() {
                     className={styles.formControl}
                     value={newClient.codePostal}
                     onChange={(e) => setNewClient({ ...newClient, codePostal: e.target.value })}
+                    disabled={saving}
                   />
                 </div>
                 <div className="col-md-6 mb-4">
@@ -396,6 +502,7 @@ function Client() {
                     className={styles.formControl}
                     value={newClient.ville}
                     onChange={(e) => setNewClient({ ...newClient, ville: e.target.value })}
+                    disabled={saving}
                   />
                 </div>
               </div>
@@ -405,14 +512,16 @@ function Client() {
                   type="button"
                   className={styles.cancelBtn}
                   data-bs-dismiss="offcanvas"
+                  disabled={saving}
                 >
                   Annuler
                 </button>
                 <button
                   type="submit"
                   className={styles.saveBtn}
+                  disabled={saving}
                 >
-                  {isEditing ? "Mettre à jour" : "Créer le client"}
+                  {saving ? "Enregistrement..." : (isEditing ? "Mettre à jour" : "Créer le client")}
                 </button>
               </div>
             </form>

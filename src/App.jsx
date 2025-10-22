@@ -45,6 +45,7 @@ function App() {
 
         {/* Routes protégées par Layout */}
         <Route element={<Layout />}>
+          {/* <Route path="/" element={<Calendrier />} /> */}
           <Route path="/calendrier" element={<Calendrier />} />
           <Route path="/rapports" element={<Rapports />} />
           <Route path="/parametres" element={<Parametres />} />

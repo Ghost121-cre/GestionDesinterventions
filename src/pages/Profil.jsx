@@ -35,11 +35,10 @@ function Profil() {
     email: "",
     telephone: "",
     bio: "",
-    role: "Technicien",
+    role: "",
     pays: "",
     ville: "",
-    codePostal: "",
-    avatar: "/default-avatar.png"
+    avatar: ""
   });
 
   const [passwordData, setPasswordData] = useState({
@@ -111,12 +110,18 @@ function Profil() {
   };
 
   const handleAvatarChange = (e) => {
-    const file = e.target.files[0];
-    if (file) {
-      const url = URL.createObjectURL(file);
-      setFormData(prev => ({ ...prev, avatar: url }));
-    }
-  };
+  const file = e.target.files[0];
+  if (file) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      setFormData(prev => ({ 
+        ...prev, 
+        avatar: e.target.result 
+      }));
+    };
+    reader.readAsDataURL(file);
+  }
+};
 
   const validatePassword = () => {
     const errors = {};
@@ -147,10 +152,32 @@ function Profil() {
     return isValid;
   };
 
-  const handlePasswordUpdate = () => {
-    if (validatePassword()) {
-      // Ici vous ajouteriez l'appel API pour changer le mot de passe
-      console.log("Mot de passe changé avec succès");
+  const handlePasswordUpdate = async () => {
+  if (validatePassword()) {
+    try {
+      console.log('🔑 Changement mot de passe...');
+
+      const response = await fetch(`https://localhost:7134/api/auth/change-password`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+          userId: user.id,
+          currentPassword: passwordData.currentPassword,
+          newPassword: passwordData.newPassword
+        }),
+      });
+
+      console.log('📡 Statut changement mot de passe:', response.status);
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Erreur lors du changement de mot de passe');
+      }
+
+      const result = await response.json();
+      console.log('✅ Mot de passe changé:', result);
       
       // Réinitialiser les champs
       setPasswordData({
@@ -158,12 +185,21 @@ function Profil() {
         newPassword: "",
         confirmPassword: ""
       });
+      setPasswordErrors({
+        currentPassword: "",
+        newPassword: "",
+        confirmPassword: ""
+      });
       setPasswordEditMode(false);
       
-      // Afficher un message de succès (vous pourriez utiliser un toast)
       alert("Mot de passe modifié avec succès !");
+      
+    } catch (error) {
+      console.error('💥 Erreur changement mot de passe:', error);
+      setPasswordErrors({ submit: error.message });
     }
-  };
+  }
+};
 
   const handleCancelPassword = () => {
     setPasswordData({
@@ -179,12 +215,51 @@ function Profil() {
     setPasswordEditMode(false);
   };
 
-  const handleSave = () => {
-    setUser(formData);
-    setEditMode(false);
-    // Ici vous pourriez ajouter un appel API pour sauvegarder les données
-  };
+const handleSave = async () => {
+  try {
+    const profileData = {
+      prenom: formData.prenom,
+      nom: formData.nom,
+      email: formData.email,
+      telephone: formData.telephone,
+      bio: formData.bio || "",
+      pays: formData.pays || "",
+      ville: formData.ville || "",
+      avatar: formData.avatar || ""
+    };
 
+    console.log('📤 Mise à jour profil:', profileData);
+
+    const response = await fetch(`https://localhost:7134/api/utilisateurs/update-profile/${user.id}`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(profileData),
+    });
+
+    console.log('📡 Statut réponse:', response.status);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      console.log('❌ Erreur détaillée:', errorText);
+      throw new Error(`Erreur ${response.status}: ${errorText}`);
+    }
+
+    const updatedUser = await response.json();
+    console.log('✅ Profil mis à jour:', updatedUser);
+    
+    // Mettre à jour l'utilisateur dans le contexte
+    setUser(prev => ({ ...prev, ...updatedUser }));
+    setEditMode(false);
+    
+    alert("Profil modifié avec succès !");
+    
+  } catch (error) {
+    console.error('💥 Erreur sauvegarde profil:', error);
+    alert(`Erreur: ${error.message}`);
+  }
+};
   const handleCancel = () => {
     setFormData(user);
     setEditMode(false);
@@ -206,8 +281,6 @@ function Profil() {
       case 'pays':
         return cilGlobeAlt;
       case 'ville':
-      case 'codePostal':
-        return cilMap;
       default:
         return cilUser;
     }
@@ -223,7 +296,6 @@ function Profil() {
       role: "Rôle",
       pays: "Pays",
       ville: "Ville",
-      codePostal: "Code Postal"
     };
     return labels[field] || field;
   };
@@ -248,23 +320,26 @@ function Profil() {
         <div className={styles.profileHeader}>
           <div className={styles.avatarSection}>
             <div className={styles.avatarWrapper}>
-              <img 
-                src={formData.avatar} 
-                alt="Avatar" 
-                className={styles.avatar}
-              />
-              {editMode && (
-                <label className={styles.avatarEdit}>
-                  <CIcon icon={cilPencil} className={styles.avatarEditIcon} />
-                  <input
-                    type="file"
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className={styles.avatarInput}
-                  />
-                </label>
-              )}
-            </div>
+  <img 
+    src={formData.avatar} 
+    alt="Avatar" 
+    className={styles.avatar}
+    onError={(e) => {
+    e.target.src = ""; 
+    }}
+  />
+  {editMode && (
+    <label className={styles.avatarEdit}>
+      <CIcon icon={cilPencil} className={styles.avatarEditIcon} />
+      <input
+        type="file"
+        accept="image/*"
+        onChange={handleAvatarChange}
+        className={styles.avatarInput}
+      />
+    </label>
+  )}
+</div>
             <div className={styles.profileInfo}>
               <h2 className={styles.profileName}>
                 {formData.prenom} {formData.nom}
@@ -367,7 +442,7 @@ function Profil() {
                 Adresse
               </h3>
               <div className={styles.fieldsGrid}>
-                {['pays', 'ville', 'codePostal'].map(field => (
+                {['pays', 'ville'].map(field => (
                   <div key={field} className={styles.field}>
                     <label className={styles.fieldLabel}>
                       <CIcon icon={getFieldIcon(field)} className={styles.fieldIcon} />

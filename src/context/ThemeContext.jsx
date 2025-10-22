@@ -1,4 +1,3 @@
-// contexts/ThemeContext.jsx
 import React, { createContext, useContext, useState, useEffect } from 'react';
 
 const ThemeContext = createContext();
@@ -32,6 +31,7 @@ export const ThemeProvider = ({ children }) => {
   );
 };
 
+// Hook personnalisé
 export const useTheme = () => {
   const context = useContext(ThemeContext);
   if (!context) {
@@ -39,3 +39,6 @@ export const useTheme = () => {
   }
   return context;
 };
+
+// Export optionnel du contexte pour un usage avancé
+export { ThemeContext };
