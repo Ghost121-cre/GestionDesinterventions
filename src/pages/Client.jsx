@@ -64,6 +64,48 @@ function Client() {
     return matchesSearch && matchesType;
   });
 
+  //  const handleSave = async () => {
+  //   if (!newProduit.nom.trim()) {
+  //     toast.error("Le nom est requis");
+  //     return;
+  //   }
+  
+  //   setSaving(true);
+  //   try {
+  //     const produitData = {
+  //       nom: newProduit.nom.trim(),
+  //       description: newProduit.description.trim(),
+  //       categorie: newProduit.categorie,
+  //       statut: newProduit.statut,
+  //     };
+  
+  //     console.log('Données produit à sauvegarder:', produitData);
+  
+  //     if (isEditing) {
+        
+  //       const produitDataWithId = {
+  //         id: parseInt(newProduit.id),
+  //         ...produitData
+  //       };
+        
+  //       console.log('Données pour modification:', produitDataWithId);
+        
+  //       const result = await produitService.updateProduit(newProduit.id, produitDataWithId);
+  //       setProduits(produits.map(produit => 
+  //         produit.id === newProduit.id ? { 
+  //           ...produit,
+  //           ...produitData
+  //         } : produit
+  //       ));
+  //       toast.success("✅ Produit modifié avec succès");
+  //     } else {
+  //       console.log('➕ Données pour création:', produitData);
+        
+  //       const result = await produitService.createProduit(produitData);
+  //       setProduits([...produits, result]);
+  //       toast.success("✅ Produit ajouté avec succès");
+  //     }
+
   const handleSave = async () => {
     if (!newClient.nom.trim() || !newClient.email.trim()) {
       toast.error("Le nom et l'email sont requis");
@@ -78,7 +120,6 @@ function Client() {
     setSaving(true);
     try {
       const clientData = {
-        id: parseInt(newClient.id),
         nom: newClient.nom.trim(),
         email: newClient.email.trim(),
         telephone: newClient.telephone.trim(),
@@ -92,7 +133,14 @@ function Client() {
       console.log('Données client à sauvegarder:', clientData);
 
       if (isEditing) {
-        const result = await clientService.updateClient(newClient.id, clientData);
+        const clientDataWithId = {
+          id: parseInt(newClient.id),
+          ...clientData
+        };
+        
+        console.log('Données pour modification:', clientDataWithId);
+
+        const result = await clientService.updateClient(newClient.id, clientDataWithId);
         setClients(clients.map(c => 
           c.id === newClient.id ? { 
             ...c,

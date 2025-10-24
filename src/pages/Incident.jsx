@@ -4,9 +4,9 @@ import { useIncident } from "../context/IncidentContext";
 import { useNavigate } from "react-router-dom";
 import styles from "../assets/css/Incident.module.css";
 import CIcon from "@coreui/icons-react";
-import { 
-  cilWarning, 
-  cilCheckCircle, 
+import {
+  cilWarning,
+  cilCheckCircle,
   cilMagnifyingGlass,
   cilCalendar,
   cilTrash,
@@ -16,7 +16,7 @@ import {
   cilChevronRight,
   cilZoomIn,
   cilPlus,
-  cilFilter
+  cilFilter,
 } from "@coreui/icons";
 import { toast } from "react-toastify";
 
@@ -36,42 +36,67 @@ function Incident() {
 
   const rowsPerPage = 10;
 
+  // Fonctions utilitaires pour accéder aux données en toute sécurité
+  const getClientName = (incident) => {
+    if (!incident || !incident.client) return "Client inconnu";
+    return typeof incident.client === "string"
+      ? incident.client
+      : incident.client.nom || "Client inconnu";
+  };
+
+  const getProductName = (incident) => {
+    if (!incident || !incident.produit) return "Produit inconnu";
+    return typeof incident.produit === "string"
+      ? incident.produit
+      : incident.produit.nom || "Produit inconnu";
+  };
+
   // 🔎 Filtrage selon onglet, recherche et dates
   const filteredIncidents = incidents
-    .filter(i => i.statut === (activeTab === "nonresolu" ? "non résolu" : "résolu"))
-    .filter(i => {
+    .filter(
+      (i) => i.statut === (activeTab === "nonresolu" ? "non résolu" : "résolu")
+    )
+    .filter((i) => {
       if (!search) return true;
       const searchLower = search.toLowerCase();
+
+      const clientName = getClientName(i).toLowerCase();
+      const productName = getProductName(i).toLowerCase();
+      const description = i.description?.toLowerCase() || "";
+
       return (
-        i.client?.toLowerCase().includes(searchLower) ||
-        i.produit?.toLowerCase().includes(searchLower) ||
-        i.description?.toLowerCase().includes(searchLower)
+        clientName.includes(searchLower) ||
+        productName.includes(searchLower) ||
+        description.includes(searchLower)
       );
     })
-    .filter(i => {
+    .filter((i) => {
       if (!startDate && !endDate) return true;
-      
-      const dateField = activeTab === "nonresolu" ? i.date_survenu : i.date_resolu || i.date_survenu;
+
+      const dateField =
+        activeTab === "nonresolu"
+          ? i.dateSurvenu
+          : i.dateResolution || i.dateSurvenu;
       if (!dateField) return false;
-      
+
       const incidentDate = new Date(dateField);
-      
+
       if (startDate && endDate) {
         const start = new Date(startDate);
         const end = new Date(endDate);
         return incidentDate >= start && incidentDate <= end;
       }
-      
+
       if (startDate) {
         const start = new Date(startDate);
         return incidentDate >= start;
       }
-      
+
       if (endDate) {
         const end = new Date(endDate);
         return incidentDate <= end;
       }
-      
+
       return true;
     });
 
@@ -83,12 +108,16 @@ function Incident() {
 
   // Navigation lightbox
   const prevImage = () =>
-    setLightboxIndex(prev => (prev === 0 ? lightboxImages.length - 1 : prev - 1));
-  
+    setLightboxIndex((prev) =>
+      prev === 0 ? lightboxImages.length - 1 : prev - 1
+    );
+
   const nextImage = () =>
-    setLightboxIndex(prev => (prev === lightboxImages.length - 1 ? 0 : prev + 1));
-  
-  const toggleZoom = () => setZoomed(prev => !prev);
+    setLightboxIndex((prev) =>
+      prev === lightboxImages.length - 1 ? 0 : prev + 1
+    );
+
+  const toggleZoom = () => setZoomed((prev) => !prev);
 
   const closeLightbox = () => {
     setLightboxIndex(null);
@@ -117,7 +146,9 @@ function Incident() {
 
   // Supprimer avec confirmation
   const confirmDelete = (incident) => {
-    if (window.confirm(`Supprimer définitivement l'incident #${incident.id} ?`)) {
+    if (
+      window.confirm(`Supprimer définitivement l'incident #${incident.id} ?`)
+    ) {
       handleDelete(incident.id);
       toast.success(`🗑️ Incident #${incident.id} supprimé !`);
     }
@@ -125,21 +156,29 @@ function Incident() {
 
   // Obtenir la couleur de priorité
   const getPriorityColor = (priority) => {
-    switch(priority) {
-      case "low": return "#10b981";
-      case "medium": return "#f59e0b";
-      case "high": return "#ef4444";
-      default: return "#6b7280";
+    switch (priority) {
+      case "low":
+        return "#10b981";
+      case "medium":
+        return "#f59e0b";
+      case "high":
+        return "#ef4444";
+      default:
+        return "#6b7280";
     }
   };
 
   // Obtenir le libellé de priorité
   const getPriorityLabel = (priority) => {
-    switch(priority) {
-      case "low": return "Basse";
-      case "medium": return "Moyenne";
-      case "high": return "Haute";
-      default: return "Non définie";
+    switch (priority) {
+      case "low":
+        return "Basse";
+      case "medium":
+        return "Moyenne";
+      case "high":
+        return "Haute";
+      default:
+        return "Non définie";
     }
   };
 
@@ -147,26 +186,56 @@ function Incident() {
   const formatDate = (dateString) => {
     if (!dateString) return "-";
     try {
-      return new Date(dateString).toLocaleDateString('fr-FR', {
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
+      return new Date(dateString).toLocaleDateString("fr-FR", {
+        day: "2-digit",
+        month: "2-digit",
+        year: "numeric",
       });
     } catch (error) {
       return "-";
     }
   };
 
-  // Obtenir les URLs des images
+  // CORRECTION : UNE SEULE FONCTION getImageUrls
   const getImageUrls = (images) => {
     if (!images || images.length === 0) return [];
-    return images.map(img => {
-      if (typeof img === "string") return img;
-      if (img instanceof File || img instanceof Blob) {
-        return URL.createObjectURL(img);
-      }
-      return img;
-    });
+
+    return images
+      .map((img) => {
+        // Si c'est déjà une URL complète
+        if (typeof img === "string" && img.startsWith("http")) {
+          return img;
+        }
+
+        // Si c'est un chemin relatif
+        if (typeof img === "string") {
+          return `https://localhost:7134${img}`;
+        }
+
+        // Si c'est un objet image
+        if (img && typeof img === "object") {
+          if (img.chemin) {
+            return img.chemin.startsWith("http")
+              ? img.chemin
+              : `https://localhost:7134${img.chemin}`;
+          } else if (img.url) {
+            return img.url.startsWith("http")
+              ? img.url
+              : `https://localhost:7134${img.url}`;
+          } else if (img.nomFichier) {
+            return `https://localhost:7134/uploads/incidents/${img.nomFichier}`;
+          }
+        }
+
+        // Fallback pour les fichiers locaux
+        if (img instanceof File || img instanceof Blob) {
+          return URL.createObjectURL(img);
+        }
+
+        console.warn("Format image non reconnu:", img);
+        return "";
+      })
+      .filter((url) => url !== "");
   };
 
   // Ouvrir la lightbox depuis le tableau
@@ -181,14 +250,14 @@ function Incident() {
     const urls = getImageUrls(images);
     setLightboxImages(urls);
     setLightboxIndex(index);
-    closeDetailsModal(); // Fermer la modal de détails
+    closeDetailsModal();
   };
 
   // Nettoyer les URLs des images créées
   useEffect(() => {
     return () => {
-      lightboxImages.forEach(url => {
-        if (url.startsWith('blob:')) {
+      lightboxImages.forEach((url) => {
+        if (url.startsWith("blob:")) {
           URL.revokeObjectURL(url);
         }
       });
@@ -198,14 +267,26 @@ function Incident() {
   // Statistiques
   const stats = {
     total: incidents.length,
-    nonResolus: incidents.filter(i => i.statut === "non résolu").length,
-    resolus: incidents.filter(i => i.statut === "résolu").length
+    nonResolus: incidents.filter((i) => i.statut === "non résolu").length,
+    resolus: incidents.filter((i) => i.statut === "résolu").length,
   };
 
   // Réinitialiser la page quand les filtres changent
   useEffect(() => {
     setCurrentPage(1);
   }, [activeTab, search, startDate, endDate]);
+
+  // AJOUTEZ CE DEBUG POUR VOIR LES DONNÉES
+  useEffect(() => {
+    console.log("📥 Incidents chargés:", incidents);
+    incidents.forEach((incident) => {
+      console.log(`Incident ${incident.id}:`, {
+        images: incident.images,
+        client: incident.client,
+        produit: incident.produit,
+      });
+    });
+  }, [incidents]);
 
   return (
     <div className={styles.container}>
@@ -238,14 +319,14 @@ function Incident() {
 
       {/* Actions rapides */}
       <div className={styles.quickActions}>
-        <button 
+        <button
           className={styles.primaryBtn}
           onClick={() => navigate("/declarer_incident")}
         >
           <CIcon icon={cilPlus} className={styles.btnIcon} />
           Déclarer un incident
         </button>
-        <button 
+        <button
           className={styles.secondaryBtn}
           onClick={() => navigate("/interventions")}
         >
@@ -258,7 +339,9 @@ function Incident() {
       <div className={styles.tabsContainer}>
         <div className={styles.tabs}>
           <button
-            className={`${styles.tab} ${activeTab === "nonresolu" ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${
+              activeTab === "nonresolu" ? styles.tabActive : ""
+            }`}
             onClick={() => setActiveTab("nonresolu")}
           >
             <CIcon icon={cilWarning} className={styles.tabIcon} />
@@ -266,7 +349,9 @@ function Incident() {
             <span className={styles.tabBadge}>{stats.nonResolus}</span>
           </button>
           <button
-            className={`${styles.tab} ${activeTab === "resolu" ? styles.tabActive : ""}`}
+            className={`${styles.tab} ${
+              activeTab === "resolu" ? styles.tabActive : ""
+            }`}
             onClick={() => setActiveTab("resolu")}
           >
             <CIcon icon={cilCheckCircle} className={styles.tabIcon} />
@@ -284,7 +369,7 @@ function Incident() {
             type="text"
             placeholder="Rechercher un incident..."
             value={search}
-            onChange={e => setSearch(e.target.value)}
+            onChange={(e) => setSearch(e.target.value)}
             className={styles.searchInput}
           />
         </div>
@@ -294,7 +379,7 @@ function Incident() {
             <input
               type="date"
               value={startDate}
-              onChange={e => setStartDate(e.target.value)}
+              onChange={(e) => setStartDate(e.target.value)}
               className={styles.dateInput}
             />
           </div>
@@ -303,13 +388,13 @@ function Incident() {
             <input
               type="date"
               value={endDate}
-              onChange={e => setEndDate(e.target.value)}
+              onChange={(e) => setEndDate(e.target.value)}
               className={styles.dateInput}
             />
           </div>
         </div>
         {(search || startDate || endDate) && (
-          <button 
+          <button
             className={styles.clearFilters}
             onClick={() => {
               setSearch("");
@@ -334,7 +419,9 @@ function Incident() {
               <th>Priorité</th>
               <th>Images</th>
               <th>Description</th>
-              <th>{activeTab === "resolu" ? "Date Résolution" : "Date Survenue"}</th>
+              <th>
+                {activeTab === "resolu" ? "Date Résolution" : "Date Survenue"}
+              </th>
               <th>Statut</th>
               <th>Actions</th>
             </tr>
@@ -343,12 +430,18 @@ function Incident() {
             {paginatedIncidents.length === 0 ? (
               <tr>
                 <td colSpan={9} className={styles.emptyState}>
-                  <CIcon icon={activeTab === "nonresolu" ? cilWarning : cilCheckCircle} size="3xl" />
+                  <CIcon
+                    icon={
+                      activeTab === "nonresolu" ? cilWarning : cilCheckCircle
+                    }
+                    size="3xl"
+                  />
                   <div className={styles.emptyText}>
-                    Aucun incident {activeTab === "nonresolu" ? "non résolu" : "résolu"} trouvé
+                    Aucun incident{" "}
+                    {activeTab === "nonresolu" ? "non résolu" : "résolu"} trouvé
                   </div>
                   {activeTab === "nonresolu" && (
-                    <button 
+                    <button
                       className={styles.emptyAction}
                       onClick={() => navigate("/declarer_incident")}
                     >
@@ -359,51 +452,78 @@ function Incident() {
                 </td>
               </tr>
             ) : (
-              paginatedIncidents.map(i => (
+              paginatedIncidents.map((i) => (
                 <tr key={i.id} className={styles.tableRow}>
                   <td className={styles.idCell}>#{i.id}</td>
+
                   <td className={styles.clientCell}>
-                    <span className={styles.clientBadge}>{i.client}</span>
+                    <span className={styles.clientBadge}>
+                      {getClientName(i)}
+                    </span>
                   </td>
-                  <td className={styles.productCell}>{i.produit}</td>
+
+                  <td className={styles.productCell}>{getProductName(i)}</td>
+
                   <td className={styles.priorityCell}>
-                    <span 
+                    <span
                       className={styles.priorityBadge}
-                      style={{ 
+                      style={{
                         backgroundColor: `${getPriorityColor(i.priorite)}20`,
                         color: getPriorityColor(i.priorite),
-                        borderColor: getPriorityColor(i.priorite)
+                        borderColor: getPriorityColor(i.priorite),
                       }}
                     >
                       {getPriorityLabel(i.priorite)}
                     </span>
                   </td>
+
                   <td className={styles.imagesCell}>
                     <div className={styles.previewContainer}>
                       {i.images && i.images.length > 0 ? (
-                        i.images.slice(0, 3).map((img, idx) => (
-                          <div key={idx} className={styles.imageWrapper}>
-                            <img
-                              src={typeof img === "string" ? img : URL.createObjectURL(img)}
-                              alt={`Incident ${i.id} - ${idx + 1}`}
-                              className={styles.previewImage}
-                              onClick={() => openLightboxFromTable(i.images, idx)}
-                            />
-                            {i.images.length > 3 && idx === 2 && (
-                              <div className={styles.moreImages}>+{i.images.length - 3}</div>
-                            )}
-                          </div>
-                        ))
+                        // CORRECTION : Utiliser getImageUrls une seule fois pour toutes les images
+                        getImageUrls(i.images)
+                          .slice(0, 3)
+                          .map((imageUrl, idx) => (
+                            <div key={idx} className={styles.imageWrapper}>
+                              <img
+                                src={imageUrl}
+                                alt={`Incident ${i.id} - ${idx + 1}`}
+                                className={styles.previewImage}
+                                onClick={() =>
+                                  openLightboxFromTable(i.images, idx)
+                                }
+                                onError={(e) => {
+                                  console.error(
+                                    `❌ Erreur chargement image ${idx}: ${imageUrl}`
+                                  );
+                                  e.target.style.display = "none";
+                                }}
+                                onLoad={() =>
+                                  console.log(
+                                    `✅ Image ${idx} chargée: ${imageUrl}`
+                                  )
+                                }
+                              />
+                              {i.images.length > 3 && idx === 2 && (
+                                <div className={styles.moreImages}>
+                                  +{i.images.length - 3}
+                                </div>
+                              )}
+                            </div>
+                          ))
                       ) : (
                         <span className={styles.noImages}>Aucune</span>
                       )}
                     </div>
                   </td>
+
                   <td className={styles.descriptionCell}>
                     <div className={styles.description}>
-                      {i.description?.length > 100 ? `${i.description.substring(0, 100)}...` : i.description}
+                      {i.description?.length > 100
+                        ? `${i.description.substring(0, 100)}...`
+                        : i.description}
                     </div>
-                    <button 
+                    <button
                       className={styles.viewDetailsBtn}
                       onClick={() => openDetailsModal(i)}
                     >
@@ -411,14 +531,25 @@ function Incident() {
                       Voir détails
                     </button>
                   </td>
+
                   <td className={styles.dateCell}>
-                    {formatDate(activeTab === "resolu" ? i.date_resolu : i.date_survenu)}
+                    {formatDate(
+                      activeTab === "resolu" ? i.dateResolution : i.dateSurvenu
+                    )}
                   </td>
+
                   <td className={styles.statusCell}>
-                    <span className={i.statut === "résolu" ? styles.badgeResolved : styles.badgePending}>
+                    <span
+                      className={
+                        i.statut === "résolu"
+                          ? styles.badgeResolved
+                          : styles.badgePending
+                      }
+                    >
                       {i.statut}
                     </span>
                   </td>
+
                   <td className={styles.actionsCell}>
                     <div className={styles.actionButtons}>
                       <button
@@ -458,18 +589,20 @@ function Incident() {
         <div className={styles.pagination}>
           <button
             className={styles.paginationBtn}
-            onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+            onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
             disabled={currentPage === 1}
           >
             <CIcon icon={cilChevronLeft} />
             Précédent
           </button>
-          
+
           <div className={styles.paginationNumbers}>
             {Array.from({ length: totalPages }, (_, idx) => (
               <button
                 key={idx}
-                className={`${styles.pageBtn} ${currentPage === idx + 1 ? styles.activePage : ""}`}
+                className={`${styles.pageBtn} ${
+                  currentPage === idx + 1 ? styles.activePage : ""
+                }`}
                 onClick={() => setCurrentPage(idx + 1)}
               >
                 {idx + 1}
@@ -479,7 +612,9 @@ function Incident() {
 
           <button
             className={styles.paginationBtn}
-            onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+            onClick={() =>
+              setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+            }
             disabled={currentPage === totalPages}
           >
             Suivant
@@ -491,7 +626,10 @@ function Incident() {
       {/* Modal de détails */}
       {showDetailsModal && selectedIncident && (
         <div className={styles.modalOverlay} onClick={closeDetailsModal}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>
                 Détails de l'incident #{selectedIncident.id}
@@ -500,69 +638,102 @@ function Incident() {
                 <CIcon icon={cilX} />
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
               <div className={styles.detailGrid}>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Client:</span>
-                  <span className={styles.detailValue}>{selectedIncident.client}</span>
+                  <span className={styles.detailValue}>
+                    {getClientName(selectedIncident)}
+                  </span>
                 </div>
+
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Produit:</span>
-                  <span className={styles.detailValue}>{selectedIncident.produit}</span>
+                  <span className={styles.detailValue}>
+                    {getProductName(selectedIncident)}
+                  </span>
                 </div>
+
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Priorité:</span>
-                  <span 
+                  <span
                     className={styles.detailValue}
-                    style={{ color: getPriorityColor(selectedIncident.priorite) }}
+                    style={{
+                      color: getPriorityColor(selectedIncident.priorite),
+                    }}
                   >
                     {getPriorityLabel(selectedIncident.priorite)}
                   </span>
                 </div>
+
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Statut:</span>
-                  <span className={selectedIncident.statut === "résolu" ? styles.badgeResolved : styles.badgePending}>
+                  <span
+                    className={
+                      selectedIncident.statut === "résolu"
+                        ? styles.badgeResolved
+                        : styles.badgePending
+                    }
+                  >
                     {selectedIncident.statut}
                   </span>
                 </div>
+
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Date de survenue:</span>
-                  <span className={styles.detailValue}>{formatDate(selectedIncident.date_survenu)}</span>
+                  <span className={styles.detailValue}>
+                    {formatDate(selectedIncident.dateSurvenu)}
+                  </span>
                 </div>
-                {selectedIncident.date_resolu && (
+
+                {selectedIncident.dateResolution && (
                   <div className={styles.detailItem}>
-                    <span className={styles.detailLabel}>Date de résolution:</span>
-                    <span className={styles.detailValue}>{formatDate(selectedIncident.date_resolu)}</span>
+                    <span className={styles.detailLabel}>
+                      Date de résolution:
+                    </span>
+                    <span className={styles.detailValue}>
+                      {formatDate(selectedIncident.dateResolution)}
+                    </span>
                   </div>
                 )}
               </div>
 
               <div className={styles.descriptionSection}>
                 <h3 className={styles.sectionTitle}>Description</h3>
-                <p className={styles.fullDescription}>{selectedIncident.description}</p>
+                <p className={styles.fullDescription}>
+                  {selectedIncident.description}
+                </p>
               </div>
 
-              {selectedIncident.images && selectedIncident.images.length > 0 && (
-                <div className={styles.imagesSection}>
-                  <h3 className={styles.sectionTitle}>Images ({selectedIncident.images.length})</h3>
-                  <div className={styles.modalImages}>
-                    {getImageUrls(selectedIncident.images).map((src, idx) => (
-                      <img
-                        key={idx}
-                        src={src}
-                        alt={`Incident ${selectedIncident.id} - ${idx + 1}`}
-                        className={styles.modalImage}
-                        onClick={() => openLightboxFromModal(selectedIncident.images, idx)}
-                      />
-                    ))}
+              {selectedIncident.images &&
+                selectedIncident.images.length > 0 && (
+                  <div className={styles.imagesSection}>
+                    <h3 className={styles.sectionTitle}>
+                      Images ({selectedIncident.images.length})
+                    </h3>
+                    <div className={styles.modalImages}>
+                      {getImageUrls(selectedIncident.images).map((src, idx) => (
+                        <img
+                          key={idx}
+                          src={src}
+                          alt={`Incident ${selectedIncident.id} - ${idx + 1}`}
+                          className={styles.modalImage}
+                          onClick={() =>
+                            openLightboxFromModal(selectedIncident.images, idx)
+                          }
+                          onError={(e) =>
+                            console.error(`Erreur image ${idx}:`, src)
+                          }
+                        />
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
               <div className={styles.modalActions}>
                 {selectedIncident.statut === "non résolu" && (
-                  <button 
+                  <button
                     className={styles.resolveBtn}
                     onClick={() => {
                       handleResolve(selectedIncident);
@@ -573,17 +744,19 @@ function Incident() {
                     Marquer comme résolu
                   </button>
                 )}
-                <button 
+                <button
                   className={styles.createInterventionBtn}
                   onClick={() => {
-                    navigate("/ajouter_intervention", { state: { incident: selectedIncident } });
+                    navigate("/ajouter_intervention", {
+                      state: { incident: selectedIncident },
+                    });
                     closeDetailsModal();
                   }}
                 >
                   <CIcon icon={cilPlus} />
                   Créer une intervention
                 </button>
-                <button 
+                <button
                   className={styles.deleteBtn}
                   onClick={() => {
                     confirmDelete(selectedIncident);
@@ -599,11 +772,14 @@ function Incident() {
         </div>
       )}
 
-      {/* Lightbox Modal amélioré */}
+      {/* Lightbox Modal */}
       {lightboxIndex !== null && (
         <div className={styles.lightboxOverlay} onClick={closeLightbox}>
-          <div className={styles.lightboxContent} onClick={e => e.stopPropagation()}>
-            <button 
+          <div
+            className={styles.lightboxContent}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
               className={styles.lightboxClose}
               onClick={closeLightbox}
               title="Fermer"
@@ -615,24 +791,31 @@ function Incident() {
               <img
                 src={lightboxImages[lightboxIndex]}
                 alt="Aperçu"
-                className={`${styles.lightboxImage} ${zoomed ? styles.zoomed : ""}`}
+                className={`${styles.lightboxImage} ${
+                  zoomed ? styles.zoomed : ""
+                }`}
                 onClick={toggleZoom}
               />
-              <button 
-                className={styles.zoomHint}
-                onClick={toggleZoom}
-              >
+              <button className={styles.zoomHint} onClick={toggleZoom}>
                 <CIcon icon={cilZoomIn} />
-                {zoomed ? 'Dézoomer' : 'Zoomer'}
+                {zoomed ? "Dézoomer" : "Zoomer"}
               </button>
             </div>
 
             {lightboxImages.length > 1 && (
               <>
-                <button className={styles.lightboxNav} onClick={prevImage} title="Image précédente">
+                <button
+                  className={styles.lightboxNav}
+                  onClick={prevImage}
+                  title="Image précédente"
+                >
                   <CIcon icon={cilChevronLeft} />
                 </button>
-                <button className={styles.lightboxNav} onClick={nextImage} title="Image suivante">
+                <button
+                  className={styles.lightboxNav}
+                  onClick={nextImage}
+                  title="Image suivante"
+                >
                   <CIcon icon={cilChevronRight} />
                 </button>
                 <div className={styles.lightboxCounter}>

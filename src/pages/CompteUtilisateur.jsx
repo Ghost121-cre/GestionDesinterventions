@@ -33,9 +33,9 @@ function CompteUtilisateur() {
     prenom: "", 
     nom: "", 
     email: "", 
-    role: "Utilisateur",
+    role: "",
     telephone: "",
-    statut: "actif",
+    statut: "",
     motDePasse: ""
   });
   const [isEditing, setIsEditing] = useState(false);
@@ -118,7 +118,6 @@ function CompteUtilisateur() {
      setSaving(true);
   try {
     const userData = {
-      id: parseInt(newUser.id),
       prenom: newUser.prenom.trim(),
       nom: newUser.nom.trim(),
       email: newUser.email.trim(),
@@ -136,7 +135,14 @@ function CompteUtilisateur() {
     console.log('📤 Données envoyées:', userData);
 
     if (isEditing) {
-      const result = await userService.updateUser(newUser.id, userData);
+
+       const userDataWithId = {
+        id: parseInt(newUser.id),
+        ...userData
+      };
+      
+      console.log('Données pour modification:', userDataWithId);
+      const result = await userService.updateUser(newUser.id, userDataWithId);
       
       setUsers(users.map(u => 
         u.id === newUser.id ? { 
@@ -149,7 +155,7 @@ function CompteUtilisateur() {
       toast.success("✅ Utilisateur modifié avec succès");
       addNotification(`Utilisateur modifié : ${userData.prenom} ${userData.nom}`);
     } else {
-      const result = await clientService.createClient(usertData);
+      const result = await userService.createUser(userData);
       toast.success("✅ Utilisateur ajouté avec succès");
     }
 

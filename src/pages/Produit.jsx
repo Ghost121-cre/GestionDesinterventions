@@ -3,14 +3,14 @@ import { useNavigate } from "react-router-dom";
 import { toast, ToastContainer } from "react-toastify";
 import CIcon from "@coreui/icons-react";
 import { produitService } from "../services/apiService";
-import { 
-  cilPencil, 
-  cilTrash, 
+import {
+  cilPencil,
+  cilTrash,
   cilPlus,
   cilSearch,
   cilFilter,
   cilInfo,
-  cilWarning
+  cilWarning,
 } from "@coreui/icons";
 import styles from "../assets/css/Produit.module.css";
 
@@ -19,12 +19,12 @@ function Produit() {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
-  const [newProduit, setNewProduit] = useState({ 
-    id: "", 
-    nom: "", 
-    description: "", 
+  const [newProduit, setNewProduit] = useState({
+    id: "",
+    nom: "",
+    description: "",
     categorie: "",
-    statut: "actif"
+    statut: "actif",
   });
   const [isEditing, setIsEditing] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
@@ -38,23 +38,26 @@ function Produit() {
   }, []);
 
   const loadProduits = async () => {
-      try {
-        setLoading(true);
-        const produitsData = await produitService.getProduits();
-        setProduits(produitsData);
-      } catch (error) {
-        toast.error("Erreur lors du chargement des produits");
-        console.error("Erreur:", error);
-      } finally {
-        setLoading(false);
-      }
-    };
+    try {
+      setLoading(true);
+      const produitsData = await produitService.getProduits();
+      setProduits(produitsData);
+    } catch (error) {
+      toast.error("Erreur lors du chargement des produits");
+      console.error("Erreur:", error);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   // Produits filtrés
-  const filteredProduits = produits.filter(produit => {
-    const matchesSearch = produit.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         (produit.description && produit.description.toLowerCase().includes(searchTerm.toLowerCase()));
-    const matchesCategorie = !filterCategorie || produit.categorie === filterCategorie;
+  const filteredProduits = produits.filter((produit) => {
+    const matchesSearch =
+      produit.nom.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      (produit.description &&
+        produit.description.toLowerCase().includes(searchTerm.toLowerCase()));
+    const matchesCategorie =
+      !filterCategorie || produit.categorie === filterCategorie;
     return matchesSearch && matchesCategorie;
   });
 
@@ -67,26 +70,40 @@ function Produit() {
     setSaving(true);
     try {
       const produitData = {
-        id: parseInt (newProduit.id),
         nom: newProduit.nom.trim(),
         description: newProduit.description.trim(),
         categorie: newProduit.categorie,
         statut: newProduit.statut,
       };
 
-      console.log('Données produit à sauvegarder:', produitData);
+      console.log("Données produit à sauvegarder:", produitData);
 
       if (isEditing) {
-        // CORRECTION: Utiliser 'p' au lieu de 'c' et 'produit' au lieu de 'p'
-        const result = await produitService.updateProduit(newProduit.id, produitData);
-        setProduits(produits.map(produit => 
-          produit.id === newProduit.id ? { 
-            ...produit,
-            ...produitData
-          } : produit
-        ));
+        const produitDataWithId = {
+          id: parseInt(newProduit.id),
+          ...produitData,
+        };
+
+        console.log("Données pour modification:", produitDataWithId);
+
+        const result = await produitService.updateProduit(
+          newProduit.id,
+          produitDataWithId
+        );
+        setProduits(
+          produits.map((produit) =>
+            produit.id === newProduit.id
+              ? {
+                  ...produit,
+                  ...produitData,
+                }
+              : produit
+          )
+        );
         toast.success("✅ Produit modifié avec succès");
       } else {
+        console.log("➕ Données pour création:", produitData);
+
         const result = await produitService.createProduit(produitData);
         setProduits([...produits, result]);
         toast.success("✅ Produit ajouté avec succès");
@@ -95,7 +112,7 @@ function Produit() {
       resetForm();
       hideOffcanvas();
     } catch (error) {
-      console.error('💥 Erreur:', error);
+      console.error("💥 Erreur:", error);
       toast.error(error.message);
     } finally {
       setSaving(false);
@@ -103,16 +120,22 @@ function Produit() {
   };
 
   const handleDelete = async (id) => {
-    const produit = produits.find(p => p.id === id);
+    const produit = produits.find((p) => p.id === id);
     if (!produit) return;
 
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le produit "${produit.nom}" ?`)) {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer le produit "${produit.nom}" ?`
+      )
+    ) {
       try {
         await produitService.deleteProduit(id);
-        setProduits(produits.filter(p => p.id !== id));
+        setProduits(produits.filter((p) => p.id !== id));
         toast.info("🗑️ Produit supprimé");
       } catch (error) {
-        toast.error(error.message || "Erreur lors de la suppression du produit");
+        toast.error(
+          error.message || "Erreur lors de la suppression du produit"
+        );
       }
     }
   };
@@ -123,7 +146,7 @@ function Produit() {
       nom: produit.nom || "",
       description: produit.description || "",
       categorie: produit.categorie || "",
-      statut: produit.statut || "actif",
+      statut: produit.statut || "",
     });
     setIsEditing(true);
     showOffcanvas();
@@ -136,17 +159,17 @@ function Produit() {
   };
 
   const resetForm = () => {
-    setNewProduit({ 
-      id: "", 
-      nom: "", 
-      description: "", 
+    setNewProduit({
+      id: "",
+      nom: "",
+      description: "",
       categorie: "",
-      statut: "actif"
+      statut: "",
     });
   };
 
   const showOffcanvas = () => {
-    const offcanvasElement = document.getElementById('offcanvasProduit');
+    const offcanvasElement = document.getElementById("offcanvasProduit");
     if (offcanvasElement) {
       const offcanvas = new window.bootstrap.Offcanvas(offcanvasElement);
       offcanvas.show();
@@ -154,9 +177,10 @@ function Produit() {
   };
 
   const hideOffcanvas = () => {
-    const offcanvasElement = document.getElementById('offcanvasProduit');
+    const offcanvasElement = document.getElementById("offcanvasProduit");
     if (offcanvasElement) {
-      const offcanvas = window.bootstrap.Offcanvas.getInstance(offcanvasElement);
+      const offcanvas =
+        window.bootstrap.Offcanvas.getInstance(offcanvasElement);
       if (offcanvas) offcanvas.hide();
     }
   };
@@ -172,7 +196,10 @@ function Produit() {
         <div className={styles.breadcrumbWrapper}>
           <nav aria-label="breadcrumb">
             <ol className={styles.breadcrumb}>
-              <li className={styles.breadcrumbItem} onClick={() => navigate("/parametres")}>
+              <li
+                className={styles.breadcrumbItem}
+                onClick={() => navigate("/parametres")}
+              >
                 Paramètres
               </li>
               <li className={styles.breadcrumbSeparator}>/</li>
@@ -193,7 +220,11 @@ function Produit() {
               {loading && " (Chargement...)"}
             </p>
           </div>
-          <button className={styles.addButton} onClick={handleAddClick} disabled={loading}>
+          <button
+            className={styles.addButton}
+            onClick={handleAddClick}
+            disabled={loading}
+          >
             <CIcon icon={cilPlus} className={styles.btnIcon} />
             Nouveau Produit
           </button>
@@ -221,8 +252,10 @@ function Produit() {
               disabled={loading}
             >
               <option value="">Toutes les catégories</option>
-              {categories.map(cat => (
-                <option key={cat} value={cat}>{cat}</option>
+              {categories.map((cat) => (
+                <option key={cat} value={cat}>
+                  {cat}
+                </option>
               ))}
             </select>
           </div>
@@ -236,7 +269,7 @@ function Produit() {
               {loading && " - Chargement..."}
             </div>
           </div>
-          
+
           {loading ? (
             <div className={styles.emptyState}>
               <div className={styles.emptyText}>Chargement des produits...</div>
@@ -259,13 +292,15 @@ function Produit() {
                     <td colSpan="6" className={styles.emptyState}>
                       <CIcon icon={cilWarning} className={styles.emptyIcon} />
                       <div className={styles.emptyText}>
-                        {produits.length === 0 
-                          ? "Aucun produit n'a été créé pour le moment" 
-                          : "Aucun produit ne correspond à votre recherche"
-                        }
+                        {produits.length === 0
+                          ? "Aucun produit n'a été créé pour le moment"
+                          : "Aucun produit ne correspond à votre recherche"}
                       </div>
                       {produits.length === 0 && (
-                        <button className={styles.emptyAction} onClick={handleAddClick}>
+                        <button
+                          className={styles.emptyAction}
+                          onClick={handleAddClick}
+                        >
                           <CIcon icon={cilPlus} />
                           Créer le premier produit
                         </button>
@@ -288,7 +323,11 @@ function Produit() {
                         </span>
                       </td>
                       <td className={styles.statutCell}>
-                        <span className={`${styles.statutBadge} ${getStatutBadgeClass(produit.statut)}`}>
+                        <span
+                          className={`${
+                            styles.statutBadge
+                          } ${getStatutBadgeClass(produit.statut)}`}
+                        >
                           {produit.statut === "actif" ? "Actif" : "Inactif"}
                         </span>
                       </td>
@@ -321,72 +360,94 @@ function Produit() {
         </div>
 
         {/* Offcanvas pour ajouter/modifier */}
-        <div className="offcanvas offcanvas-end" tabIndex="-1" id="offcanvasProduit">
+        <div
+          className="offcanvas offcanvas-end"
+          tabIndex="-1"
+          id="offcanvasProduit"
+        >
           <div className={styles.offcanvasHeader}>
             <h5 className={styles.offcanvasTitle}>
               {isEditing ? "Modifier le produit" : "Nouveau produit"}
             </h5>
-            <button 
-              type="button" 
-              className="btn-close" 
+            <button
+              type="button"
+              className="btn-close"
               data-bs-dismiss="offcanvas"
               aria-label="Close"
               disabled={saving}
             ></button>
           </div>
           <div className="offcanvas-body">
-            <form onSubmit={(e) => { e.preventDefault(); handleSave(); }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                handleSave();
+              }}
+            >
               <div className="mb-3">
                 <label className={styles.formLabel}>Nom du produit *</label>
                 <input
                   type="text"
                   className={styles.formControl}
                   value={newProduit.nom}
-                  onChange={(e) => setNewProduit({ ...newProduit, nom: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduit({ ...newProduit, nom: e.target.value })
+                  }
                   required
                   disabled={saving}
                 />
               </div>
-              
+
               <div className="mb-3">
                 <label className={styles.formLabel}>Description</label>
                 <textarea
                   className={styles.formControl}
                   rows="3"
                   value={newProduit.description}
-                  onChange={(e) => setNewProduit({ ...newProduit, description: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduit({
+                      ...newProduit,
+                      description: e.target.value,
+                    })
+                  }
                   disabled={saving}
                 />
               </div>
-              
+
               <div className="mb-3">
                 <label className={styles.formLabel}>Catégorie</label>
                 <select
                   className={styles.formControl}
                   value={newProduit.categorie}
-                  onChange={(e) => setNewProduit({ ...newProduit, categorie: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduit({ ...newProduit, categorie: e.target.value })
+                  }
                   disabled={saving}
                 >
                   <option value="">Sélectionner une catégorie</option>
-                  {categories.map(cat => (
-                    <option key={cat} value={cat}>{cat}</option>
+                  {categories.map((cat) => (
+                    <option key={cat} value={cat}>
+                      {cat}
+                    </option>
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className={styles.formLabel}>Statut</label>
                 <select
                   className={styles.formControl}
                   value={newProduit.statut}
-                  onChange={(e) => setNewProduit({ ...newProduit, statut: e.target.value })}
+                  onChange={(e) =>
+                    setNewProduit({ ...newProduit, statut: e.target.value })
+                  }
                   disabled={saving}
                 >
                   <option value="actif">Actif</option>
                   <option value="inactif">Inactif</option>
                 </select>
               </div>
-              
+
               <div className={styles.formActions}>
                 <button
                   type="button"
@@ -401,7 +462,11 @@ function Produit() {
                   className={styles.saveBtn}
                   disabled={saving}
                 >
-                  {saving ? "Enregistrement..." : (isEditing ? "Mettre à jour" : "Créer le produit")}
+                  {saving
+                    ? "Enregistrement..."
+                    : isEditing
+                    ? "Mettre à jour"
+                    : "Créer le produit"}
                 </button>
               </div>
             </form>

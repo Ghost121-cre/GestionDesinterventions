@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import CIcon from "@coreui/icons-react";
-import { 
-  cilEnvelopeOpen, 
-  cilLockLocked, 
+import {
+  cilEnvelopeOpen,
+  cilLockLocked,
   cilShieldAlt,
   cilCheckCircle,
-  cilWarning
+  cilWarning,
 } from "@coreui/icons";
 import Login from "../assets/images/Login.jpg";
 import Activ from "../assets/images/activ.png";
@@ -15,12 +15,18 @@ import { useUser } from "../context/UserContext";
 import FirstLoginModal from "../pages/FirstLoginModal.jsx";
 
 function LoginPage() {
-  const { user, login, changePasswordFirstLogin, loading, error: contextError } = useUser();
+  const {
+    user,
+    login,
+    changePasswordFirstLogin,
+    loading,
+    error: contextError,
+  } = useUser();
   const navigate = useNavigate();
 
   const [formData, setFormData] = useState({
     email: "",
-    password: ""
+    password: "",
   });
   const [error, setError] = useState("");
   const [rememberMe, setRememberMe] = useState(false);
@@ -44,9 +50,9 @@ function LoginPage() {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
-      [name]: value
+      [name]: value,
     }));
     if (error) setError("");
   };
@@ -57,12 +63,15 @@ function LoginPage() {
 
     try {
       await login(formData.email, formData.password);
-      
+
       if (rememberMe) {
-        localStorage.setItem('rememberedUser', JSON.stringify({
-          email: formData.email,
-          remember: true
-        }));
+        localStorage.setItem(
+          "rememberedUser",
+          JSON.stringify({
+            email: formData.email,
+            remember: true,
+          })
+        );
       }
     } catch (err) {
       console.error("Erreur de connexion:", err);
@@ -147,7 +156,9 @@ function LoginPage() {
                     className={styles.checkbox}
                     disabled={loading}
                   />
-                  <span className={styles.checkboxText}>Se souvenir de moi</span>
+                  <span className={styles.checkboxText}>
+                    Se souvenir de moi
+                  </span>
                 </label>
               </div>
 
@@ -158,8 +169,8 @@ function LoginPage() {
                 </div>
               )}
 
-              <button 
-                type="submit" 
+              <button
+                type="submit"
                 className={styles.submitBtn}
                 disabled={loading}
               >
@@ -181,24 +192,37 @@ function LoginPage() {
           {/* Section droite - Illustration */}
           <div className={styles.illustrationSection}>
             <div className={styles.illustrationContent}>
-              <img src={Login} alt="Gestion d'interventions" className={styles.illustration} />
+              <img
+                src={Login}
+                alt="Gestion d'interventions"
+                className={styles.illustration}
+              />
               <div className={styles.illustrationText}>
                 <h3>Gérez vos interventions efficacement</h3>
                 <p>
-                  Suivez, planifiez et optimisez toutes vos interventions techniques 
-                  depuis une interface unique et intuitive.
+                  Suivez, planifiez et optimisez toutes vos interventions
+                  techniques depuis une interface unique et intuitive.
                 </p>
                 <ul className={styles.featuresList}>
                   <li>
-                    <CIcon icon={cilCheckCircle} className={styles.featureIcon} />
+                    <CIcon
+                      icon={cilCheckCircle}
+                      className={styles.featureIcon}
+                    />
                     Suivi en temps réel
                   </li>
                   <li>
-                    <CIcon icon={cilCheckCircle} className={styles.featureIcon} />
+                    <CIcon
+                      icon={cilCheckCircle}
+                      className={styles.featureIcon}
+                    />
                     Rapports automatisés
                   </li>
                   <li>
-                    <CIcon icon={cilCheckCircle} className={styles.featureIcon} />
+                    <CIcon
+                      icon={cilCheckCircle}
+                      className={styles.featureIcon}
+                    />
                     Gestion des équipes
                   </li>
                 </ul>

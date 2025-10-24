@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useState } from "react";
+import React, { createContext, useContext, useState, useEffect } from "react";
+import { incidentService } from "../services/apiService";
 
 const IncidentContext = createContext();
 
@@ -6,43 +7,77 @@ export const useIncident = () => useContext(IncidentContext);
 
 export const IncidentProvider = ({ children }) => {
   const [incidents, setIncidents] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Ajouter un incident
-  const addIncident = (data) => {
-    const id = incidents.length ? incidents[incidents.length - 1].id + 1 : 1;
-    setIncidents((prev) => [
-      ...prev,
-      { id, ...data, statut: "non résolu" },
-    ]);
-  };
+  // Charger les incidents depuis l'API
+  useEffect(() => {
+    loadIncidents();
+  }, []);
 
-  // ❌ Supprimer
-  const handleDelete = (id) => {
-    if (window.confirm("Confirmer la suppression ?")) {
-      setIncidents((prev) => prev.filter((i) => i.id !== id));
+  const loadIncidents = async () => {
+    try {
+      setLoading(true);
+      const incidentsData = await incidentService.getIncidents();
+      console.log('📥 Incidents chargés:', incidentsData);
+      setIncidents(incidentsData);
+    } catch (error) {
+      console.error('Erreur chargement incidents:', error);
+    } finally {
+      setLoading(false);
     }
   };
 
-  // ✅ Marquer comme résolu AVEC DATE
-  const handleMarkResolved = (id) => {
-    setIncidents((prev) =>
-      prev.map((i) => 
-        i.id === id ? { 
-          ...i, 
-          statut: "résolu",
-          date_resolu: new Date().toISOString().split('T')[0] // Date du jour au format YYYY-MM-DD
-        } : i
-      )
-    );
+  // Ajouter un incident
+  const addIncident = async (data) => {
+    try {
+      console.log('📤 Création incident avec données:', data);
+      const newIncident = await incidentService.createIncident(data);
+      console.log('✅ Incident créé:', newIncident);
+      
+      // IMPORTANT: Recharger les incidents depuis l'API
+      await loadIncidents();
+      
+      return newIncident;
+    } catch (error) {
+      console.error('Erreur création incident:', error);
+      throw error;
+    }
+  };
+
+ 
+  // Marquer comme résolu
+  const handleMarkResolved = async (id) => {
+    try {
+      await incidentService.markAsResolved(id);
+      // Recharger depuis l'API
+      await loadIncidents();
+    } catch (error) {
+      console.error('Erreur résolution incident:', error);
+      throw error;
+    }
+  };
+
+  // Supprimer
+  const handleDelete = async (id) => {
+    try {
+      await incidentService.deleteIncident(id);
+      // Recharger depuis l'API
+      await loadIncidents();
+    } catch (error) {
+      console.error('Erreur suppression incident:', error);
+      throw error;
+    }
   };
 
   return (
     <IncidentContext.Provider
       value={{
         incidents,
+        loading,
         addIncident,
         handleDelete,
         handleMarkResolved,
+        refreshIncidents: loadIncidents
       }}
     >
       {children}
