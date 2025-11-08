@@ -8,13 +8,13 @@ import {
   CDropdownItem,
   CAvatar,
   CBadge,
-  CTooltip
+  CTooltip,
 } from "@coreui/react";
 import CIcon from "@coreui/icons-react";
-import { 
-  cilUser, 
-  cilAccountLogout, 
-  cilBell, 
+import {
+  cilUser,
+  cilAccountLogout,
+  cilBell,
   cilSettings,
   cilSearch,
   cilMenu,
@@ -23,7 +23,7 @@ import {
   cilEnvelopeOpen,
   cilShieldAlt,
   cilCreditCard,
-  cilCog
+  cilCog,
 } from "@coreui/icons";
 import { NavLink, useNavigate, useLocation } from "react-router-dom";
 import { UserContext } from "../context/UserContext";
@@ -33,7 +33,8 @@ import "../assets/css/Navbar.css";
 
 function Navbar({ sidebarWidth, onToggleSidebar }) {
   const { user, logout } = useContext(UserContext);
-  const { notifications, markAsRead, markAllAsRead, unreadCount } = useContext(NotificationContext);
+  const { notifications, markAsRead, markAllAsRead, unreadCount } =
+    useContext(NotificationContext);
   const { darkMode, toggleDarkMode } = useTheme(); // ✅ Correction ici
   const [isMobile, setIsMobile] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -46,18 +47,18 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
     window.addEventListener("resize", handleResize);
-    
+
     const handleScroll = () => setScrolled(window.scrollY > 10);
     window.addEventListener("scroll", handleScroll);
-    
+
     const handleClickOutside = (event) => {
       if (searchRef.current && !searchRef.current.contains(event.target)) {
         setSearchOpen(false);
       }
     };
-    
+
     document.addEventListener("mousedown", handleClickOutside);
-    
+
     return () => {
       window.removeEventListener("resize", handleResize);
       window.removeEventListener("scroll", handleScroll);
@@ -67,13 +68,14 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
 
   const userName = user ? `${user.prenom} ${user.nom}` : "Invité";
   const userRole = user?.role || "Utilisateur";
-  const userInitials = user ? `${user.prenom?.[0] || ''}${user.nom?.[0] || ''}`.toUpperCase() : "GU";
+  const userInitials = user
+    ? `${user.prenom?.[0] || ""}${user.nom?.[0] || ""}`.toUpperCase()
+    : "GU";
 
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
-
 
   const handleSearch = (e) => {
     if (e.key === "Enter") {
@@ -87,11 +89,15 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
   };
 
   const getNotificationIcon = (type) => {
-    switch(type) {
-      case 'message': return cilEnvelopeOpen;
-      case 'security': return cilShieldAlt;
-      case 'payment': return cilCreditCard;
-      default: return cilBell;
+    switch (type) {
+      case "message":
+        return cilEnvelopeOpen;
+      case "security":
+        return cilShieldAlt;
+      case "payment":
+        return cilCreditCard;
+      default:
+        return cilBell;
     }
   };
 
@@ -112,7 +118,9 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
 
   return (
     <CNavbar
-      className={`custom-navbar ${scrolled ? 'scrolled' : ''} ${darkMode ? 'dark-mode' : ''}`}
+      className={`custom-navbar ${scrolled ? "scrolled" : ""} ${
+        darkMode ? "dark-mode" : ""
+      }`}
       style={{
         marginLeft: isMobile ? 0 : sidebarWidth,
         width: isMobile ? "100%" : `calc(100% - ${sidebarWidth}px)`,
@@ -122,16 +130,16 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
         {/* Section gauche */}
         <div className="navbar-left">
           {isMobile && (
-            <button 
-              className="sidebar-toggle-btn"
-              onClick={onToggleSidebar}
-            >
+            <button className="sidebar-toggle-btn" onClick={onToggleSidebar}>
               <CIcon icon={cilMenu} size="lg" />
             </button>
           )}
-          
+
           {/* Recherche */}
-          <div className={`search-container ${searchOpen ? 'open' : ''}`} ref={searchRef}>
+          <div
+            className={`search-container ${searchOpen ? "open" : ""}`}
+            ref={searchRef}
+          >
             <div className="search-input-wrapper">
               <CIcon icon={cilSearch} className="search-icon" />
               <input
@@ -165,15 +173,24 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
         <div className="navbar-right">
           {/* Mode sombre */}
           <CTooltip content={darkMode ? "Mode clair" : "Mode sombre"}>
-            <button className="nav-btn theme-toggle" onClick={toggleDarkMode}> {/* ✅ Utilisation directe */}
+            <button className="nav-btn theme-toggle" onClick={toggleDarkMode}>
+              {" "}
+              {/* ✅ Utilisation directe */}
               <CIcon icon={darkMode ? cilSun : cilMoon} size="lg" />
             </button>
           </CTooltip>
 
           {/* Notifications */}
-          <CDropdown variant="nav-item" alignment="end" className="notification-dropdown">
+          <CDropdown
+            variant="nav-item"
+            alignment="end"
+            className="notification-dropdown"
+          >
             <CTooltip content="Notifications">
-              <CDropdownToggle className="nav-btn notification-toggle" caret={false}>
+              <CDropdownToggle
+                className="nav-btn notification-toggle"
+                caret={false}
+              >
                 <div className="notification-icon-wrapper">
                   <CIcon icon={cilBell} size="lg" />
                   {unreadCount > 0 && (
@@ -189,15 +206,12 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
               <div className="notification-header">
                 <h6>Notifications</h6>
                 {notifications.length > 0 && (
-                  <button 
-                    className="mark-all-read-btn"
-                    onClick={markAllAsRead}
-                  >
+                  <button className="mark-all-read-btn" onClick={markAllAsRead}>
                     Tout marquer comme lu
                   </button>
                 )}
               </div>
-              
+
               <div className="notification-list">
                 {notifications.length === 0 ? (
                   <div className="empty-notifications">
@@ -208,7 +222,9 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
                   notifications.slice(0, 6).map((notification) => (
                     <CDropdownItem
                       key={notification.id}
-                      className={`notification-item ${notification.read ? 'read' : 'unread'}`}
+                      className={`notification-item ${
+                        notification.read ? "read" : "unread"
+                      }`}
                       onClick={() => markAsRead(notification.id)}
                     >
                       <div className="notification-icon">
@@ -222,14 +238,12 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
                           {formatNotificationTime(notification.date)}
                         </div>
                       </div>
-                      {!notification.read && (
-                        <div className="unread-dot"></div>
-                      )}
+                      {!notification.read && <div className="unread-dot"></div>}
                     </CDropdownItem>
                   ))
                 )}
               </div>
-              
+
               {notifications.length > 0 && (
                 <div className="notification-footer">
                   <NavLink to="/notifications" className="view-all-link">
@@ -241,7 +255,11 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
           </CDropdown>
 
           {/* Profil utilisateur */}
-          <CDropdown variant="nav-item" alignment="end" className="profile-dropdown">
+          <CDropdown
+            variant="nav-item"
+            alignment="end"
+            className="profile-dropdown"
+          >
             <CDropdownToggle className="profile-toggle" caret={false}>
               <div className="profile-avatar-wrapper">
                 <CAvatar
@@ -282,19 +300,30 @@ function Navbar({ sidebarWidth, onToggleSidebar }) {
 
               <div className="dropdown-divider"></div>
 
-              <CDropdownItem component={NavLink} to="/profil" className="dropdown-item-custom">
+              <CDropdownItem
+                component={NavLink}
+                to="/profil"
+                className="dropdown-item-custom"
+              >
                 <CIcon icon={cilUser} className="me-2" />
                 Mon profil
               </CDropdownItem>
-              
-              <CDropdownItem component={NavLink} to="/parametres" className="dropdown-item-custom">
+
+              <CDropdownItem
+                component={NavLink}
+                to="/parametres"
+                className="dropdown-item-custom"
+              >
                 <CIcon icon={cilSettings} className="me-2" />
                 Paramètres
               </CDropdownItem>
 
               <div className="dropdown-divider"></div>
 
-              <CDropdownItem onClick={handleLogout} className="dropdown-item-custom logout-item">
+              <CDropdownItem
+                onClick={handleLogout}
+                className="dropdown-item-custom logout-item"
+              >
                 <CIcon icon={cilAccountLogout} className="me-2" />
                 Déconnexion
               </CDropdownItem>

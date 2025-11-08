@@ -1,6 +1,6 @@
 import { authHeader } from './authHeader';
 
-const API_URL = 'https://localhost:7134/api';
+const API_URL = 'http://localhost:5275/api';
 
 const handleResponse = async (response) => {
   console.log('📡 Statut HTTP:', response.status);
@@ -494,6 +494,7 @@ export const interventionService = {
     }
   },
 
+
   updateIntervention: async (id, interventionData) => {
     try {
       const response = await fetch(`${API_URL}/interventions/${id}`, {
@@ -635,10 +636,9 @@ export const dataService = {
     }
   },
 
-  getTechniciens: async () => {
+   getUtilisateurs: async () => {
     try {
-      // Si vous avez un endpoint pour les techniciens
-      const response = await fetch(`${API_URL}/utilisateurs/techniciens`, {
+      const response = await fetch(`${API_URL}/utilisateurs`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
@@ -648,9 +648,43 @@ export const dataService = {
       
       return await handleResponse(response);
     } catch (error) {
-      console.error('Erreur lors de la récupération des techniciens:', error);
-      // Retourner une liste par défaut si l'endpoint n'existe pas
-      return ["Nacro", "Youssouf", "Issouf"];
+      console.error('Erreur lors de la récupération des utilisateurs:', error);
+      throw error;
     }
-  }
+  },
+
+  getIncidents: async () => {
+    try {
+      const response = await fetch(`${API_URL}/incidents`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+      });
+      
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des incidents:', error);
+      throw error;
+    }
+  },
+
+  getInterventions: async () => {
+    try {
+      const response = await fetch(`${API_URL}/interventions`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json',
+          ...authHeader()
+        },
+      });
+
+      return await handleResponse(response);
+    } catch (error) {
+      console.error('Erreur lors de la récupération des interventions:', error);
+      throw error;
+    }
+  },
+
 };

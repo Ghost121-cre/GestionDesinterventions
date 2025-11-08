@@ -2,11 +2,15 @@ import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useInterventions } from "../context/InterventionContext";
 import { useIncident } from "../context/IncidentContext";
-import { dataService } from "../services/apiService";
 import "bootstrap/dist/css/bootstrap.min.css";
 import styles from "../assets/css/InterventionForm.module.css";
 import { toast } from "react-toastify";
 import CIcon from "@coreui/icons-react";
+import {
+  interventionService,
+  dataService,
+  userService,
+} from "../services/apiService";
 import {
   cilCalendar,
   cilUser,
@@ -28,7 +32,7 @@ function InterventionForm() {
   const { incidents } = useIncident();
 
   const incidentFromNav = location.state?.incident;
-  const techniciens = ["Nacro", "Youssouf", "Issouf"];
+  const [techniciens, setTechniciens] = useState([]);
   const fileInputRef = useRef(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -37,15 +41,37 @@ function InterventionForm() {
   const [produits, setProduits] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  // Charger les techniciens depuis l'API
+  useEffect(() => {
+    const loadTechniciens = async () => {
+      try {
+        console.log("🔄 Chargement des techniciens...");
+        const users = await userService.getUsers();
+
+        const techniciensTrouves = users.filter(
+          (user) => user.role && user.role.toLowerCase() === "technicien"
+        );
+
+        console.log("👨‍💼 Techniciens trouvés:", techniciensTrouves);
+        setTechniciens(techniciensTrouves);
+      } catch (error) {
+        console.error("❌ Erreur chargement techniciens:", error);
+        toast.error("Erreur lors du chargement des techniciens");
+      }
+    };
+
+    loadTechniciens();
+  }, []);
+
   const [form, setForm] = useState({
     clientId: "",
     produitId: "",
     description: "",
     datetime: "",
-    technicien: "",
+    technicienId: "",
     incidentId: "",
     images: [],
-    priorite: "medium",
+    priorite: "",
   });
 
   const [previews, setPreviews] = useState([]);
@@ -116,7 +142,7 @@ function InterventionForm() {
       if (incidentFromNav.images && incidentFromNav.images.length > 0) {
         const imageUrls = incidentFromNav.images.map((img) => {
           if (typeof img === "string") return img;
-          if (img.chemin) return `https://localhost:7134${img.chemin}`;
+          if (img.chemin) return `http://localhost:5275${img.chemin}`;
           return URL.createObjectURL(img);
         });
         setPreviews(imageUrls);
@@ -138,7 +164,7 @@ function InterventionForm() {
         if (selectedIncident.images && selectedIncident.images.length > 0) {
           previewUrls = selectedIncident.images.map((img) => {
             if (typeof img === "string") return img;
-            if (img.chemin) return `https://localhost:7134${img.chemin}`;
+            if (img.chemin) return `http://localhost:5275${img.chemin}`;
             return URL.createObjectURL(img);
           });
         }
@@ -207,7 +233,8 @@ function InterventionForm() {
       !form.clientId ||
       !form.produitId ||
       !form.description ||
-      !form.datetime
+      !form.datetime ||
+      !form.technicienId
     ) {
       toast.error("⚠️ Veuillez remplir tous les champs obligatoires !");
       return;
@@ -221,15 +248,63 @@ function InterventionForm() {
         produitId: parseInt(form.produitId),
         description: form.description,
         datetime: form.datetime,
-        technicien: form.technicien,
+        technicienId: parseInt(form.technicienId),
         incidentId: form.incidentId ? parseInt(form.incidentId) : null,
-        images: form.images,
         priorite: form.priorite,
+        datePlanifiee: form.datetime,
         statut: "En attente",
         createdAt: new Date().toISOString(),
       };
 
-      await addIntervention(newIntervention);
+      console.log("📤 Création intervention SANS images:", newIntervention);
+
+      // 1. Créer l'intervention d'abord
+      const interventionCreee = await addIntervention(newIntervention);
+      console.log("✅ Intervention créée:", interventionCreee);
+
+      // 2. COPIER les images de l'incident vers l'intervention
+      if (form.incidentId && form.images && form.images.length > 0) {
+        console.log("📸 Copie des images depuis l'incident...", form.images);
+
+        for (const image of form.images) {
+          try {
+            // Si c'est déjà un File object (nouvelle image ajoutée)
+            if (image instanceof File) {
+              await interventionService.uploadImage(
+                interventionCreee.id,
+                image
+              );
+              console.log("✅ Nouvelle image uploadée:", image.name);
+            }
+            // Si c'est une URL d'image existante (depuis l'incident)
+            else if (typeof image === "string" || image.url || image.chemin) {
+              await copyImageFromIncident(interventionCreee.id, image);
+              console.log("✅ Image d'incident copiée:", image);
+            }
+          } catch (uploadError) {
+            console.error("❌ Erreur copie image:", uploadError);
+          }
+        }
+      }
+
+      // 3. Uploader les nouvelles images (sans incident)
+      if (!form.incidentId && form.images && form.images.length > 0) {
+        console.log("📸 Upload des nouvelles images...");
+        for (const imageFile of form.images) {
+          if (imageFile instanceof File) {
+            try {
+              await interventionService.uploadImage(
+                interventionCreee.id,
+                imageFile
+              );
+              console.log("✅ Nouvelle image uploadée:", imageFile.name);
+            } catch (uploadError) {
+              console.error("❌ Erreur upload image:", uploadError);
+            }
+          }
+        }
+      }
+
       toast.success("✅ Intervention ajoutée avec succès !");
 
       // Reset formulaire
@@ -238,10 +313,10 @@ function InterventionForm() {
         produitId: "",
         description: "",
         datetime: "",
-        technicien: "",
+        technicienId: "",
         incidentId: "",
         images: [],
-        priorite: "medium",
+        priorite: "",
       });
       previews.forEach((url) => URL.revokeObjectURL(url));
       setPreviews([]);
@@ -249,9 +324,55 @@ function InterventionForm() {
 
       setTimeout(() => navigate("/interventions"), 1500);
     } catch (error) {
+      console.error("❌ Erreur création intervention:", error);
       toast.error("❌ Erreur lors de l'ajout de l'intervention");
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  // Fonction pour copier une image d'incident vers intervention
+  const copyImageFromIncident = async (interventionId, imageData) => {
+    try {
+      // Récupérer l'URL de l'image
+      let imageUrl = "";
+
+      if (typeof imageData === "string") {
+        imageUrl = imageData;
+      } else if (imageData.url) {
+        imageUrl = imageData.url;
+      } else if (imageData.chemin) {
+        imageUrl = imageData.chemin;
+      } else if (imageData.nomFichier) {
+        imageUrl = `http://localhost:5275/uploads/${imageData.nomFichier}`;
+      }
+
+      if (!imageUrl) {
+        console.warn("⚠️ URL d'image non trouvée:", imageData);
+        return;
+      }
+
+      console.log("🖼️ Copie d'image depuis:", imageUrl);
+
+      // Télécharger l'image depuis l'URL
+      const response = await fetch(imageUrl);
+      if (!response.ok) {
+        throw new Error(`Erreur téléchargement image: ${response.status}`);
+      }
+
+      const blob = await response.blob();
+
+      // Créer un File object à partir du blob
+      const fileName = imageUrl.split("/").pop() || `image-${Date.now()}.jpg`;
+      const file = new File([blob], fileName, { type: blob.type });
+
+      // Uploader vers l'intervention
+      await interventionService.uploadImage(interventionId, file);
+
+      console.log("✅ Image copiée avec succès:", fileName);
+    } catch (error) {
+      console.error("❌ Erreur lors de la copie d'image:", error);
+      throw error;
     }
   };
 
@@ -641,19 +762,21 @@ function InterventionForm() {
                   <div className={styles.formGroup}>
                     <label className={styles.label}>
                       <CIcon icon={cilUser} className={styles.labelIcon} />
-                      Technicien assigné
+                      Technicien assigné *
                     </label>
                     <select
                       className={styles.select}
-                      value={form.technicien}
+                      value={form.technicienId}
                       onChange={(e) =>
-                        setForm({ ...form, technicien: e.target.value })
+                        setForm({ ...form, technicienId: e.target.value })
                       }
+                      required
                     >
                       <option value="">-- Sélectionner un technicien --</option>
-                      {techniciens.map((t, idx) => (
-                        <option key={idx} value={t}>
-                          {t}
+                      {techniciens.map((tech) => (
+                        <option key={tech.id} value={tech.id}>
+                          {tech.prenom} {tech.nom}{" "}
+                          {tech.email ? `(${tech.email})` : ""}
                         </option>
                       ))}
                     </select>

@@ -33,11 +33,14 @@
   border-bottom: none !important;
 }
 
-/* Header amélioré */
+/* ==================== */
+/* HEADER BLANC MINIMALISTE */
+/* ==================== */
+
 .sidebar-header {
-  padding: 20px 16px;
-  border-bottom: 1px solid var(--border-color);
-  background: linear-gradient(135deg, var(--primary-color) 0%, var(--primary-hover) 100%);
+  padding: 24px 16px;
+  border-bottom: 1px solid #f0f0f0;
+  background: #ffffff !important;
   min-height: 80px;
   display: flex;
   align-items: center;
@@ -46,28 +49,40 @@
 
 .sidebar-brand {
   width: 100%;
+  display: flex;
+  justify-content: center;
 }
 
 .logo-container {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 8px;
-  border-radius: 12px;
-  background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
-  transition: all 0.3s ease;
+  justify-content: center;
+  padding: 0;
+  background: transparent !important;
 }
 
-/* ✅ Styles améliorés pour l'image avec fallback */
 .logo-img {
-  width: 40px;
-  height: 40px;
+  width: 65px;
+  height: 65px;
   object-fit: contain;
-  transition: transform 0.3s ease;
-  border-radius: 6px;
-  background: rgba(255, 255, 255, 0.2); /* Fond de fallback */
+  transition: all 0.3s ease;
+  border-radius: 10px;
+  background: transparent;
+  filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.08));
 }
+
+.logo-img:hover {
+  transform: scale(1.08);
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.12));
+}
+
+/* Suppression totale du texte */
+.logo-text,
+.logo-title,
+.logo-subtitle {
+  display: none !important;
+}
+
 
 /* Fallback si l'image ne charge pas */
 .logo-img:before {
@@ -86,33 +101,6 @@
 
 .logo-container:hover .logo-img {
   transform: scale(1.1);
-}
-
-.logo-text {
-  display: flex;
-  flex-direction: column;
-  line-height: 1.2;
-}
-
-.logo-title {
-  font-size: 1.25rem;
-  font-weight: 800;
-  color: white;
-  letter-spacing: 0.5px;
-}
-
-.logo-subtitle {
-  font-size: 0.75rem;
-  font-weight: 500;
-  color: rgba(255, 255, 255, 0.8);
-  opacity: 0;
-  transform: translateY(10px);
-  transition: all 0.3s ease;
-}
-
-.sidebar-fixed:hover .logo-subtitle {
-  opacity: 1;
-  transform: translateY(0);
 }
 
 /* Navigation améliorée */
@@ -213,7 +201,7 @@
 }
 
 .nav-link.active .nav-label {
-  color: white;
+  color: black;
   font-weight: 600;
 }
 
@@ -288,10 +276,16 @@
   box-shadow: 0 6px 16px rgba(37, 99, 235, 0.4);
 }
 
-/* ✅ Assurer que le bouton n'apparaît qu'en mobile */
+/* Mobile */
 @media (max-width: 768px) {
-  .hamburger-btn {
-    display: flex !important;
+  .sidebar-header {
+    padding: 20px 12px;
+    min-height: 70px;
+  }
+  
+  .logo-img {
+    width: 55px;
+    height: 55px;
   }
 }
 
@@ -400,10 +394,6 @@
   animation: slideOut 0.4s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-/* ==================== */
-/* STYLES MODE SOMBRE - ICÔNES & TEXTE */
-/* ==================== */
-
 /* 🎯 ICÔNES EN MODE SOMBRE */
 [data-theme="dark"] .nav-icon {
   color: var(--text-secondary) !important; /* Gris clair pour les icônes normales */
@@ -450,12 +440,12 @@
 /* 🎯 COULEURS DIFFÉRENTES PAR SECTION EN MODE SOMBRE */
 /* Section Dashboard/Accueil - Vert */
 [data-theme="dark"] .nav-section:nth-of-type(1) .nav-icon {
-  color: var(--success-color) !important;
+  color: var(--info-color) !important;
 }
 
 /* Section Gestion - Orange */
 [data-theme="dark"] .nav-section:nth-of-type(2) .nav-icon {
-  color: var(--warning-color) !important;
+  color: var(--info-color) !important;
 }
 
 /* Section Documents - Cyan */
@@ -482,10 +472,12 @@
   background: var(--bg-primary);
   box-shadow: 2px 0 30px rgba(0, 0, 0, 0.5);
 }
-
+/* Mode sombre - header reste blanc */
 [data-theme="dark"] .sidebar-header {
-  background: linear-gradient(135deg, var(--primary-color) 0%, #6366f1 100%);
+  background: #ffffff !important;
+  border-bottom: 1px solid #e5e5e5;
 }
+
 
 [data-theme="dark"] .logo-container {
   background: rgba(255, 255, 255, 0.05);
@@ -572,3 +564,4 @@
   padding: 6px 8px;
   margin-bottom: 4px;
 }
+

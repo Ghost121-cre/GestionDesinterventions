@@ -202,14 +202,12 @@ function Incident() {
 
     return images
       .map((img) => {
-        // Si c'est déjà une URL complète
         if (typeof img === "string" && img.startsWith("http")) {
           return img;
         }
 
-        // Si c'est un chemin relatif
         if (typeof img === "string") {
-          return `https://localhost:7134${img}`;
+          return `http://localhost:5275${img}`;
         }
 
         // Si c'est un objet image
@@ -217,13 +215,13 @@ function Incident() {
           if (img.chemin) {
             return img.chemin.startsWith("http")
               ? img.chemin
-              : `https://localhost:7134${img.chemin}`;
+              : `http://localhost:5275${img.chemin}`;
           } else if (img.url) {
             return img.url.startsWith("http")
               ? img.url
-              : `https://localhost:7134${img.url}`;
+              : `http://localhost:5275${img.url}`;
           } else if (img.nomFichier) {
-            return `https://localhost:7134/uploads/incidents/${img.nomFichier}`;
+            return `http://localhost:5275/uploads/incidents/${img.nomFichier}`;
           }
         }
 
@@ -480,7 +478,6 @@ function Incident() {
                   <td className={styles.imagesCell}>
                     <div className={styles.previewContainer}>
                       {i.images && i.images.length > 0 ? (
-                        // CORRECTION : Utiliser getImageUrls une seule fois pour toutes les images
                         getImageUrls(i.images)
                           .slice(0, 3)
                           .map((imageUrl, idx) => (

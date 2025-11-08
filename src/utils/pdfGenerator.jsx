@@ -1,5 +1,14 @@
-import { pdf, Document, Page, Text, View, StyleSheet, Image } from "@react-pdf/renderer";
-import logo from "../assets/images/activ.png"; // adapte le chemin selon ton projet
+import {
+  pdf,
+  Document,
+  Page,
+  Text,
+  View,
+  StyleSheet,
+  Image,
+} from "@react-pdf/renderer";
+import logo from "../assets/images/activ.png";
+import { rapportService } from "../services/rapportService";
 
 const styles = StyleSheet.create({
   page: {
@@ -59,7 +68,6 @@ const styles = StyleSheet.create({
   fieldLabel: {
     fontWeight: "bold",
     marginBottom: 2,
-   
   },
   sectionTitle: {
     backgroundColor: "#031c36ff",
@@ -108,31 +116,65 @@ const styles = StyleSheet.create({
 });
 
 const RapportPDFDocument = ({ rapport, intervention }) => {
+  // Récupérer les heures depuis l'intervention
+  const getHeuresIntervention = () => {
+    // Vérifiez d'abord dans le rapport, puis dans l'intervention
+    if (rapport.heureDebut && rapport.heureFin) {
+      return {
+        heureDebut: rapport.heureDebut,
+        heureFin: rapport.heureFin,
+      };
+    }
+    if (intervention?.heureDebut && intervention?.heureFin) {
+      return {
+        heureDebut: intervention.heureDebut,
+        heureFin: intervention.heureFin,
+      };
+    }
+    return {
+      heureDebut: "",
+      heureFin: "",
+    };
+  };
+
+  const heures = getHeuresIntervention();
+
   const formatDate = (dateString) => {
     if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleDateString("fr-FR", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
+    try {
+      const date = new Date(dateString);
+      return isNaN(date.getTime())
+        ? ""
+        : date.toLocaleDateString("fr-FR", {
+            day: "2-digit",
+            month: "2-digit",
+            year: "numeric",
+          });
+    } catch {
+      return "";
+    }
   };
 
-  const formatTime = (dateString) => {
-    if (!dateString) return "";
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("fr-FR", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
+  const formatTime = (timeString) => {
+    if (!timeString) return "";
 
-  const generateInterventionNumber = () => {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = String(now.getMonth() + 1).padStart(2, "0");
-    const random = String(Math.floor(Math.random() * 1000)).padStart(3, "0");
-    return `${year}-${month}-${random}`;
+    // Si c'est déjà une heure formatée (HH:MM)
+    if (typeof timeString === "string" && timeString.includes(":")) {
+      return timeString;
+    }
+
+    // Si c'est une date/heure complète
+    try {
+      const date = new Date(timeString);
+      return isNaN(date.getTime())
+        ? ""
+        : date.toLocaleTimeString("fr-FR", {
+            hour: "2-digit",
+            minute: "2-digit",
+          });
+    } catch {
+      return "";
+    }
   };
 
   return (
@@ -143,44 +185,53 @@ const RapportPDFDocument = ({ rapport, intervention }) => {
           <View style={styles.headerContainer}>
             <Image src={logo} style={styles.logo} />
             <View style={styles.headerRight}>
-              <Text style={styles.headerTitle}>FICHE D’INTERVENTION</Text>
+              <Text style={styles.headerTitle}>FICHE D'INTERVENTION</Text>
               <View style={styles.infoBox}>
                 <Text>
                   <Text style={styles.label}>Numéro :</Text>{" "}
-                  {intervention?.id || generateInterventionNumber()}
+                  {intervention?.id || rapport.interventionId || "—"}
                 </Text>
               </View>
               <View style={styles.infoBox}>
                 <Text>
                   <Text style={styles.label}>Date :</Text>{" "}
-                  {formatDate(rapport.date || intervention?.datetime)}
+                  {formatDate(rapport.dateRapport || intervention?.datetime)}
                 </Text>
               </View>
               <View style={styles.infoBox}>
                 <Text>
-                  <Text style={styles.label}>Horaire :</Text> De{" "}
-                  {formatTime(intervention?.startedAt) || "HH:MM"} à{" "}
-                  {formatTime(intervention?.endedAt) || "HH:MM"}
+                  <Text style={styles.label}>Horaire :</Text>{" "}
+                  {heures.heureDebut && heures.heureFin
+                    ? `De ${formatTime(heures.heureDebut)} à ${formatTime(
+                        heures.heureFin
+                      )}`
+                    : "Non spécifié"}
                 </Text>
               </View>
             </View>
           </View>
-
           <View style={styles.separator} />
 
           {/* Informations principales */}
           <View>
             <View style={styles.fieldBlock}>
               <Text style={styles.fieldLabel}>Client :</Text>
-              <Text>{rapport.client || intervention?.client || "—"}</Text>
+              <Text>{rapport.client || intervention?.client?.nom || "—"}</Text>
             </View>
+
+            {/* Section Intervenant(s) */}
             <View style={styles.fieldBlock}>
-              <Text style={styles.fieldLabel}>Intervenant :</Text>
-              <Text>{rapport.intervenant || intervention?.technicien || "—"}</Text>
+              <Text style={styles.fieldLabel}>Intervenant(s) :</Text>
+              <Text>
+                {rapport.intervenant && rapport.intervenant.length > 0
+                  ? rapport.intervenant.join(", ")
+                  : intervention?.technicien || "—"}
+              </Text>
             </View>
+
             <View style={styles.fieldBlock}>
-              <Text style={styles.fieldLabel}>Type d’intervention :</Text>
-              <Text>{rapport.type || "—"}</Text>
+              <Text style={styles.fieldLabel}>Type d'intervention :</Text>
+              <Text>{rapport.typeIntervention || "—"}</Text>
             </View>
           </View>
 
@@ -197,13 +248,17 @@ const RapportPDFDocument = ({ rapport, intervention }) => {
           {/* OBSERVATION */}
           <Text style={styles.sectionTitle}>OBSERVATION</Text>
           <View style={styles.sectionContent}>
-            <Text>{rapport.observation || "Aucune observation"}</Text>
+            <Text>{rapport.observations || "Aucune observation"}</Text>
           </View>
 
           {/* TRAVAUX EFFECTUÉS */}
           <Text style={styles.sectionTitle}>TRAVAUX EFFECTUÉS</Text>
           <View style={styles.sectionContent}>
-            <Text>{rapport.travaux || "Aucun travail spécifié"}</Text>
+            <Text>
+              {rapport.travauxEffectues ||
+                rapport.travaux ||
+                "Aucun travail spécifié"}
+            </Text>
           </View>
 
           {/* Signatures */}
@@ -214,7 +269,7 @@ const RapportPDFDocument = ({ rapport, intervention }) => {
             </View>
             <View style={styles.signatureCell}>
               <Text style={styles.signatureHeader}>CLIENT</Text>
-              <Text>{rapport.client || "—"}</Text>
+              <Text>{rapport.client || intervention?.client?.nom || "—"}</Text>
             </View>
             <View style={styles.signatureCellLast}>
               <Text style={styles.signatureHeader}>ACTIV'</Text>
@@ -227,25 +282,98 @@ const RapportPDFDocument = ({ rapport, intervention }) => {
   );
 };
 
-// Fonction principale
 export const generateRapportPDF = async (rapport, intervention) => {
   try {
+    console.log("🔍 DEBUG - Début de la génération du PDF");
+    console.log("🔍 DEBUG - Rapport:", rapport);
+    console.log("🔍 DEBUG - Intervention:", intervention);
+    console.log("🔍 DEBUG - Type de rapport:", typeof rapport);
+    console.log("🔍 DEBUG - Type d'intervention:", typeof intervention);
+
+    // Vérification des données essentielles
+    if (!rapport) {
+      throw new Error("Le rapport est null ou undefined");
+    }
+
+    if (!intervention) {
+      console.warn(
+        "⚠️ Aucune intervention fournie, utilisation des données du rapport uniquement"
+      );
+    }
+
+    // 1. Création du document PDF
+    console.log("🔍 DEBUG - Création du document PDF...");
     const pdfDocument = (
-      <RapportPDFDocument rapport={rapport} intervention={intervention} />
+      <RapportPDFDocument rapport={rapport} intervention={intervention || {}} />
     );
-    const blob = await pdf(pdfDocument).toBlob();
+
+    console.log("🔍 DEBUG - Document PDF créé, génération du blob...");
+
+    // 2. Génération du PDF avec gestion d'erreur spécifique
+    let blob;
+    try {
+      const pdfInstance = pdf(pdfDocument);
+      blob = await pdfInstance.toBlob();
+      console.log("🔍 DEBUG - Blob généré avec succès, taille:", blob.size);
+    } catch (pdfError) {
+      console.error("❌ Erreur lors de la génération du blob PDF:", pdfError);
+      throw new Error(`Échec de la génération PDF: ${pdfError.message}`);
+    }
+
+    // 3. Téléchargement
+    console.log("🔍 DEBUG - Préparation du téléchargement...");
+
+    if (typeof window === "undefined") {
+      throw new Error("Navigation non disponible (environnement serveur)");
+    }
 
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
 
-    const interventionNumber = intervention?.id || "INTERVENTION";
+    const interventionNumber = intervention?.id || rapport.id || "unknown";
     link.download = `FICHE_INTERVENTION_${interventionNumber}.pdf`;
+
+    console.log("🔍 DEBUG - Téléchargement du fichier:", link.download);
+
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(url);
+    document.body.removeChild(link);
+
+    // Nettoyage
+    setTimeout(() => {
+      URL.revokeObjectURL(url);
+      console.log("🔍 DEBUG - URL libérée");
+    }, 1000);
+
+    console.log("🎉 Rapport PDF généré et téléchargé avec succès!");
+
+    return {
+      success: true,
+      rapportId: rapport.id,
+      fileName: link.download,
+    };
   } catch (error) {
-    console.error("Erreur lors de la génération du PDF :", error);
+    console.error("❌ ERREUR DÉTAILLÉE - Génération PDF échouée:");
+    console.error("🔍 Message:", error.message);
+    console.error("🔍 Stack:", error.stack);
+    console.error("🔍 Type:", typeof error);
+
+    // Message d'erreur utilisateur plus clair
+    let userMessage = "Erreur lors de la génération du PDF";
+
+    if (
+      error.message.includes("container") ||
+      error.message.includes("document")
+    ) {
+      userMessage =
+        "Erreur technique: environnement de génération PDF non supporté";
+    } else if (error.message.includes("blob")) {
+      userMessage = "Erreur lors de la création du fichier PDF";
+    } else if (error.message.includes("navigation")) {
+      userMessage = "Impossible de télécharger le PDF dans cet environnement";
+    }
+
+    throw new Error(userMessage);
   }
 };
-
-export default generateRapportPDF;

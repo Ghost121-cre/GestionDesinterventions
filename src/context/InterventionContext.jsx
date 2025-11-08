@@ -19,7 +19,15 @@ export const InterventionProvider = ({ children }) => {
     try {
       setLoading(true);
       const interventionsData = await interventionService.getInterventions();
-      console.log("📥 Interventions chargées:", interventionsData);
+      console.log(
+        "📥 Interventions chargées avec images:",
+        interventionsData.map((i) => ({
+          id: i.id,
+          hasImages: !!i.images,
+          imagesCount: i.images?.length || 0,
+          images: i.images,
+        }))
+      );
       setInterventions(interventionsData);
     } catch (error) {
       console.error("Erreur chargement interventions:", error);
@@ -28,29 +36,6 @@ export const InterventionProvider = ({ children }) => {
     }
   };
 
-  // Dans votre contexte IncidentContext, ajoutez ce debug
-  const loadIncidents = async () => {
-    try {
-      setLoading(true);
-      const incidentsData = await incidentService.getIncidents();
-      console.log("📥 STRUCTURE COMPLÈTE DES INCIDENTS:", incidentsData);
-
-      if (incidentsData.length > 0) {
-        console.log("📥 PREMIER INCIDENT DÉTAILLÉ:", incidentsData[0]);
-        console.log("📥 CLIENT DU PREMIER INCIDENT:", incidentsData[0].client);
-        console.log(
-          "📥 PRODUIT DU PREMIER INCIDENT:",
-          incidentsData[0].produit
-        );
-      }
-
-      setIncidents(incidentsData);
-    } catch (error) {
-      console.error("Erreur chargement incidents:", error);
-    } finally {
-      setLoading(false);
-    }
-  };
   // Ajouter une intervention
   const addIntervention = async (data) => {
     try {

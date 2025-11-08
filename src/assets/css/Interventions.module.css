@@ -983,6 +983,21 @@
   gap: 8px;
 }
 
+/* Dans votre fichier CSS */
+.form-select[multiple] {
+  min-height: 120px;
+}
+
+.form-select[multiple] option {
+  padding: 8px 12px;
+  border-bottom: 1px solid #eee;
+}
+
+.form-select[multiple] option:checked {
+  background-color: #007bff;
+  color: white;
+}
+
 .offcanvasTitleIcon {
   color: var(--primary-color);
 }

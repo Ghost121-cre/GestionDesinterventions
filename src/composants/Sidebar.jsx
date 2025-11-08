@@ -1,12 +1,7 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
 import "../assets/css/Sidebar.css";
-// Essayez ces chemins alternatifs pour l'image :
 import activ from "../assets/images/activ.png";
-// ou si ça ne marche pas :
-// import activ from "/src/assets/images/activ.png";
-// ou utilisez un chemin relatif :
-// const activ = "/src/assets/images/activ.png";
 
 import {
   CSidebar,
@@ -15,19 +10,19 @@ import {
   CSidebarNav,
   CNavItem,
   CNavTitle,
-} from '@coreui/react';
-import CIcon from '@coreui/icons-react';
-import { 
-  cilRecycle, 
-  cilSettings, 
-  cilDescription, 
-  cilCalendar, 
-  cilUser, 
-  cilHome, 
-  cilWarning, 
+} from "@coreui/react";
+import CIcon from "@coreui/icons-react";
+import {
+  cilRecycle,
+  cilSettings,
+  cilDescription,
+  cilCalendar,
+  cilUser,
+  cilHome,
+  cilWarning,
   cilSpeedometer,
-  cilMenu // ✅ Icône hamburger ajoutée
-} from '@coreui/icons';
+  cilMenu, // ✅ Icône hamburger ajoutée
+} from "@coreui/icons";
 
 function Sidebar({ sidebarWidth, setSidebarWidth }) {
   const expandedWidth = 250;
@@ -39,8 +34,8 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
   useEffect(() => {
     const handleResize = () => setIsMobile(window.innerWidth < 768);
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   const toggleMobileSidebar = () => setIsOpenMobile(!isOpenMobile);
@@ -48,7 +43,8 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
   // ✅ Fonction de fallback pour l'image
   const handleImageError = (e) => {
     console.log("Image non trouvée, utilisation du fallback");
-    e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%236366f1' rx='8'/%3E%3Ctext x='20' y='24' font-family='Arial' font-size='14' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E";
+    e.target.src =
+      "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='40' height='40' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' fill='%236366f1' rx='8'/%3E%3Ctext x='20' y='24' font-family='Arial' font-size='14' fill='white' text-anchor='middle'%3EA%3C/text%3E%3C/svg%3E";
     e.target.alt = "Logo Activ Fallback";
   };
 
@@ -58,14 +54,17 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
         to={to}
         className={({ isActive }) =>
           isActive
-            ? sidebarWidth === collapsedWidth ? "nav-link active collapsed" : "nav-link active"
+            ? sidebarWidth === collapsedWidth
+              ? "nav-link active collapsed"
+              : "nav-link active"
             : "nav-link"
         }
         onClick={() => isMobile && setIsOpenMobile(false)}
       >
         <div className="nav-item-content">
           <CIcon customClassName="nav-icon" icon={icon} />
-          {(!isMobile && sidebarWidth !== collapsedWidth) || (isMobile && isOpenMobile) ? (
+          {(!isMobile && sidebarWidth !== collapsedWidth) ||
+          (isMobile && isOpenMobile) ? (
             <span className="nav-label">{label}</span>
           ) : null}
         </div>
@@ -79,7 +78,7 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
       className="border-end sidebar-fixed"
       style={{
         width: sidebarWidth,
-        transition: 'width 0.3s',
+        transition: "width 0.3s",
       }}
       onMouseEnter={() => !isMobile && setSidebarWidth(expandedWidth)}
       onMouseLeave={() => !isMobile && setSidebarWidth(collapsedWidth)}
@@ -87,52 +86,46 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
       <CSidebarHeader className="sidebar-header">
         <CSidebarBrand className="sidebar-brand">
           <div className="logo-container">
-            {/* ✅ Ajout de onError pour le fallback */}
-            <img 
-              src={activ} 
-              alt="Logo Activ" 
+            {/* ✅ Logo seul sans texte */}
+            <img
+              src={activ}
+              alt="Logo Activ"
               className="logo-img"
               onError={handleImageError}
             />
-            {sidebarWidth !== collapsedWidth && (
-              <div className="logo-text">
-                <span className="logo-title">ACTIV</span>
-                <span className="logo-subtitle">Gestion des interventions</span>
-              </div>
-            )}
           </div>
         </CSidebarBrand>
       </CSidebarHeader>
 
       <CSidebarNav className="sidebar-nav">
         <CNavTitle className="sidebar-title">
-          {sidebarWidth !== collapsedWidth ? 'Navigation' : '•••'}
+          {sidebarWidth !== collapsedWidth ? "Navigation" : "•••"}
         </CNavTitle>
-        
+
         <div className="nav-section">
           {renderNavItem("/dashboard", cilSpeedometer, "Dashboard")}
           {renderNavItem("/accueil", cilHome, "Accueil")}
         </div>
-        
+
         <div className="nav-section">
           <div className="section-label">
-            {sidebarWidth !== collapsedWidth ? 'Gestion' : '⚙️'}
+            {sidebarWidth !== collapsedWidth ? "Gestion" : "⚙️"}
           </div>
           {renderNavItem("/incidents", cilWarning, "Incidents")}
           {renderNavItem("/interventions", cilRecycle, "Interventions")}
           {renderNavItem("/calendrier", cilCalendar, "Calendrier")}
         </div>
-        
+
         <div className="nav-section">
           <div className="section-label">
-            {sidebarWidth !== collapsedWidth ? 'Documents' : '📄'}
+            {sidebarWidth !== collapsedWidth ? "Documents" : "📄"}
           </div>
           {renderNavItem("/rapports", cilDescription, "Rapports")}
         </div>
-        
+
         <div className="nav-section">
           <div className="section-label">
-            {sidebarWidth !== collapsedWidth ? 'Compte' : '👤'}
+            {sidebarWidth !== collapsedWidth ? "Compte" : "👤"}
           </div>
           {renderNavItem("/profil", cilUser, "Profil")}
           {renderNavItem("/parametres", cilSettings, "Paramètres")}
@@ -144,45 +137,41 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
   // Mobile sidebar
   const mobileSidebar = (
     <>
-      <div className={`mobile-sidebar ${isOpenMobile ? 'open' : ''}`}>
+      <div className={`mobile-sidebar ${isOpenMobile ? "open" : ""}`}>
         <div className="mobile-sidebar-content">
           <CSidebarHeader className="sidebar-header">
             <CSidebarBrand className="sidebar-brand">
               <div className="logo-container">
-                <img 
-                  src={activ} 
-                  alt="Logo Activ" 
+                <img
+                  src={activ}
+                  alt="Logo Activ"
                   className="logo-img"
                   onError={handleImageError}
                 />
-                <div className="logo-text">
-                  <span className="logo-title">ACTIV</span>
-                  <span className="logo-subtitle">Gestion des interventions</span>
-                </div>
               </div>
             </CSidebarBrand>
           </CSidebarHeader>
-          
+
           <CSidebarNav className="sidebar-nav">
             <CNavTitle className="sidebar-title">Navigation</CNavTitle>
-            
+
             <div className="nav-section">
               {renderNavItem("/dashboard", cilSpeedometer, "Dashboard")}
               {renderNavItem("/accueil", cilHome, "Accueil")}
             </div>
-            
+
             <div className="nav-section">
               <div className="section-label">Gestion</div>
               {renderNavItem("/incidents", cilWarning, "Incidents")}
               {renderNavItem("/interventions", cilRecycle, "Interventions")}
               {renderNavItem("/calendrier", cilCalendar, "Calendrier")}
             </div>
-            
+
             <div className="nav-section">
               <div className="section-label">Documents</div>
               {renderNavItem("/rapports", cilDescription, "Rapports")}
             </div>
-            
+
             <div className="nav-section">
               <div className="section-label">Compte</div>
               {renderNavItem("/profil", cilUser, "Profil")}
@@ -191,7 +180,9 @@ function Sidebar({ sidebarWidth, setSidebarWidth }) {
           </CSidebarNav>
         </div>
       </div>
-      {isOpenMobile && <div className="sidebar-overlay" onClick={toggleMobileSidebar}></div>}
+      {isOpenMobile && (
+        <div className="sidebar-overlay" onClick={toggleMobileSidebar}></div>
+      )}
     </>
   );
 

@@ -4,10 +4,10 @@ import { UserContext } from "../context/UserContext";
 import { useInterventions } from "../context/InterventionContext";
 import { useIncident } from "../context/IncidentContext";
 import CIcon from "@coreui/icons-react";
-import { 
-  cilPencil, 
-  cilCheck, 
-  cilX, 
+import {
+  cilPencil,
+  cilCheck,
+  cilX,
   cilUser,
   cilEnvelopeOpen,
   cilPhone,
@@ -19,58 +19,74 @@ import {
   cilCheckCircle,
   cilWarning,
   cilChartLine,
-  cilLockLocked
+  cilLockLocked,
 } from "@coreui/icons";
 
 function Profil() {
   const { user, setUser } = useContext(UserContext);
   const { interventions } = useInterventions();
   const { incidents } = useIncident();
-  
+
   const [editMode, setEditMode] = useState(false);
   const [passwordEditMode, setPasswordEditMode] = useState(false);
-  const [formData, setFormData] = useState(user || {
-    prenom: "",
-    nom: "",
-    email: "",
-    telephone: "",
-    bio: "",
-    role: "",
-    pays: "",
-    ville: "",
-    avatar: ""
-  });
+  const [formData, setFormData] = useState(
+    user || {
+      prenom: "",
+      nom: "",
+      email: "",
+      telephone: "",
+      bio: "",
+      role: "",
+      pays: "",
+      ville: "",
+      avatar: "",
+    }
+  );
 
   const [passwordData, setPasswordData] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   const [passwordErrors, setPasswordErrors] = useState({
     currentPassword: "",
     newPassword: "",
-    confirmPassword: ""
+    confirmPassword: "",
   });
 
   // Calcul des statistiques réelles
   const getRealStats = () => {
-    const userInterventions = interventions.filter(i => i.technicien === `${formData.prenom} ${formData.nom}`.trim());
-    const interventionsTerminees = userInterventions.filter(i => i.statut === "Terminé").length;
-    const interventionsEnCours = userInterventions.filter(i => i.statut === "En cours").length;
-    const userIncidents = incidents.filter(inc => inc.statut === "non résolu").length;
-    
+    const userInterventions = interventions.filter(
+      (i) => i.technicien === `${formData.prenom} ${formData.nom}`.trim()
+    );
+    const interventionsTerminees = userInterventions.filter(
+      (i) => i.statut === "Terminé"
+    ).length;
+    const interventionsEnCours = userInterventions.filter(
+      (i) => i.statut === "En cours"
+    ).length;
+    const userIncidents = incidents.filter(
+      (inc) => inc.statut === "non résolu"
+    ).length;
+
     // Calcul du taux de satisfaction (simulé pour l'exemple)
-    const satisfaction = userInterventions.length > 0 
-      ? Math.min(100, Math.floor((interventionsTerminees / userInterventions.length) * 100) + 20)
-      : 0;
+    const satisfaction =
+      userInterventions.length > 0
+        ? Math.min(
+            100,
+            Math.floor(
+              (interventionsTerminees / userInterventions.length) * 100
+            ) + 20
+          )
+        : 0;
 
     return {
       totalInterventions: userInterventions.length,
       interventionsTerminees,
       interventionsEnCours,
       incidentsNonResolus: userIncidents,
-      satisfaction
+      satisfaction,
     };
   };
 
@@ -88,7 +104,9 @@ function Profil() {
         <div className={styles.emptyState}>
           <CIcon icon={cilUser} size="3xl" className={styles.emptyIcon} />
           <h2 className={styles.emptyTitle}>Utilisateur non connecté</h2>
-          <p className={styles.emptyText}>Veuillez vous connecter pour accéder à votre profil</p>
+          <p className={styles.emptyText}>
+            Veuillez vous connecter pour accéder à votre profil
+          </p>
         </div>
       </div>
     );
@@ -96,32 +114,32 @@ function Profil() {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePasswordChange = (e) => {
     const { name, value } = e.target;
-    setPasswordData(prev => ({ ...prev, [name]: value }));
-    
+    setPasswordData((prev) => ({ ...prev, [name]: value }));
+
     // Effacer l'erreur quand l'utilisateur commence à taper
     if (passwordErrors[name]) {
-      setPasswordErrors(prev => ({ ...prev, [name]: "" }));
+      setPasswordErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
 
   const handleAvatarChange = (e) => {
-  const file = e.target.files[0];
-  if (file) {
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      setFormData(prev => ({ 
-        ...prev, 
-        avatar: e.target.result 
-      }));
-    };
-    reader.readAsDataURL(file);
-  }
-};
+    const file = e.target.files[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        setFormData((prev) => ({
+          ...prev,
+          avatar: e.target.result,
+        }));
+      };
+      reader.readAsDataURL(file);
+    }
+  };
 
   const validatePassword = () => {
     const errors = {};
@@ -136,7 +154,8 @@ function Profil() {
       errors.newPassword = "Le nouveau mot de passe est requis";
       isValid = false;
     } else if (passwordData.newPassword.length < 6) {
-      errors.newPassword = "Le mot de passe doit contenir au moins 6 caractères";
+      errors.newPassword =
+        "Le mot de passe doit contenir au moins 6 caractères";
       isValid = false;
     }
 
@@ -153,134 +172,140 @@ function Profil() {
   };
 
   const handlePasswordUpdate = async () => {
-  if (validatePassword()) {
-    try {
-      console.log('🔑 Changement mot de passe...');
+    if (validatePassword()) {
+      try {
+        console.log("🔑 Changement mot de passe...");
 
-      const response = await fetch(`https://localhost:7134/api/auth/change-password`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-          userId: user.id,
-          currentPassword: passwordData.currentPassword,
-          newPassword: passwordData.newPassword
-        }),
-      });
+        const response = await fetch(
+          `http://localhost:5275/api/auth/change-password`,
+          {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              userId: user.id,
+              currentPassword: passwordData.currentPassword,
+              newPassword: passwordData.newPassword,
+            }),
+          }
+        );
 
-      console.log('📡 Statut changement mot de passe:', response.status);
+        console.log("📡 Statut changement mot de passe:", response.status);
 
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.message || 'Erreur lors du changement de mot de passe');
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Erreur lors du changement de mot de passe"
+          );
+        }
+
+        const result = await response.json();
+        console.log("✅ Mot de passe changé:", result);
+
+        // Réinitialiser les champs
+        setPasswordData({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setPasswordErrors({
+          currentPassword: "",
+          newPassword: "",
+          confirmPassword: "",
+        });
+        setPasswordEditMode(false);
+
+        alert("Mot de passe modifié avec succès !");
+      } catch (error) {
+        console.error("💥 Erreur changement mot de passe:", error);
+        setPasswordErrors({ submit: error.message });
       }
-
-      const result = await response.json();
-      console.log('✅ Mot de passe changé:', result);
-      
-      // Réinitialiser les champs
-      setPasswordData({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
-      setPasswordErrors({
-        currentPassword: "",
-        newPassword: "",
-        confirmPassword: ""
-      });
-      setPasswordEditMode(false);
-      
-      alert("Mot de passe modifié avec succès !");
-      
-    } catch (error) {
-      console.error('💥 Erreur changement mot de passe:', error);
-      setPasswordErrors({ submit: error.message });
     }
-  }
-};
+  };
 
   const handleCancelPassword = () => {
     setPasswordData({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
     setPasswordErrors({
       currentPassword: "",
       newPassword: "",
-      confirmPassword: ""
+      confirmPassword: "",
     });
     setPasswordEditMode(false);
   };
 
-const handleSave = async () => {
-  try {
-    const profileData = {
-      prenom: formData.prenom,
-      nom: formData.nom,
-      email: formData.email,
-      telephone: formData.telephone,
-      bio: formData.bio || "",
-      pays: formData.pays || "",
-      ville: formData.ville || "",
-      avatar: formData.avatar || ""
-    };
+  const handleSave = async () => {
+    try {
+      const profileData = {
+        prenom: formData.prenom,
+        nom: formData.nom,
+        email: formData.email,
+        telephone: formData.telephone,
+        bio: formData.bio || "",
+        pays: formData.pays || "",
+        ville: formData.ville || "",
+        avatar: formData.avatar || "",
+      };
 
-    console.log('📤 Mise à jour profil:', profileData);
+      console.log("📤 Mise à jour profil:", profileData);
 
-    const response = await fetch(`https://localhost:7134/api/utilisateurs/update-profile/${user.id}`, {
-      method: 'PUT',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(profileData),
-    });
+      const response = await fetch(
+        `http://localhost:5275/api/utilisateurs/update-profile/${user.id}`,
+        {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify(profileData),
+        }
+      );
 
-    console.log('📡 Statut réponse:', response.status);
+      console.log("📡 Statut réponse:", response.status);
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      console.log('❌ Erreur détaillée:', errorText);
-      throw new Error(`Erreur ${response.status}: ${errorText}`);
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.log("❌ Erreur détaillée:", errorText);
+        throw new Error(`Erreur ${response.status}: ${errorText}`);
+      }
+
+      const updatedUser = await response.json();
+      console.log("✅ Profil mis à jour:", updatedUser);
+
+      // Mettre à jour l'utilisateur dans le contexte
+      setUser((prev) => ({ ...prev, ...updatedUser }));
+      setEditMode(false);
+
+      alert("Profil modifié avec succès !");
+    } catch (error) {
+      console.error("💥 Erreur sauvegarde profil:", error);
+      alert(`Erreur: ${error.message}`);
     }
-
-    const updatedUser = await response.json();
-    console.log('✅ Profil mis à jour:', updatedUser);
-    
-    // Mettre à jour l'utilisateur dans le contexte
-    setUser(prev => ({ ...prev, ...updatedUser }));
-    setEditMode(false);
-    
-    alert("Profil modifié avec succès !");
-    
-  } catch (error) {
-    console.error('💥 Erreur sauvegarde profil:', error);
-    alert(`Erreur: ${error.message}`);
-  }
-};
+  };
   const handleCancel = () => {
     setFormData(user);
     setEditMode(false);
   };
 
   const getFieldIcon = (field) => {
-    switch(field) {
-      case 'prenom':
-      case 'nom':
+    switch (field) {
+      case "prenom":
+      case "nom":
         return cilUser;
-      case 'email':
+      case "email":
         return cilEnvelopeOpen;
-      case 'telephone':
+      case "telephone":
         return cilPhone;
-      case 'bio':
+      case "bio":
         return cilDescription;
-      case 'role':
+      case "role":
         return cilBriefcase;
-      case 'pays':
+      case "pays":
         return cilGlobeAlt;
-      case 'ville':
+      case "ville":
       default:
         return cilUser;
     }
@@ -301,15 +326,19 @@ const handleSave = async () => {
   };
 
   const getFieldType = (field) => {
-    if (field === 'email') return 'email';
-    if (field === 'telephone') return 'tel';
-    return 'text';
+    if (field === "email") return "email";
+    if (field === "telephone") return "tel";
+    return "text";
   };
 
   // Interventions récentes
   const recentInterventions = interventions
-    .filter(i => i.technicien === `${formData.prenom} ${formData.nom}`.trim())
-    .sort((a, b) => new Date(b.datetime || b.createdAt) - new Date(a.datetime || a.createdAt))
+    .filter((i) => i.technicien === `${formData.prenom} ${formData.nom}`.trim())
+    .sort(
+      (a, b) =>
+        new Date(b.datetime || b.createdAt) -
+        new Date(a.datetime || a.createdAt)
+    )
     .slice(0, 5);
 
   return (
@@ -320,26 +349,26 @@ const handleSave = async () => {
         <div className={styles.profileHeader}>
           <div className={styles.avatarSection}>
             <div className={styles.avatarWrapper}>
-  <img 
-    src={formData.avatar} 
-    alt="Avatar" 
-    className={styles.avatar}
-    onError={(e) => {
-    e.target.src = ""; 
-    }}
-  />
-  {editMode && (
-    <label className={styles.avatarEdit}>
-      <CIcon icon={cilPencil} className={styles.avatarEditIcon} />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleAvatarChange}
-        className={styles.avatarInput}
-      />
-    </label>
-  )}
-</div>
+              <img
+                src={formData.avatar}
+                alt="Avatar"
+                className={styles.avatar}
+                onError={(e) => {
+                  e.target.src = "";
+                }}
+              />
+              {editMode && (
+                <label className={styles.avatarEdit}>
+                  <CIcon icon={cilPencil} className={styles.avatarEditIcon} />
+                  <input
+                    type="file"
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className={styles.avatarInput}
+                  />
+                </label>
+              )}
+            </div>
             <div className={styles.profileInfo}>
               <h2 className={styles.profileName}>
                 {formData.prenom} {formData.nom}
@@ -368,14 +397,14 @@ const handleSave = async () => {
               </div>
             ) : (
               <div className={styles.editActions}>
-                <button 
+                <button
                   className={styles.editBtn}
                   onClick={() => setEditMode(true)}
                 >
                   <CIcon icon={cilPencil} className={styles.btnIcon} />
                   Modifier le profil
                 </button>
-                <button 
+                <button
                   className={styles.editBtn}
                   onClick={() => setPasswordEditMode(true)}
                 >
@@ -397,19 +426,24 @@ const handleSave = async () => {
                 Informations personnelles
               </h3>
               <div className={styles.fieldsGrid}>
-                {['prenom', 'nom', 'email', 'telephone', 'bio'].map(field => (
+                {["prenom", "nom", "email", "telephone", "bio"].map((field) => (
                   <div key={field} className={styles.field}>
                     <label className={styles.fieldLabel}>
-                      <CIcon icon={getFieldIcon(field)} className={styles.fieldIcon} />
+                      <CIcon
+                        icon={getFieldIcon(field)}
+                        className={styles.fieldIcon}
+                      />
                       {getFieldLabel(field)}
                     </label>
                     {editMode ? (
-                      field === 'bio' ? (
+                      field === "bio" ? (
                         <textarea
                           name={field}
-                          value={formData[field] || ''}
+                          value={formData[field] || ""}
                           onChange={handleChange}
-                          placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                          placeholder={`Entrez votre ${getFieldLabel(
+                            field
+                          ).toLowerCase()}`}
                           className={styles.textarea}
                           rows={3}
                         />
@@ -417,16 +451,20 @@ const handleSave = async () => {
                         <input
                           type={getFieldType(field)}
                           name={field}
-                          value={formData[field] || ''}
+                          value={formData[field] || ""}
                           onChange={handleChange}
-                          placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                          placeholder={`Entrez votre ${getFieldLabel(
+                            field
+                          ).toLowerCase()}`}
                           className={styles.input}
                         />
                       )
                     ) : (
                       <div className={styles.fieldValue}>
                         {formData[field] || (
-                          <span className={styles.placeholder}>Non renseigné</span>
+                          <span className={styles.placeholder}>
+                            Non renseigné
+                          </span>
                         )}
                       </div>
                     )}
@@ -442,25 +480,32 @@ const handleSave = async () => {
                 Adresse
               </h3>
               <div className={styles.fieldsGrid}>
-                {['pays', 'ville'].map(field => (
+                {["pays", "ville"].map((field) => (
                   <div key={field} className={styles.field}>
                     <label className={styles.fieldLabel}>
-                      <CIcon icon={getFieldIcon(field)} className={styles.fieldIcon} />
+                      <CIcon
+                        icon={getFieldIcon(field)}
+                        className={styles.fieldIcon}
+                      />
                       {getFieldLabel(field)}
                     </label>
                     {editMode ? (
                       <input
                         type="text"
                         name={field}
-                        value={formData[field] || ''}
+                        value={formData[field] || ""}
                         onChange={handleChange}
-                        placeholder={`Entrez votre ${getFieldLabel(field).toLowerCase()}`}
+                        placeholder={`Entrez votre ${getFieldLabel(
+                          field
+                        ).toLowerCase()}`}
                         className={styles.input}
                       />
                     ) : (
                       <div className={styles.fieldValue}>
                         {formData[field] || (
-                          <span className={styles.placeholder}>Non renseigné</span>
+                          <span className={styles.placeholder}>
+                            Non renseigné
+                          </span>
                         )}
                       </div>
                     )}
@@ -479,7 +524,10 @@ const handleSave = async () => {
                 <div className={styles.fieldsGrid}>
                   <div className={styles.field}>
                     <label className={styles.fieldLabel}>
-                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      <CIcon
+                        icon={cilLockLocked}
+                        className={styles.fieldIcon}
+                      />
                       Mot de passe actuel
                     </label>
                     <input
@@ -488,16 +536,23 @@ const handleSave = async () => {
                       value={passwordData.currentPassword}
                       onChange={handlePasswordChange}
                       placeholder="Entrez votre mot de passe actuel"
-                      className={`${styles.input} ${passwordErrors.currentPassword ? styles.inputError : ''}`}
+                      className={`${styles.input} ${
+                        passwordErrors.currentPassword ? styles.inputError : ""
+                      }`}
                     />
                     {passwordErrors.currentPassword && (
-                      <span className={styles.errorText}>{passwordErrors.currentPassword}</span>
+                      <span className={styles.errorText}>
+                        {passwordErrors.currentPassword}
+                      </span>
                     )}
                   </div>
-                  
+
                   <div className={styles.field}>
                     <label className={styles.fieldLabel}>
-                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      <CIcon
+                        icon={cilLockLocked}
+                        className={styles.fieldIcon}
+                      />
                       Nouveau mot de passe
                     </label>
                     <input
@@ -506,16 +561,23 @@ const handleSave = async () => {
                       value={passwordData.newPassword}
                       onChange={handlePasswordChange}
                       placeholder="Entrez votre nouveau mot de passe"
-                      className={`${styles.input} ${passwordErrors.newPassword ? styles.inputError : ''}`}
+                      className={`${styles.input} ${
+                        passwordErrors.newPassword ? styles.inputError : ""
+                      }`}
                     />
                     {passwordErrors.newPassword && (
-                      <span className={styles.errorText}>{passwordErrors.newPassword}</span>
+                      <span className={styles.errorText}>
+                        {passwordErrors.newPassword}
+                      </span>
                     )}
                   </div>
-                  
+
                   <div className={styles.field}>
                     <label className={styles.fieldLabel}>
-                      <CIcon icon={cilLockLocked} className={styles.fieldIcon} />
+                      <CIcon
+                        icon={cilLockLocked}
+                        className={styles.fieldIcon}
+                      />
                       Confirmer le mot de passe
                     </label>
                     <input
@@ -524,20 +586,30 @@ const handleSave = async () => {
                       value={passwordData.confirmPassword}
                       onChange={handlePasswordChange}
                       placeholder="Confirmez votre nouveau mot de passe"
-                      className={`${styles.input} ${passwordErrors.confirmPassword ? styles.inputError : ''}`}
+                      className={`${styles.input} ${
+                        passwordErrors.confirmPassword ? styles.inputError : ""
+                      }`}
                     />
                     {passwordErrors.confirmPassword && (
-                      <span className={styles.errorText}>{passwordErrors.confirmPassword}</span>
+                      <span className={styles.errorText}>
+                        {passwordErrors.confirmPassword}
+                      </span>
                     )}
                   </div>
                 </div>
-                
+
                 <div className={styles.passwordActions}>
-                  <button className={styles.saveBtn} onClick={handlePasswordUpdate}>
+                  <button
+                    className={styles.saveBtn}
+                    onClick={handlePasswordUpdate}
+                  >
                     <CIcon icon={cilCheck} className={styles.btnIcon} />
                     Mettre à jour le mot de passe
                   </button>
-                  <button className={styles.cancelBtn} onClick={handleCancelPassword}>
+                  <button
+                    className={styles.cancelBtn}
+                    onClick={handleCancelPassword}
+                  >
                     <CIcon icon={cilX} className={styles.btnIcon} />
                     Annuler
                   </button>
@@ -559,28 +631,36 @@ const handleSave = async () => {
                   <div className={styles.statIconWrapper}>
                     <CIcon icon={cilBriefcase} className={styles.statIcon} />
                   </div>
-                  <div className={styles.statValue}>{stats.totalInterventions}</div>
+                  <div className={styles.statValue}>
+                    {stats.totalInterventions}
+                  </div>
                   <div className={styles.statLabel}>Interventions totales</div>
                 </div>
                 <div className={styles.statItem}>
                   <div className={styles.statIconWrapper}>
                     <CIcon icon={cilCheckCircle} className={styles.statIcon} />
                   </div>
-                  <div className={styles.statValue}>{stats.interventionsTerminees}</div>
+                  <div className={styles.statValue}>
+                    {stats.interventionsTerminees}
+                  </div>
                   <div className={styles.statLabel}>Terminées</div>
                 </div>
                 <div className={styles.statItem}>
                   <div className={styles.statIconWrapper}>
                     <CIcon icon={cilClock} className={styles.statIcon} />
                   </div>
-                  <div className={styles.statValue}>{stats.interventionsEnCours}</div>
+                  <div className={styles.statValue}>
+                    {stats.interventionsEnCours}
+                  </div>
                   <div className={styles.statLabel}>En cours</div>
                 </div>
                 <div className={styles.statItem}>
                   <div className={styles.statIconWrapper}>
                     <CIcon icon={cilWarning} className={styles.statIcon} />
                   </div>
-                  <div className={styles.statValue}>{stats.incidentsNonResolus}</div>
+                  <div className={styles.statValue}>
+                    {stats.incidentsNonResolus}
+                  </div>
                   <div className={styles.statLabel}>Incidents actifs</div>
                 </div>
                 <div className={styles.statItem}>
@@ -604,24 +684,38 @@ const handleSave = async () => {
                   recentInterventions.map((intervention, index) => (
                     <div key={intervention.id} className={styles.activityItem}>
                       <div className={styles.activityIcon}>
-                        <CIcon icon={
-                          intervention.statut === "Terminé" ? cilCheckCircle :
-                          intervention.statut === "En cours" ? cilClock : cilWarning
-                        } />
+                        <CIcon
+                          icon={
+                            intervention.statut === "Terminé"
+                              ? cilCheckCircle
+                              : intervention.statut === "En cours"
+                              ? cilClock
+                              : cilWarning
+                          }
+                        />
                       </div>
                       <div className={styles.activityContent}>
                         <div className={styles.activityTitle}>
                           {intervention.client} - {intervention.produit}
                         </div>
                         <div className={styles.activityDetails}>
-                          <span className={`${styles.statusBadge} ${
-                            intervention.statut === "Terminé" ? styles.statusCompleted :
-                            intervention.statut === "En cours" ? styles.statusInProgress : styles.statusPending
-                          }`}>
+                          <span
+                            className={`${styles.statusBadge} ${
+                              intervention.statut === "Terminé"
+                                ? styles.statusCompleted
+                                : intervention.statut === "En cours"
+                                ? styles.statusInProgress
+                                : styles.statusPending
+                            }`}
+                          >
                             {intervention.statut}
                           </span>
                           <span className={styles.activityDate}>
-                            {intervention.datetime ? new Date(intervention.datetime).toLocaleDateString('fr-FR') : 'Date non définie'}
+                            {intervention.datetime
+                              ? new Date(
+                                  intervention.datetime
+                                ).toLocaleDateString("fr-FR")
+                              : "Date non définie"}
                           </span>
                         </div>
                       </div>
@@ -629,7 +723,10 @@ const handleSave = async () => {
                   ))
                 ) : (
                   <div className={styles.noActivity}>
-                    <CIcon icon={cilBriefcase} className={styles.noActivityIcon} />
+                    <CIcon
+                      icon={cilBriefcase}
+                      className={styles.noActivityIcon}
+                    />
                     <p>Aucune intervention récente</p>
                   </div>
                 )}

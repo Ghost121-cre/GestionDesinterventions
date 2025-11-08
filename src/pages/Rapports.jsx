@@ -5,6 +5,7 @@ import { toast } from "react-toastify";
 import { generateRapportPDF } from "../utils/pdfGenerator";
 import styles from "../assets/css/Rapports.module.css";
 import CIcon from "@coreui/icons-react";
+
 import {
   cilFile,
   cilUser,
@@ -17,7 +18,7 @@ import {
   cilChevronLeft,
   cilChevronRight,
   cilInfo,
-  cilWarning
+  cilWarning,
 } from "@coreui/icons";
 
 function Rapports() {
@@ -36,32 +37,37 @@ function Rapports() {
 
   // Clients uniques pour le filtre
   const uniqueClients = useMemo(() => {
-    return [...new Set(rapports.map(r => r.client).filter(Boolean))];
+    return [...new Set(rapports.map((r) => r.client).filter(Boolean))];
   }, [rapports]);
 
   // Filtrer les rapports
   const filteredRapports = useMemo(() => {
     return rapports
-      .filter(rapport =>
-        search === "" ||
-        rapport.client?.toLowerCase().includes(search.toLowerCase()) ||
-        rapport.intervenant?.toLowerCase().includes(search.toLowerCase()) ||
-        rapport.description?.toLowerCase().includes(search.toLowerCase()) ||
-        rapport.type?.toLowerCase().includes(search.toLowerCase()) ||
-        rapport.travaux?.toLowerCase().includes(search.toLowerCase()) ||
-        rapport.observation?.toLowerCase().includes(search.toLowerCase())
+      .filter(
+        (rapport) =>
+          search === "" ||
+          rapport.client?.toLowerCase().includes(search.toLowerCase()) ||
+          rapport.intervenant?.toLowerCase().includes(search.toLowerCase()) ||
+          rapport.description?.toLowerCase().includes(search.toLowerCase()) ||
+          rapport.type?.toLowerCase().includes(search.toLowerCase()) ||
+          rapport.travaux?.toLowerCase().includes(search.toLowerCase()) ||
+          rapport.observation?.toLowerCase().includes(search.toLowerCase())
       )
-      .filter(rapport => {
+      .filter((rapport) => {
         if (startDate && endDate) {
           const rapportDate = rapport.date ? new Date(rapport.date) : null;
           if (!rapportDate) return false;
-          return rapportDate >= new Date(startDate) && rapportDate <= new Date(endDate);
+          return (
+            rapportDate >= new Date(startDate) &&
+            rapportDate <= new Date(endDate)
+          );
         }
         return true;
       })
-      .filter(rapport =>
-        clientFilter === "" ||
-        rapport.client?.toLowerCase().includes(clientFilter.toLowerCase())
+      .filter(
+        (rapport) =>
+          clientFilter === "" ||
+          rapport.client?.toLowerCase().includes(clientFilter.toLowerCase())
       )
       .sort((a, b) => new Date(b.date) - new Date(a.date)); // Tri par date décroissante
   }, [rapports, search, startDate, endDate, clientFilter]);
@@ -76,16 +82,20 @@ function Rapports() {
   // Statistiques améliorées
   const stats = useMemo(() => {
     const totalRapports = rapports.length;
-    const rapportsAvecIntervenant = rapports.filter(r => r.intervenant).length;
-    
-    const rapportsCeMois = rapports.filter(r => {
+    const rapportsAvecIntervenant = rapports.filter(
+      (r) => r.intervenant
+    ).length;
+
+    const rapportsCeMois = rapports.filter((r) => {
       const rapportDate = new Date(r.date);
       const now = new Date();
-      return rapportDate.getMonth() === now.getMonth() && 
-             rapportDate.getFullYear() === now.getFullYear();
+      return (
+        rapportDate.getMonth() === now.getMonth() &&
+        rapportDate.getFullYear() === now.getFullYear()
+      );
     }).length;
 
-    const rapportsCetteSemaine = rapports.filter(r => {
+    const rapportsCetteSemaine = rapports.filter((r) => {
       const rapportDate = new Date(r.date);
       const now = new Date();
       const startOfWeek = new Date(now.setDate(now.getDate() - now.getDay()));
@@ -102,42 +112,56 @@ function Rapports() {
       return acc;
     }, {});
 
-    const topClient = Object.entries(clientCounts).sort((a, b) => b[1] - a[1])[0];
+    const topClient = Object.entries(clientCounts).sort(
+      (a, b) => b[1] - a[1]
+    )[0];
 
     return {
       total: totalRapports,
       avecIntervenant: rapportsAvecIntervenant,
       ceMois: rapportsCeMois,
       cetteSemaine: rapportsCetteSemaine,
-      topClient: topClient ? { nom: topClient[0], count: topClient[1] } : null
+      topClient: topClient ? { nom: topClient[0], count: topClient[1] } : null,
     };
   }, [rapports]);
 
   const handleDelete = (id, client) => {
-    if (window.confirm(`Êtes-vous sûr de vouloir supprimer le rapport pour ${client} ?`)) {
+    if (
+      window.confirm(
+        `Êtes-vous sûr de vouloir supprimer le rapport pour ${client} ?`
+      )
+    ) {
       deleteRapport(id);
       toast.error("🗑️ Rapport supprimé");
     }
   };
 
   const getInterventionForRapport = (rapport) => {
-    return interventions.find(intervention => intervention.id === rapport.interventionId);
+    return interventions.find(
+      (intervention) => intervention.id === rapport.interventionId
+    );
   };
 
-  const handleDownload = (rapport) => {
+  const handleDownload = async (rapport) => {
     const interventionAssociee = getInterventionForRapport(rapport);
-    
+
     if (!interventionAssociee) {
       toast.error("❌ Intervention associée non trouvée");
       return;
     }
 
     try {
-      generateRapportPDF(rapport, interventionAssociee);
-      toast.success("📄 Rapport téléchargé avec succès !");
+      console.log("📥 Début du téléchargement du rapport...");
+
+      // Cette fonction va maintenant sauvegarder en base ET générer le PDF
+      const result = await generateRapportPDF(rapport, interventionAssociee);
+
+      toast.success(
+        `📄 Rapport #${result.rapportId} téléchargé et sauvegardé !`
+      );
     } catch (error) {
-      console.error("Erreur lors du téléchargement:", error);
-      toast.error("❌ Erreur lors du téléchargement du rapport");
+      console.error("❌ Erreur lors du téléchargement:", error);
+      toast.error(`❌ Erreur: ${error.message}`);
     }
   };
 
@@ -153,21 +177,21 @@ function Rapports() {
 
   const formatDateTime = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour: '2-digit',
-      minute: '2-digit'
+    return new Date(dateString).toLocaleString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+      hour: "2-digit",
+      minute: "2-digit",
     });
   };
 
   const formatDate = (dateString) => {
     if (!dateString) return "-";
-    return new Date(dateString).toLocaleDateString('fr-FR', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit'
+    return new Date(dateString).toLocaleDateString("fr-FR", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
     });
   };
 
@@ -207,7 +231,7 @@ function Rapports() {
             <div className={styles.statLabel}>Rapports Totaux</div>
           </div>
         </div>
-        
+
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
             <CIcon icon={cilUser} size="2xl" />
@@ -217,7 +241,7 @@ function Rapports() {
             <div className={styles.statLabel}>Avec Intervenant</div>
           </div>
         </div>
-        
+
         <div className={styles.statCard}>
           <div className={styles.statIcon}>
             <CIcon icon={cilChartLine} size="2xl" />
@@ -260,7 +284,10 @@ function Rapports() {
               type="text"
               placeholder="Rechercher un rapport..."
               value={search}
-              onChange={e => { setSearch(e.target.value); setCurrentPage(1); }}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setCurrentPage(1);
+              }}
               className={styles.searchInput}
             />
           </div>
@@ -269,12 +296,17 @@ function Rapports() {
             <CIcon icon={cilUser} className={styles.filterIcon} />
             <select
               value={clientFilter}
-              onChange={e => { setClientFilter(e.target.value); setCurrentPage(1); }}
+              onChange={(e) => {
+                setClientFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className={styles.selectFilter}
             >
               <option value="">Tous les clients</option>
-              {uniqueClients.map(client => (
-                <option key={client} value={client}>{client}</option>
+              {uniqueClients.map((client) => (
+                <option key={client} value={client}>
+                  {client}
+                </option>
               ))}
             </select>
           </div>
@@ -285,7 +317,10 @@ function Rapports() {
               <input
                 type="date"
                 value={startDate}
-                onChange={e => { setStartDate(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setStartDate(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className={styles.dateInput}
                 placeholder="Date début"
               />
@@ -295,7 +330,10 @@ function Rapports() {
               <input
                 type="date"
                 value={endDate}
-                onChange={e => { setEndDate(e.target.value); setCurrentPage(1); }}
+                onChange={(e) => {
+                  setEndDate(e.target.value);
+                  setCurrentPage(1);
+                }}
                 className={styles.dateInput}
                 placeholder="Date fin"
               />
@@ -303,10 +341,7 @@ function Rapports() {
           </div>
 
           {hasActiveFilters && (
-            <button 
-              className={styles.clearFilters}
-              onClick={clearFilters}
-            >
+            <button className={styles.clearFilters} onClick={clearFilters}>
               <CIcon icon={cilX} />
               Effacer les filtres
             </button>
@@ -324,7 +359,6 @@ function Rapports() {
 
       {/* Contenu principal */}
       <div className={styles.content}>
-        {/* Tableau des rapports amélioré */}
         <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
@@ -344,15 +378,18 @@ function Rapports() {
                 <tr>
                   <td colSpan="8" className={styles.emptyState}>
                     <div className={styles.emptyMessage}>
-                      <CIcon icon={cilFile} size="3xl" className={styles.emptyIcon} />
+                      <CIcon
+                        icon={cilFile}
+                        size="3xl"
+                        className={styles.emptyIcon}
+                      />
                       <div className={styles.emptyText}>
-                        {rapports.length === 0 
-                          ? "Aucun rapport n'a été généré pour le moment." 
-                          : "Aucun rapport ne correspond aux critères de recherche."
-                        }
+                        {rapports.length === 0
+                          ? "Aucun rapport n'a été généré pour le moment."
+                          : "Aucun rapport ne correspond aux critères de recherche."}
                       </div>
                       {hasActiveFilters && (
-                        <button 
+                        <button
                           className={styles.emptyAction}
                           onClick={clearFilters}
                         >
@@ -370,29 +407,39 @@ function Rapports() {
                       #{(currentPage - 1) * rowsPerPage + index + 1}
                     </td>
                     <td className={styles.clientCell}>
-                      <span className={styles.clientBadge}>{rapport.client}</span>
+                      <span className={styles.clientBadge}>
+                        {rapport.client}
+                      </span>
                     </td>
                     <td className={styles.intervenantCell}>
-                      {rapport.intervenant || 
-                        <span className={styles.notSpecified}>Non spécifié</span>
-                      }
+                      {rapport.intervenant || (
+                        <span className={styles.notSpecified}>
+                          Non spécifié
+                        </span>
+                      )}
                     </td>
                     <td className={styles.typeCell}>
-                      {rapport.type || 
-                        <span className={styles.notSpecified}>Non spécifié</span>
-                      }
+                      {rapport.typeIntervention || (
+                        <span className={styles.notSpecified}>
+                          Non spécifié
+                        </span>
+                      )}
                     </td>
                     <td className={styles.descriptionCell}>
                       <div className={styles.description}>
-                        {rapport.description ? 
-                          (rapport.description.length > 80 ? 
-                            `${rapport.description.substring(0, 80)}...` : 
+                        {rapport.description ? (
+                          rapport.description.length > 80 ? (
+                            `${rapport.description.substring(0, 80)}...`
+                          ) : (
                             rapport.description
-                          ) : 
-                          <span className={styles.notSpecified}>Aucune description</span>
-                        }
+                          )
+                        ) : (
+                          <span className={styles.notSpecified}>
+                            Aucune description
+                          </span>
+                        )}
                       </div>
-                      <button 
+                      <button
                         className={styles.viewDetailsBtn}
                         onClick={() => openDetailsModal(rapport)}
                       >
@@ -401,7 +448,7 @@ function Rapports() {
                       </button>
                     </td>
                     <td className={styles.dateCell}>
-                      {formatDate(rapport.date)}
+                      {formatDate(rapport.dateRapport)}
                     </td>
                     <td className={styles.interventionCell}>
                       <span className={styles.interventionId}>
@@ -426,7 +473,9 @@ function Rapports() {
                         </button>
                         <button
                           className={styles.deleteBtn}
-                          onClick={() => handleDelete(rapport.id, rapport.client)}
+                          onClick={() =>
+                            handleDelete(rapport.id, rapport.client)
+                          }
                           title="Supprimer"
                         >
                           <CIcon icon={cilTrash} />
@@ -445,18 +494,20 @@ function Rapports() {
           <div className={styles.pagination}>
             <button
               className={styles.paginationBtn}
-              onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(prev - 1, 1))}
               disabled={currentPage === 1}
             >
               <CIcon icon={cilChevronLeft} />
               Précédent
             </button>
-            
+
             <div className={styles.paginationNumbers}>
               {Array.from({ length: totalPages }, (_, idx) => (
                 <button
                   key={idx}
-                  className={`${styles.pageBtn} ${currentPage === idx + 1 ? styles.activePage : ""}`}
+                  className={`${styles.pageBtn} ${
+                    currentPage === idx + 1 ? styles.activePage : ""
+                  }`}
                   onClick={() => setCurrentPage(idx + 1)}
                 >
                   {idx + 1}
@@ -466,7 +517,9 @@ function Rapports() {
 
             <button
               className={styles.paginationBtn}
-              onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
+              onClick={() =>
+                setCurrentPage((prev) => Math.min(prev + 1, totalPages))
+              }
               disabled={currentPage === totalPages}
             >
               Suivant
@@ -479,47 +532,57 @@ function Rapports() {
       {/* Modal de détails du rapport */}
       {showDetailsModal && selectedRapport && (
         <div className={styles.modalOverlay} onClick={closeDetailsModal}>
-          <div className={styles.modalContent} onClick={e => e.stopPropagation()}>
+          <div
+            className={styles.modalContent}
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className={styles.modalHeader}>
               <h2 className={styles.modalTitle}>
                 <CIcon icon={cilFile} className={styles.modalTitleIcon} />
-                Détails du Rapport #{rapports.findIndex(r => r.id === selectedRapport.id) + 1}
+                Détails du Rapport #
+                {rapports.findIndex((r) => r.id === selectedRapport.id) + 1}
               </h2>
               <button className={styles.modalClose} onClick={closeDetailsModal}>
                 <CIcon icon={cilX} />
               </button>
             </div>
-            
+
             <div className={styles.modalBody}>
               <div className={styles.detailGrid}>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Client:</span>
-                  <span className={styles.detailValue}>{selectedRapport.client}</span>
+                  <span className={styles.detailValue}>
+                    {selectedRapport.client}
+                  </span>
                 </div>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Intervenant:</span>
                   <span className={styles.detailValue}>
-                    {selectedRapport.intervenant || 
+                    {selectedRapport.intervenant || (
                       <span className={styles.notSpecified}>Non spécifié</span>
-                    }
+                    )}
                   </span>
                 </div>
                 <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Type d'intervention:</span>
+                  <span className={styles.detailLabel}>
+                    Type d'intervention:
+                  </span>
                   <span className={styles.detailValue}>
-                    {selectedRapport.type || 
+                    {selectedRapport.typeIntervention || (
                       <span className={styles.notSpecified}>Non spécifié</span>
-                    }
+                    )}
                   </span>
                 </div>
                 <div className={styles.detailItem}>
                   <span className={styles.detailLabel}>Date du rapport:</span>
                   <span className={styles.detailValue}>
-                    {formatDateTime(selectedRapport.date)}
+                    {formatDateTime(selectedRapport.dateRapport)}
                   </span>
                 </div>
                 <div className={styles.detailItem}>
-                  <span className={styles.detailLabel}>Intervention associée:</span>
+                  <span className={styles.detailLabel}>
+                    Intervention associée:
+                  </span>
                   <span className={styles.detailValue}>
                     #{selectedRapport.interventionId}
                   </span>
@@ -530,9 +593,11 @@ function Rapports() {
                 <h3 className={styles.sectionTitle}>Description</h3>
                 <div className={styles.detailItem}>
                   <p className={styles.fullDescription}>
-                    {selectedRapport.description || 
-                      <span className={styles.notSpecified}>Aucune description fournie</span>
-                    }
+                    {selectedRapport.description || (
+                      <span className={styles.notSpecified}>
+                        Aucune description fournie
+                      </span>
+                    )}
                   </p>
                 </div>
               </div>
@@ -541,7 +606,9 @@ function Rapports() {
                 <div className={styles.descriptionSection}>
                   <h3 className={styles.sectionTitle}>Observations</h3>
                   <div className={styles.detailItem}>
-                    <p className={styles.fullDescription}>{selectedRapport.observation}</p>
+                    <p className={styles.fullDescription}>
+                      {selectedRapport.observation}
+                    </p>
                   </div>
                 </div>
               )}
@@ -550,13 +617,15 @@ function Rapports() {
                 <div className={styles.descriptionSection}>
                   <h3 className={styles.sectionTitle}>Travaux effectués</h3>
                   <div className={styles.detailItem}>
-                    <p className={styles.fullDescription}>{selectedRapport.travaux}</p>
+                    <p className={styles.fullDescription}>
+                      {selectedRapport.travaux}
+                    </p>
                   </div>
                 </div>
               )}
 
               <div className={styles.modalActions}>
-                <button 
+                <button
                   className={styles.downloadBtn}
                   onClick={() => {
                     handleDownload(selectedRapport);
@@ -566,7 +635,7 @@ function Rapports() {
                   <CIcon icon={cilCloudDownload} />
                   Télécharger le PDF
                 </button>
-                <button 
+                <button
                   className={styles.deleteBtn}
                   onClick={() => {
                     handleDelete(selectedRapport.id, selectedRapport.client);
